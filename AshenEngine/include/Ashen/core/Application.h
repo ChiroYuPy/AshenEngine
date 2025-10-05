@@ -70,6 +70,8 @@ namespace ash {
 
         void InitializeInput() const;
 
+        void SendDefaultEvents();
+
         void Shutdown() const;
 
         void Tick(float deltaTime) const;

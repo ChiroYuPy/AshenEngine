@@ -12,8 +12,8 @@ namespace voxelity {
     struct ChunkCoord {
         int x, y, z;
 
-        explicit ChunkCoord(const int x = 0, const int y = 0, const int z = 0) : x(x), y(y), z(z) {
-        }
+        ChunkCoord(const int x = 0, const int y = 0, const int z = 0) : x(x), y(y), z(z) {}
+        ChunkCoord(const glm::ivec3& v) : x(v.x), y(v.y), z(v.z) {}
 
         bool operator==(const ChunkCoord &other) const {
             return x == other.x && y == other.y && z == other.z;
@@ -47,6 +47,8 @@ namespace voxelity {
         void drawOpaque(ash::ShaderProgram &shader) const;
 
         void drawTransparent(ash::ShaderProgram &shader) const;
+
+        bool isDirty() const { return m_dirty; }
 
     private:
         ChunkCoord m_position;

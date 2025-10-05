@@ -61,7 +61,7 @@ namespace ash {
         [[nodiscard]] GLFWwindow *GetHandle() const { return m_Handle; }
 
     private:
-        void SetupCallbacks();
+        void SetupCallbacks() const;
 
         struct WindowData {
             std::string Title;

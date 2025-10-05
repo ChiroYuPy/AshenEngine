@@ -1,5 +1,6 @@
 #include "Voxelity/voxelWorld/chunk/Chunk.h"
 
+#include "Ashen/core/Logger.h"
 #include "Ashen/renderer/gfx/Shader.h"
 #include "Voxelity/voxelWorld/utils/DirectionUtils.h"
 #include "Voxelity/voxelWorld/world/World.h"

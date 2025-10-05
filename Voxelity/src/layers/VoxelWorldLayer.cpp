@@ -1,13 +1,10 @@
 #include "Voxelity/layers/VoxelWorldLayer.h"
-
-#include <format>
 #include "Voxelity/entities/Player.h"
+#include "Voxelity/voxelWorld/generation/NaturalTerrainGenerator.h"
 #include "Ashen/core/Input.h"
-#include "Ashen/core/Logger.h"
 #include "Ashen/events/ApplicationEvent.h"
 #include "Ashen/renderer/RenderCommand.h"
 #include "Ashen/renderer/Renderer.h"
-#include "Ashen/renderer/Renderer2D.h"
 #include "Ashen/resources/ResourceManager.h"
 
 namespace voxelity {
@@ -15,10 +12,13 @@ namespace voxelity {
         setupCamera();
         setupShader();
         setupWorld();
+        setupEntityManager();
         setupPlayer();
         setupWorldInteractor();
         setupSkybox();
         setupInputHandler();
+
+        m_world->updateLoadedChunks(m_player->position, m_config.renderDistance);
     }
 
     VoxelWorldLayer::~VoxelWorldLayer() {
@@ -27,68 +27,62 @@ namespace voxelity {
         m_world.reset();
     }
 
-    void VoxelWorldLayer::OnEvent(ash::Event &event) {
+    void VoxelWorldLayer::OnEvent(ash::Event& event) {
         if (m_inputHandler)
             m_inputHandler->handleEvent(event);
 
         ash::EventDispatcher dispatcher(event);
-        dispatcher.Dispatch<ash::WindowResizeEvent>([this](const ash::WindowResizeEvent &e) {
+        dispatcher.Dispatch<ash::WindowResizeEvent>([this](const ash::WindowResizeEvent& e) {
             m_camera->OnResize(e.GetWidth(), e.GetHeight());
             return false;
         });
     }
 
     void VoxelWorldLayer::OnUpdate(const float ts) {
-        if (!m_player || !m_world || !m_worldRenderer) return;
+        if (!m_player || !m_world) return;
 
-        m_player->update(ts, *m_world);
+        // 1. Mise à jour du chargement des chunks
+        // m_world->updateLoadedChunks(m_player->position, m_config.renderDistance);
+        m_world->processChunkLoading(1);
 
-        /*
-        m_fpsTimer += ts;
-        m_frameCount++;
+        // 2. CRUCIAL: Construction des meshes (séparé du chargement)
+        m_world->processMeshBuilding(1);
 
-        if (m_fpsTimer >= 1.0f) {
-            pixl::Logger::info() << std::format("FPS: {}", m_frameCount);
-            m_fpsTimer = 0.0f;
-            m_frameCount = 0;
-        }
-        */
+        // 3. Mise à jour des entités
+        m_entityManager->updateAll(ts, *m_world);
 
-        // Mise à jour du bloc ciblé
-        const glm::vec3 cameraPos = m_camera->GetPosition();
-        const glm::vec3 cameraDir = m_camera->GetFront();
+        // 4. Mise à jour du renderer
+        if (m_worldRenderer)
+            m_worldRenderer->update(ts);
 
-        const auto targetedBlock = m_worldInteractor->getTargetedBlock(cameraPos, cameraDir);
-        if (targetedBlock) {
-            m_targetedBlockPos = targetedBlock->blockPos;
-            m_hasTargetedBlock = true;
-        } else {
-            m_hasTargetedBlock = false;
+        // Debug: afficher les statistiques toutes les 60 frames
+        static int frameCount = 0;
+        if (++frameCount % 60 == 0) {
+            ash::Logger::info() << "Chunks: " << m_world->getLoadedChunkCount()
+                               << " | Pending Load: " << m_world->getPendingLoadCount()
+                               << " | Pending Mesh: " << m_world->getPendingMeshCount();
         }
     }
 
     void VoxelWorldLayer::OnRender() {
         if (!m_camera || !m_worldRenderer) return;
 
-        // Configuration OpenGL spécifique à cette scène 3D
         ash::RenderCommand::EnableDepthTest(true);
         ash::RenderCommand::SetDepthFunc(ash::RenderCommand::DepthFunc::Less);
 
-        // 1. Skybox (rendu en premier avec depth trick)
         renderSkybox();
-
-        // 2. Monde 3D
         renderWorld();
+    }
+
+    void VoxelWorldLayer::setRenderDistance(const int distance) {
+        m_config.renderDistance = distance;
     }
 
     void VoxelWorldLayer::setupCamera() {
         m_camera = ash::MakeRef<ash::PerspectiveCamera>();
-        m_camera->SetPosition(World::toWorldPos({-RENDER_DISTANCE - 1, RENDER_HEIGHT, -RENDER_DISTANCE - 1}));
+        m_camera->SetPosition({0, 70, 0});
         m_camera->SetFov(70.f);
         m_camera->SetRotation(45.f, 0.f);
-
-        // Caméra orthographique pour l'UI 2D
-        m_orthoCam = ash::MakeRef<ash::OrthographicCamera>(-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
     }
 
     void VoxelWorldLayer::setupShader() {
@@ -96,26 +90,26 @@ namespace voxelity {
     }
 
     void VoxelWorldLayer::setupWorld() {
-        m_world = ash::MakeScope<World>();
-        m_worldRenderer = ash::MakeScope<WorldRenderer>(*m_world, *m_camera, *m_shader);
+        auto generator = std::make_unique<NaturalTerrainGenerator>(0);
+        m_world = std::make_unique<World>(std::move(generator));
+        m_worldRenderer = std::make_unique<WorldRenderer>(*m_world, *m_camera, *m_shader);
+        m_worldRenderer->setMaxMeshBuildsPerFrame(1);
+    }
 
-        m_world->generateArea(
-            {-RENDER_DISTANCE, -RENDER_HEIGHT, -RENDER_DISTANCE},
-            {RENDER_DISTANCE, RENDER_HEIGHT, RENDER_DISTANCE}
-        );
-        m_worldRenderer->buildAll();
+    void VoxelWorldLayer::setupEntityManager() {
+        m_entityManager = std::make_unique<EntityManager>();
     }
 
     void VoxelWorldLayer::setupPlayer() {
-        m_player = ash::MakeScope<Player>(m_camera);
-        m_player->position = World::toWorldPos({0, 1, 0}, {0, 0, 0});
+        m_player = m_entityManager->createEntity<Player>(m_camera);
+        m_player->position = {0, 70, 0};
         m_player->velocity = {0.0f, 0.0f, 0.0f};
     }
 
     void VoxelWorldLayer::setupWorldInteractor() {
-        m_worldInteractor = ash::MakeScope<WorldInteractor>(*m_world, *m_worldRenderer);
+        m_worldInteractor = std::make_unique<WorldInteractor>(*m_world, *m_worldRenderer);
         m_worldInteractor->setMaxReach(64.0f);
-        m_worldInteractor->setSelectedVoxelID(1);
+        m_worldInteractor->setSelectedVoxelID(VoxelID::DIRT);
     }
 
     void VoxelWorldLayer::setupSkybox() {
@@ -159,7 +153,7 @@ namespace voxelity {
     }
 
     void VoxelWorldLayer::setupInputHandler() {
-        m_inputHandler = ash::MakeScope<InputHandler>(
+        m_inputHandler = std::make_unique<InputHandler>(
             *this,
             m_player->getController(),
             *m_worldInteractor
@@ -167,7 +161,6 @@ namespace voxelity {
     }
 
     void VoxelWorldLayer::renderSkybox() const {
-        // Trick pour dessiner la skybox en dernier mais qu'elle apparaisse derrière tout
         ash::RenderCommand::SetDepthWrite(false);
         ash::RenderCommand::SetDepthFunc(ash::RenderCommand::DepthFunc::LessEqual);
 
@@ -182,12 +175,11 @@ namespace voxelity {
 
         ash::Renderer::DrawArrays(*m_skyboxVAO, 36);
 
-        // Restaurer état normal
         ash::RenderCommand::SetDepthWrite(true);
         ash::RenderCommand::SetDepthFunc(ash::RenderCommand::DepthFunc::Less);
     }
 
     void VoxelWorldLayer::renderWorld() const {
-        m_worldRenderer->renderAll();
+        m_worldRenderer->render();
     }
 }

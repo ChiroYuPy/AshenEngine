@@ -36,6 +36,8 @@ namespace ash {
         m_Running = true;
         float lastFrameTime = GetTime();
 
+        SendDefaultEvents();
+
         while (m_Running && !m_Window->ShouldClose()) {
             const float time = GetTime();
             const float deltaTime = time - lastFrameTime;
@@ -93,6 +95,11 @@ namespace ash {
 
     void Application::InitializeInput() const {
         Input::Init(*m_Window);
+    }
+
+    void Application::SendDefaultEvents() {
+        WindowResizeEvent event(m_Window->GetWidth(), m_Window->GetHeight());
+        OnEvent(event);
     }
 
     void Application::Shutdown() const {

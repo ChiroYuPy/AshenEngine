@@ -1,64 +1,95 @@
 #include "Voxelity/voxelWorld/world/WorldRenderer.h"
-#include "Voxelity/voxelWorld/world/World.h"
-#include "Voxelity/VoxelityApp.h"
 #include "Ashen/renderer/RenderCommand.h"
 
 namespace voxelity {
-    WorldRenderer::WorldRenderer(World &world, ash::Camera &camera, ash::ShaderProgram &shader)
+    WorldRenderer::WorldRenderer(World& world, ash::Camera& camera, ash::ShaderProgram& shader)
         : m_world(world), m_camera(camera), m_shader(shader) {
-        m_textureColorpalette.updateFromRegistry();
+        m_textureColorPalette.updateFromRegistry();
+        m_world.addObserver(this);
     }
 
-    void WorldRenderer::buildAll() const {
-        m_world.forEachChunk([&](const ChunkCoord &, Chunk *chunk) {
-            if (chunk)
-                chunk->buildMesh(m_world);
-        });
+    WorldRenderer::~WorldRenderer() {
+        m_world.removeObserver(this);
     }
 
-    void WorldRenderer::renderAll() {
+    void WorldRenderer::update(float deltaTime) {
+        processDirtyChunks();
+    }
+
+    void WorldRenderer::render() {
         setupMatrices();
         bindCommonResources();
-
         renderOpaquePass();
         renderTransparentPass();
+    }
+
+    void WorldRenderer::addDirtyChunks(const std::vector<ChunkCoord>& chunks) {
+        m_dirtyChunks.insert(chunks.begin(), chunks.end());
+    }
+
+    void WorldRenderer::onVoxelChanged(const glm::ivec3& worldPos, VoxelType oldType, VoxelType newType) {
+        const ChunkCoord coord = World::toChunkCoord(worldPos);
+        m_dirtyChunks.insert(coord);
+    }
+
+    void WorldRenderer::onChunkLoaded(const ChunkCoord& coord) {
+        m_dirtyChunks.insert(coord);
+    }
+
+    void WorldRenderer::onChunkUnloaded(const ChunkCoord& coord) {
+        m_dirtyChunks.erase(coord);
+    }
+
+    void WorldRenderer::processDirtyChunks() {
+        int processed = 0;
+        auto it = m_dirtyChunks.begin();
+
+        while (it != m_dirtyChunks.end() && processed < m_maxMeshBuildsPerFrame) {
+            ChunkCoord coord = *it;
+            Chunk* chunk = m_world.getChunk(coord);
+
+            if (chunk && chunk->isDirty()) {
+                chunk->buildMesh(m_world);
+                processed++;
+            }
+
+            it = m_dirtyChunks.erase(it);
+        }
     }
 
     void WorldRenderer::setupMatrices() {
         const glm::mat4 view = m_camera.GetViewMatrix();
         const glm::mat4 proj = m_camera.GetProjectionMatrix();
-
         m_viewProjection = proj * view;
     }
 
     void WorldRenderer::bindCommonResources() const {
         m_shader.Bind();
         m_shader.SetMat4("u_ViewProjection", m_viewProjection);
-
-        glBindTextureUnit(0, m_textureColorpalette.GetTexture().ID());
+        glBindTextureUnit(0, m_textureColorPalette.GetTexture().ID());
         m_shader.SetInt("u_ColorTex", 0);
-        m_shader.SetFloat("u_ChunkSpacing", chunkSpacing);
+        m_shader.SetFloat("u_ChunkSpacing", m_chunkSpacing);
     }
 
     void WorldRenderer::renderOpaquePass() const {
         ash::RenderCommand::SetDepthWrite(true);
         ash::RenderCommand::EnableBlending(false);
 
-        m_world.forEachChunk([&](const ChunkCoord &, const Chunk *chunk) {
-            if (chunk)
-                chunk->drawOpaque(m_shader);
+        m_world.forEachChunk([&](const ChunkCoord&, const Chunk* chunk) {
+            if (chunk) chunk->drawOpaque(m_shader);
         });
     }
 
     void WorldRenderer::renderTransparentPass() const {
         ash::RenderCommand::EnableBlending(true);
-        ash::RenderCommand::SetBlendFunc(ash::RenderCommand::BlendFactor::SrcAlpha,
-                                         ash::RenderCommand::BlendFactor::OneMinusSrcAlpha);
+        ash::RenderCommand::SetBlendFunc(
+            ash::RenderCommand::BlendFactor::SrcAlpha,
+            ash::RenderCommand::BlendFactor::OneMinusSrcAlpha
+        );
         ash::RenderCommand::SetDepthWrite(false);
 
-        m_world.forEachChunk([&](const ChunkCoord &, const Chunk *chunk) {
-            if (chunk)
-                chunk->drawTransparent(m_shader);
+        m_world.forEachChunk([&](const ChunkCoord&, const Chunk* chunk) {
+            if (chunk) chunk->drawTransparent(m_shader);
         });
 
         ash::RenderCommand::SetDepthWrite(true);

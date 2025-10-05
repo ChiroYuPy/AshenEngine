@@ -31,6 +31,8 @@ set(APP_SOURCES
         include/Voxelity/layers/UILayer.h
         src/layers/DebugLayer.cpp
         include/Voxelity/layers/DebugLayer.h
+        src/voxelWorld/world/ChunkManager.cpp
+        include/Voxelity/voxelWorld/world/ChunkManager.h
 )
 
 add_executable(Voxelity ${APP_SOURCES})

@@ -36,8 +36,6 @@ namespace voxelity {
 
         m_world.setVoxel(position.x, position.y, position.z, blockType);
 
-        m_chunkRenderer.buildAll();
-
         ash::Logger::info() << std::format("Block placed at ({}, {}, {})", position.x, position.y, position.z);
         return true;
     }
@@ -49,8 +47,6 @@ namespace voxelity {
         }
 
         m_world.setVoxel(position.x, position.y, position.z, VoxelID::AIR);
-
-        m_chunkRenderer.buildAll();
 
         ash::Logger::info() << std::format("Block broken at ({}, {}, {})", position.x, position.y, position.z);
         return true;

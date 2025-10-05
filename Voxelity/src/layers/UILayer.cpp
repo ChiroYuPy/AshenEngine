@@ -26,11 +26,10 @@ namespace voxelity {
         ash::Renderer2D::BeginScene(*m_UICamera);
 
         if (m_CrosshairTexture) {
-            constexpr float crosshairSize = 64.0f;
-
             if (m_3DCrosshair) {
 
             } else {
+                constexpr float crosshairSize = 64.0f;
                 ash::Renderer2D::DrawQuad(center, {crosshairSize, crosshairSize}, m_CrosshairTexture, {1,1,1,1});
             }
         }

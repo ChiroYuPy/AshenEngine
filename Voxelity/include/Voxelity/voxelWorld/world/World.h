@@ -1,57 +1,65 @@
 #ifndef VOXELITY_WORLD_H
 #define VOXELITY_WORLD_H
 
-#include <unordered_map>
-#include <functional>
-
+#include "Ashen/core/Types.h"
 #include "Voxelity/voxelWorld/chunk/Chunk.h"
 #include "Voxelity/voxelWorld/voxel/VoxelType.h"
-#include "Voxelity/voxelWorld/generation/ITerrainGenerator.h"
+#include "Voxelity/voxelWorld/world/ChunkManager.h"
 
 namespace voxelity {
+    class IWorldObserver {
+    public:
+        virtual ~IWorldObserver() = default;
+        virtual void onVoxelChanged(const glm::ivec3& worldPos, VoxelType oldType, VoxelType newType) = 0;
+        virtual void onChunkLoaded(const ChunkCoord& coord) = 0;
+        virtual void onChunkUnloaded(const ChunkCoord& coord) = 0;
+    };
+
     class World {
     public:
-        World();
-
+        explicit World(ash::Scope<ITerrainGenerator> generator);
         ~World() = default;
 
         VoxelType getVoxel(int worldX, int worldY, int worldZ) const;
-
+        VoxelType getVoxel(const glm::ivec3& worldPos) const;
         void setVoxel(int worldX, int worldY, int worldZ, VoxelType type);
+        void setVoxel(const glm::ivec3& worldPos, VoxelType type);
 
-        VoxelType getVoxel(const glm::ivec3 &worldPos) const;
+        Chunk* getChunk(const ChunkCoord& coord) const;
+        Chunk* getChunk(int x, int y, int z) const;
 
-        void setVoxel(const glm::ivec3 &worldPos, VoxelType type);
+        void updateLoadedChunks(const glm::vec3& playerPos, int renderDistance) const;
+        void processChunkLoading(int maxChunksPerFrame = 1) const;
 
-        Chunk *getOrCreateChunk(int x, int y, int z);
+        // NOUVEAU: Traitement séparé de la construction des meshes
+        void processMeshBuilding(int maxBuildsPerFrame = 2) const;
 
-        Chunk *getOrCreateChunk(const glm::ivec3 &pos);
+        void forEachChunk(const std::function<void(const ChunkCoord&, Chunk*)>& func) const;
+        void forEachChunkInRadius(const glm::vec3& center, int radius,
+                                   const std::function<void(const ChunkCoord&, Chunk*)>& func) const;
 
-        Chunk *getChunk(int x, int y, int z);
+        static ash::IVec3 toChunkCoord(int x, int y, int z);
+        static ash::IVec3 toChunkCoord(const glm::ivec3& worldPos);
+        static ash::IVec3 toLocalCoord(int x, int y, int z);
+        static ash::IVec3 toLocalCoord(const glm::ivec3& position);
+        static ash::IVec3 toWorldPos(const glm::ivec3& chunkCoord, const glm::ivec3& localPos = {0, 0, 0});
 
-        Chunk *getChunk(const glm::ivec3 &pos);
+        void addObserver(IWorldObserver* observer);
+        void removeObserver(IWorldObserver* observer);
 
-        static ChunkCoord toChunkCoord(int x, int y, int z);
+        size_t getLoadedChunkCount() const;
+        size_t getPendingLoadCount() const;
+        size_t getPendingMeshCount() const; // NOUVEAU
 
-        static ChunkCoord toChunkCoord(const glm::ivec3 &worldPos);
-
-        static glm::ivec3 toLocalCoord(int x, int y, int z);
-
-        static glm::ivec3 toLocalCoord(const glm::ivec3 &position);
-
-        static glm::ivec3 toWorldPos(const glm::ivec3 &chunkCoord, const glm::ivec3 &localPos = {0, 0, 0});
-
-        void clear();
-
-        void forEachChunk(const std::function<void(const ChunkCoord &, Chunk *)> &func);
-
-        void generateArea(const glm::ivec3 &startPos, const glm::ivec3 &endPos);
+        void clear() const;
 
     private:
-        std::unordered_map<ChunkCoord, ash::Scope<Chunk> > m_chunks;
+        ash::Scope<ChunkManager> m_chunkManager;
+        std::vector<IWorldObserver*> m_observers;
 
-        ash::Scope<ITerrainGenerator> m_generator;
+        void notifyVoxelChanged(const glm::ivec3& worldPos, VoxelType oldType, VoxelType newType) const;
+        void markNeighborChunksDirty(const ChunkCoord& chunkCoord, const glm::ivec3& localPos);
     };
 }
 
-#endif //VOXELITY_WORLD_H
+#endif

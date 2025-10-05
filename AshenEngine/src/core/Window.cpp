@@ -48,7 +48,7 @@ namespace ash {
         SetupCallbacks();
     }
 
-    void Window::SetupCallbacks() {
+    void Window::SetupCallbacks() const {
         // Window resize callback
         glfwSetWindowSizeCallback(m_Handle, [](GLFWwindow *window, const int width, const int height) {
             WindowData &data = *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
