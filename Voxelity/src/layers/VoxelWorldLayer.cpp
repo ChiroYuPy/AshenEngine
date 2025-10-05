@@ -4,6 +4,7 @@
 #include "Voxelity/entities/Player.h"
 #include "Ashen/core/Input.h"
 #include "Ashen/core/Logger.h"
+#include "Ashen/events/ApplicationEvent.h"
 #include "Ashen/renderer/RenderCommand.h"
 #include "Ashen/renderer/Renderer.h"
 #include "Ashen/renderer/Renderer2D.h"
@@ -27,9 +28,14 @@ namespace voxelity {
     }
 
     void VoxelWorldLayer::OnEvent(ash::Event &event) {
-        if (m_inputHandler) {
+        if (m_inputHandler)
             m_inputHandler->handleEvent(event);
-        }
+
+        ash::EventDispatcher dispatcher(event);
+        dispatcher.Dispatch<ash::WindowResizeEvent>([this](const ash::WindowResizeEvent &e) {
+            m_camera->OnResize(e.GetWidth(), e.GetHeight());
+            return false;
+        });
     }
 
     void VoxelWorldLayer::OnUpdate(const float ts) {

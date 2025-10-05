@@ -60,19 +60,19 @@ namespace ash {
         static float GetTime();
 
     private:
-        void InitializeGLFW();
+        void InitializeGLFW() const;
 
-        void InitializeResourceSystem();
+        void InitializeResourceSystem() const;
 
         void InitializeWindow();
 
-        void InitializeRenderer();
+        void InitializeRenderer() const;
 
-        void InitializeInput();
+        void InitializeInput() const;
 
-        void Shutdown();
+        void Shutdown() const;
 
-        void Tick(float deltaTime);
+        void Tick(float deltaTime) const;
 
         void ProcessEvents() const;
 

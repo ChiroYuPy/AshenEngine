@@ -30,15 +30,14 @@ namespace voxelity {
         if (!entity.useGravity) return;
 
         float gravityFactor = 1.0f;
-        float dragFactor = m_config.airDrag; // drag normal
+        float dragFactor = m_config.airDrag;
 
         // Vérifier si l'entité est dans un liquide
-        const glm::ivec3 blockPos = glm::floor(entity.position); // bloc "occupé" par le joueur
+        const glm::ivec3 blockPos = glm::floor(entity.position);
         const auto voxel = world.getVoxel(blockPos.x, blockPos.y, blockPos.z);
         if (voxel && isVoxelLiquid(voxel)) {
-            // bloc liquide
-            gravityFactor = 0.3f; // chute plus lente (flottabilité)
-            dragFactor = m_config.airDrag * 5.0f; // drag plus fort pour simuler la résistance de l'eau
+            gravityFactor = 0.3f;
+            dragFactor = m_config.airDrag * 5.0f;
         }
 
         // Appliquer la gravité
@@ -59,12 +58,13 @@ namespace voxelity {
 
         entity.onGround = false;
 
-        ash::AABB entityBox(entity.position, entity.boundingBoxSize);
+        // Obtenir la bounding box de l'entité à sa position actuelle
+        ash::BoundingBox3D entityBox = entity.getBoundingBox();
         glm::vec3 remainingMotion = motion;
         glm::vec3 actualMotion(0.0f);
 
         // Ordre: Y (vertical) -> X -> Z pour éviter les blocages
-        constexpr int axisOrder[3] = {1, 0, 2}; // Y, X, Z
+        constexpr int axisOrder[3] = {1, 0, 2};
 
         for (const int axis: axisOrder) {
             if (std::abs(remainingMotion[axis]) < m_config.collisionEpsilon) continue;
@@ -73,7 +73,9 @@ namespace voxelity {
             const float moved = sweepAxis(entityBox, remainingMotion[axis], axis, world, collisions);
 
             actualMotion[axis] += moved;
-            entityBox = entityBox.offset(glm::vec3(
+
+            // Déplacer la bounding box sur cet axe
+            entityBox = entityBox.Offset(glm::vec3(
                 axis == 0 ? moved : 0.0f,
                 axis == 1 ? moved : 0.0f,
                 axis == 2 ? moved : 0.0f
@@ -96,20 +98,14 @@ namespace voxelity {
         return actualMotion;
     }
 
-    float PhysicsSystem::sweepAxis(const ash::AABB &aabb, const float motion, const int axis,
+    float PhysicsSystem::sweepAxis(const ash::BoundingBox3D &aabb, const float motion, const int axis,
                                    const World &world, CollisionResult &result) const {
         result.clear();
 
         if (std::abs(motion) < m_config.collisionEpsilon) return 0.0f;
 
         // Créer une AABB élargie pour le sweep
-        const auto sweepVector = glm::vec3(
-            axis == 0 ? motion : 0.0f,
-            axis == 1 ? motion : 0.0f,
-            axis == 2 ? motion : 0.0f
-        );
-
-        ash::AABB sweepBox = aabb;
+        ash::BoundingBox3D sweepBox = aabb;
         if (motion > 0.0f) {
             sweepBox.max[axis] += motion;
         } else {
@@ -117,7 +113,7 @@ namespace voxelity {
         }
 
         // Expansion pour être sûr de détecter les collisions
-        sweepBox = sweepBox.expand(m_config.collisionEpsilon);
+        sweepBox = sweepBox.Expand(m_config.collisionEpsilon);
 
         // Récupérer tous les blocs potentiels
         std::vector<glm::ivec3> blocks;
@@ -128,26 +124,26 @@ namespace voxelity {
 
         // Tester chaque bloc
         for (const auto &blockPos: blocks) {
-            const ash::AABB blockBox = ash::AABB::fromBlock(blockPos);
+            const ash::BoundingBox3D blockBox = ash::BoundingBox3D::fromBlock(blockPos);
 
-            // Tester l'intersection sur l'axe du mouvement
-            ash::AABB testBox = aabb.offset(glm::vec3(
-                axis == 0 ? closestHit : 0.0f,
-                axis == 1 ? closestHit : 0.0f,
-                axis == 2 ? closestHit : 0.0f
-            ));
+            // Calculer la distance de collision
+            float hitDist;
+            if (motion > 0.0f) {
+                hitDist = blockBox.min[axis] - aabb.max[axis];
+            } else {
+                hitDist = blockBox.max[axis] - aabb.min[axis];
+            }
 
-            if (testBox.intersects(blockBox)) {
-                // Calculer la distance exacte de collision
-                float hitDist;
-                if (motion > 0.0f) {
-                    hitDist = blockBox.min[axis] - aabb.max[axis];
-                } else {
-                    hitDist = blockBox.max[axis] - aabb.min[axis];
-                }
+            // Vérifier si cette collision est plus proche
+            if (std::abs(hitDist) < std::abs(closestHit)) {
+                // Vérifier que l'AABB déplacée intersecte réellement le bloc
+                ash::BoundingBox3D testBox = aabb.Offset(glm::vec3(
+                    axis == 0 ? hitDist : 0.0f,
+                    axis == 1 ? hitDist : 0.0f,
+                    axis == 2 ? hitDist : 0.0f
+                ));
 
-                // Si c'est la collision la plus proche
-                if (std::abs(hitDist) < std::abs(closestHit)) {
+                if (testBox.Intersects(blockBox)) {
                     closestHit = hitDist;
                     hitFound = true;
 
@@ -171,7 +167,7 @@ namespace voxelity {
         return closestHit - sign * m_config.collisionEpsilon;
     }
 
-    void PhysicsSystem::getBroadPhaseBlocks(const ash::AABB &aabb, std::vector<glm::ivec3> &blocks,
+    void PhysicsSystem::getBroadPhaseBlocks(const ash::BoundingBox3D &aabb, std::vector<glm::ivec3> &blocks,
                                             const World &world) {
         blocks.clear();
 

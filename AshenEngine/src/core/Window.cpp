@@ -1,6 +1,8 @@
 #include "Ashen/core/Window.h"
 
 #include <iostream>
+
+#include "Ashen/core/Logger.h"
 #include "Ashen/events/ApplicationEvent.h"
 #include "Ashen/events/KeyEvent.h"
 #include "Ashen/events/MouseEvent.h"
@@ -8,8 +10,8 @@
 namespace ash {
     Window::Window(const WindowProperties &specification) {
         m_Data.Title = specification.Title;
-        m_Data.Width = specification.Width;
-        m_Data.Height = specification.Height;
+        m_Data.Size.x = specification.Width;
+        m_Data.Size.y = specification.Height;
         m_Data.VSync = specification.VSync;
     }
 
@@ -23,7 +25,7 @@ namespace ash {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
-        m_Handle = glfwCreateWindow(m_Data.Width, m_Data.Height,
+        m_Handle = glfwCreateWindow(m_Data.Size.x, m_Data.Size.y,
                                     m_Data.Title.c_str(), nullptr, nullptr);
 
         if (!m_Handle) {
@@ -50,8 +52,10 @@ namespace ash {
         // Window resize callback
         glfwSetWindowSizeCallback(m_Handle, [](GLFWwindow *window, const int width, const int height) {
             WindowData &data = *static_cast<WindowData *>(glfwGetWindowUserPointer(window));
-            data.Width = width;
-            data.Height = height;
+            data.Size.x = width;
+            data.Size.y = height;
+
+            Logger::info("window size: {}, {}", width, height);
 
             WindowResizeEvent event(width, height);
             data.EventCallback(event);

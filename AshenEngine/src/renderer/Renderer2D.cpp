@@ -242,7 +242,7 @@ namespace ash {
     }
 
     void Renderer2D::BeginScene(const Camera &camera) {
-        s_Data.ViewProjectionMatrix = camera.GetViewProjectionMatrix();
+        s_Data.ViewProjectionMatrix = camera.GetProjectionMatrix() * camera.GetViewMatrix();
         StartBatch();
     }
 

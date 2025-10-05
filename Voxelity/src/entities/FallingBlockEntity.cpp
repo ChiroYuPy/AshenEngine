@@ -35,10 +35,7 @@ namespace voxelity {
 
     void FallingBlockEntity::checkLanding(const World &world) {
         // Si le bloc est au sol et ne bouge presque plus
-        if (onGround &&glm::length(velocity)
-        <
-        0.1f
-        ) {
+        if (onGround && glm::length(velocity) < 0.1f) {
             // Convertir en bloc solide dans le monde
             const auto blockPos = glm::ivec3(glm::floor(position));
 

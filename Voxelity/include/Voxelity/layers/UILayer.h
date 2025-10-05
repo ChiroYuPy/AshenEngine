@@ -3,6 +3,7 @@
 
 #include "Ashen/core/Layer.h"
 #include "Ashen/renderer/Camera.h"
+#include "Ashen/renderer/gfx/Texture.h"
 
 namespace voxelity {
     class UILayer final : public ash::Layer {
@@ -13,12 +14,11 @@ namespace voxelity {
 
         void OnEvent(ash::Event &event) override;
 
-        void ToggleInventory() { m_ShowInventory = !m_ShowInventory; }
-        [[nodiscard]] bool IsInventoryOpen() const { return m_ShowInventory; }
-
     private:
-        ash::Ref<ash::OrthographicCamera> m_UICamera;
-        bool m_ShowInventory = false;
+        ash::Ref<ash::UICamera> m_UICamera;
+        ash::Ref<ash::Texture2D> m_CrosshairTexture;
+
+        bool m_3DCrosshair;
     };
 }
 

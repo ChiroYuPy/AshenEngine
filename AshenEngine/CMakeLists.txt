@@ -15,7 +15,6 @@ set(CORE_SOURCES
         src/renderer/Renderer.cpp
         src/renderer/Renderer2D.cpp
 
-        include/Ashen/math/AABB.h
         include/Ashen/math/Math.h
         include/Ashen/utils/FileSystem.h
         src/utils/FileSystem.cpp
@@ -23,6 +22,7 @@ set(CORE_SOURCES
         src/utils/ImageLoader.cpp
         include/Ashen/resources/ResourceManager.h
         src/resources/ResourceManager.cpp
+        include/Ashen/math/BoundingBox.h
 
 )
 

@@ -3,7 +3,7 @@
 
 #include <glm/glm.hpp>
 
-#include "Ashen/math/AABB.h"
+#include "Ashen/math/BoundingBox.h"
 
 namespace voxelity {
     class World;
@@ -26,8 +26,8 @@ namespace voxelity {
         bool isActive = true;
         bool onGround = false;
 
-        ash::AABB getAABB() const {
-            return ash::AABB(position, boundingBoxSize);
+        [[nodiscard]] ash::BoundingBox3D getBoundingBox() const {
+            return {position - boundingBoxSize * 0.5f, position + boundingBoxSize * 0.5f};
         }
 
     protected:

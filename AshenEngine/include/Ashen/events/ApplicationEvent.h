@@ -12,10 +12,10 @@ namespace ash {
             : m_Width(width), m_Height(height) {
         }
 
-        unsigned int GetWidth() const { return m_Width; }
-        unsigned int GetHeight() const { return m_Height; }
+        [[nodiscard]] unsigned int GetWidth() const { return m_Width; }
+        [[nodiscard]] unsigned int GetHeight() const { return m_Height; }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             std::stringstream ss;
             ss << "WindowResizeEvent: " << m_Width << ", " << m_Height;
             return ss.str();

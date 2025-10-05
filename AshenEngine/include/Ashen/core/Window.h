@@ -49,11 +49,13 @@ namespace ash {
         [[nodiscard]] bool ShouldClose() const;
 
         [[nodiscard]] std::string GetTitle() const { return m_Data.Title; }
-        [[nodiscard]] uint32_t GetWidth() const { return m_Data.Width; }
-        [[nodiscard]] uint32_t GetHeight() const { return m_Data.Height; }
+        [[nodiscard]] UVec2 GetSizeU() const { return m_Data.Size; }
+        [[nodiscard]] Vec2 GetSizeF() const { return {m_Data.Size}; }
+        [[nodiscard]] uint32_t GetWidth() const { return m_Data.Size.x; }
+        [[nodiscard]] uint32_t GetHeight() const { return m_Data.Size.y; }
 
         [[nodiscard]] float GetAspectRatio() const {
-            return static_cast<float>(m_Data.Width) / static_cast<float>(m_Data.Height);
+            return static_cast<float>(m_Data.Size.x) / static_cast<float>(m_Data.Size.y);
         }
 
         [[nodiscard]] GLFWwindow *GetHandle() const { return m_Handle; }
@@ -63,7 +65,7 @@ namespace ash {
 
         struct WindowData {
             std::string Title;
-            uint32_t Width, Height;
+            UVec2 Size;
             bool VSync;
             EventCallbackFn EventCallback;
         };

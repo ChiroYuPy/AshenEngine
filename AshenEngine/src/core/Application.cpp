@@ -13,8 +13,6 @@
 #include "Ashen/resources/ResourceManager.h"
 
 namespace ash {
-    Application *Application::s_Instance = nullptr;
-
     Application::Application(ApplicationSettings settings)
         : m_Settings(std::move(settings)), m_Running(false) {
         if (s_Instance) {
@@ -34,14 +32,43 @@ namespace ash {
         Shutdown();
     }
 
-    void Application::InitializeGLFW() {
+    void Application::Run() {
+        m_Running = true;
+        float lastFrameTime = GetTime();
+
+        while (m_Running && !m_Window->ShouldClose()) {
+            const float time = GetTime();
+            const float deltaTime = time - lastFrameTime;
+            lastFrameTime = time;
+
+            Tick(deltaTime);
+        }
+    }
+
+    void Application::Stop() {
+        m_Running = false;
+    }
+
+    Vec2 Application::GetFramebufferSize() const {
+        return m_Window->GetFramebufferSize();
+    }
+
+    Application &Application::Get() {
+        return *s_Instance;
+    }
+
+    float Application::GetTime() {
+        return static_cast<float>(glfwGetTime());
+    }
+
+    void Application::InitializeGLFW() const {
         if (!glfwInit()) {
             Logger::error("Failed to initialize GLFW");
             throw std::runtime_error("GLFW initialization failed");
         }
     }
 
-    void Application::InitializeResourceSystem() {
+    void Application::InitializeResourceSystem() const {
         ResourcePaths::Instance().SetWorkingDirectory(m_Settings.ResourceDirectory);
         AssetLibrary::Initialize();
     }
@@ -59,16 +86,16 @@ namespace ash {
         });
     }
 
-    void Application::InitializeRenderer() {
+    void Application::InitializeRenderer() const {
         InitOpenGLDebugMessageCallback();
         Renderer::Init();
     }
 
-    void Application::InitializeInput() {
+    void Application::InitializeInput() const {
         Input::Init(*m_Window);
     }
 
-    void Application::Shutdown() {
+    void Application::Shutdown() const {
         AssetLibrary::ClearAll();
         Renderer::Shutdown();
 
@@ -79,20 +106,7 @@ namespace ash {
         glfwTerminate();
     }
 
-    void Application::Run() {
-        m_Running = true;
-        float lastFrameTime = GetTime();
-
-        while (m_Running && !m_Window->ShouldClose()) {
-            const float time = GetTime();
-            const float deltaTime = time - lastFrameTime;
-            lastFrameTime = time;
-
-            Tick(deltaTime);
-        }
-    }
-
-    void Application::Tick(float deltaTime) {
+    void Application::Tick(const float deltaTime) const {
         ProcessEvents();
         Update(deltaTime);
         Render();
@@ -103,7 +117,7 @@ namespace ash {
         m_Window->PollEvents();
     }
 
-    void Application::Update(float deltaTime) const {
+    void Application::Update(const float deltaTime) const {
         Input::Update();
         UpdateLayers(deltaTime);
     }
@@ -112,22 +126,6 @@ namespace ash {
         Renderer::BeginFrame();
         RenderLayers();
         Renderer::EndFrame();
-    }
-
-    void Application::Stop() {
-        m_Running = false;
-    }
-
-    Vec2 Application::GetFramebufferSize() const {
-        return m_Window->GetFramebufferSize();
-    }
-
-    Application &Application::Get() {
-        return *s_Instance;
-    }
-
-    float Application::GetTime() {
-        return static_cast<float>(glfwGetTime());
     }
 
     void Application::OnEvent(Event &event) {
@@ -157,4 +155,6 @@ namespace ash {
             layer->OnRender();
         }
     }
+
+    Application *Application::s_Instance = nullptr;
 }
