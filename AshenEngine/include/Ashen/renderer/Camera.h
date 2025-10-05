@@ -7,7 +7,7 @@
 
 #include "Ashen/math/Math.h"
 
-namespace pixl {
+namespace ash {
     class Camera {
     public:
         virtual ~Camera() = default;

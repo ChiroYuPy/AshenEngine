@@ -1,7 +1,7 @@
 #include "Ashen/core/Window.h"
 #include "Ashen/core/Input.h"
 
-namespace pixl {
+namespace ash {
     void Input::Init(const Window &window) {
         s_Window = window.GetHandle();
         s_Keys.reset();

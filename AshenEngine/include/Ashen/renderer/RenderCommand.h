@@ -6,7 +6,7 @@
 #include "glad/glad.h"
 #include "Ashen/math/Math.h"
 
-namespace pixl {
+namespace ash {
     class RenderCommand {
     public:
         enum class DepthFunc : GLenum {

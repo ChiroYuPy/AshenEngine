@@ -4,7 +4,7 @@
 #include "Ashen/UI/Widget.h"
 #include "Ashen/events/Event.h"
 
-namespace pixl {
+namespace ash {
     class Layer {
     public:
         virtual ~Layer() = default;

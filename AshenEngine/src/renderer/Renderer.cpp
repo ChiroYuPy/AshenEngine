@@ -6,7 +6,7 @@
 #include "Ashen/renderer/Renderer2D.h"
 #include "Ashen/renderer/gfx/VertexArray.h"
 
-namespace pixl {
+namespace ash {
     Renderer::Statistics Renderer::s_Stats;
 
     void Renderer::Init() {

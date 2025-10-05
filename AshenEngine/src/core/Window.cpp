@@ -5,7 +5,7 @@
 #include "Ashen/events/KeyEvent.h"
 #include "Ashen/events/MouseEvent.h"
 
-namespace pixl {
+namespace ash {
     Window::Window(const WindowProperties &specification) {
         m_Data.Title = specification.Title;
         m_Data.Width = specification.Width;

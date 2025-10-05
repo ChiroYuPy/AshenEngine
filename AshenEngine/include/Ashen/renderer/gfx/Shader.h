@@ -12,7 +12,7 @@
 #include "Ashen/math/Math.h"
 #include "Ashen/renderer/Bindable.h"
 
-namespace pixl {
+namespace ash {
     enum class ShaderType : GLenum {
         Vertex = GL_VERTEX_SHADER,
         Fragment = GL_FRAGMENT_SHADER,

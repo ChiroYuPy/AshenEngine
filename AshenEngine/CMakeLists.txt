@@ -1,4 +1,4 @@
-project(Core LANGUAGES CXX)
+project(Ashen LANGUAGES CXX)
 
 set(CORE_SOURCES
         vendor/src/IMG.cpp
@@ -17,14 +17,19 @@ set(CORE_SOURCES
 
         include/Ashen/math/AABB.h
         include/Ashen/math/Math.h
-        include/Ashen/resources/ResourceSystem.h
+        include/Ashen/utils/FileSystem.h
+        src/utils/FileSystem.cpp
+        include/Ashen/utils/ImageLoader.h
+        src/utils/ImageLoader.cpp
+        include/Ashen/resources/ResourceManager.h
+        src/resources/ResourceManager.cpp
 
 )
 
-add_library(Core STATIC ${CORE_SOURCES})
+add_library(Ashen STATIC ${CORE_SOURCES})
 
 # Headers publics
-target_include_directories(Core
+target_include_directories(Ashen
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/vendor/include
@@ -36,4 +41,4 @@ add_subdirectory(vendor/glad)
 find_package(glfw3 REQUIRED)
 
 
-target_link_libraries(Core PUBLIC glad glfw)
+target_link_libraries(Ashen PUBLIC glad glfw)

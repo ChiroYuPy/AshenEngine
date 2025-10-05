@@ -9,7 +9,7 @@
 #include "stb_image.h"
 #include "glad/glad.h"
 
-namespace pixl {
+namespace ash {
     class Texture : public Bindable {
     public:
         explicit Texture(const GLenum target)

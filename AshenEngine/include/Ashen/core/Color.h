@@ -10,7 +10,7 @@
 
 #include "Ashen/math/Math.h"
 
-namespace pixl {
+namespace ash {
     class Color {
     public:
         float r, g, b, a;

@@ -5,16 +5,16 @@
 #include "Ashen/renderer/Camera.h"
 
 namespace voxelity {
-    class DebugLayer final : public pixl::Layer {
+    class DebugLayer final : public ash::Layer {
     public:
         DebugLayer();
 
         void OnRender() override;
 
-        void OnEvent(pixl::Event &event) override;
+        void OnEvent(ash::Event &event) override;
 
     private:
-        pixl::Ref<pixl::OrthographicCamera> m_DebugCamera;
+        ash::Ref<ash::OrthographicCamera> m_DebugCamera;
     };
 }
 

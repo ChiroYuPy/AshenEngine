@@ -16,13 +16,13 @@ namespace voxelity {
     constexpr unsigned int RENDER_DISTANCE = 2;
     constexpr unsigned int RENDER_HEIGHT = 2;
 
-    class VoxelWorldLayer final : public pixl::Layer {
+    class VoxelWorldLayer final : public ash::Layer {
     public:
         VoxelWorldLayer();
 
         ~VoxelWorldLayer() override;
 
-        void OnEvent(pixl::Event &event) override;
+        void OnEvent(ash::Event &event) override;
 
         void OnUpdate(float ts) override;
 
@@ -56,24 +56,24 @@ namespace voxelity {
         void renderWorld() const;
 
         // Systèmes principaux
-        pixl::Scope<World> m_world;
-        pixl::Scope<WorldRenderer> m_worldRenderer;
-        pixl::Scope<WorldInteractor> m_worldInteractor;
-        pixl::Scope<Player> m_player;
-        pixl::Scope<InputHandler> m_inputHandler;
+        ash::Scope<World> m_world;
+        ash::Scope<WorldRenderer> m_worldRenderer;
+        ash::Scope<WorldInteractor> m_worldInteractor;
+        ash::Scope<Player> m_player;
+        ash::Scope<InputHandler> m_inputHandler;
 
         // Caméra et shader
-        pixl::Ref<pixl::PerspectiveCamera> m_camera;
-        pixl::Ref<pixl::ShaderProgram> m_shader;
+        ash::Ref<ash::PerspectiveCamera> m_camera;
+        ash::Ref<ash::ShaderProgram> m_shader;
 
         // Skybox
-        pixl::Ref<pixl::ShaderProgram> m_skyboxShader;
-        pixl::Ref<pixl::VertexArray> m_skyboxVAO;
-        pixl::Ref<pixl::VertexBuffer> m_skyboxVBO;
-        pixl::Ref<pixl::TextureCubeMap> m_skyboxTexture;
+        ash::Ref<ash::ShaderProgram> m_skyboxShader;
+        ash::Ref<ash::VertexArray> m_skyboxVAO;
+        ash::Ref<ash::VertexBuffer> m_skyboxVBO;
+        ash::Ref<ash::TextureCubeMap> m_skyboxTexture;
 
         // UI/Debug
-        pixl::Ref<pixl::OrthographicCamera> m_orthoCam;
+        ash::Ref<ash::OrthographicCamera> m_orthoCam;
         glm::ivec3 m_targetedBlockPos{};
         bool m_hasTargetedBlock = false;
 

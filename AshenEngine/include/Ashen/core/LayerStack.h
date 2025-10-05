@@ -5,7 +5,7 @@
 #include "Layer.h"
 #include "Ashen/events/Event.h"
 
-namespace pixl {
+namespace ash {
     class LayerStack {
     public:
         LayerStack() = default;
@@ -29,10 +29,6 @@ namespace pixl {
         void PopLayer();
 
         void Clear();
-
-        void OnUpdate(float ts) const;
-
-        void OnRender() const;
 
         void OnEvent(Event &event);
 

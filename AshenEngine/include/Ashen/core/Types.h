@@ -3,7 +3,7 @@
 
 #include <memory>
 
-namespace pixl {
+namespace ash {
     template<typename T>
     using Scope = std::unique_ptr<T>;
 

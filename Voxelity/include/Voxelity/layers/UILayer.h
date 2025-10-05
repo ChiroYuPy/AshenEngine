@@ -5,19 +5,19 @@
 #include "Ashen/renderer/Camera.h"
 
 namespace voxelity {
-    class UILayer final : public pixl::Layer {
+    class UILayer final : public ash::Layer {
     public:
         UILayer();
 
         void OnRender() override;
 
-        void OnEvent(pixl::Event &event) override;
+        void OnEvent(ash::Event &event) override;
 
         void ToggleInventory() { m_ShowInventory = !m_ShowInventory; }
         [[nodiscard]] bool IsInventoryOpen() const { return m_ShowInventory; }
 
     private:
-        pixl::Ref<pixl::OrthographicCamera> m_UICamera;
+        ash::Ref<ash::OrthographicCamera> m_UICamera;
         bool m_ShowInventory = false;
     };
 }

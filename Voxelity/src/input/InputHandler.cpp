@@ -17,20 +17,20 @@ namespace voxelity {
           , m_worldInteractor(worldInteractor) {
     }
 
-    void InputHandler::handleEvent(pixl::Event &event) {
-        pixl::EventDispatcher dispatcher(event);
+    void InputHandler::handleEvent(ash::Event &event) {
+        ash::EventDispatcher dispatcher(event);
 
-        dispatcher.Dispatch<pixl::KeyPressedEvent>([this](const pixl::KeyPressedEvent &e) {
+        dispatcher.Dispatch<ash::KeyPressedEvent>([this](const ash::KeyPressedEvent &e) {
             handleKeyPress(e);
             return true;
         });
 
-        dispatcher.Dispatch<pixl::MouseButtonPressedEvent>([this](const pixl::MouseButtonPressedEvent &e) {
+        dispatcher.Dispatch<ash::MouseButtonPressedEvent>([this](const ash::MouseButtonPressedEvent &e) {
             handleMouseButton(e);
             return true;
         });
 
-        dispatcher.Dispatch<pixl::MouseScrolledEvent>([this](const pixl::MouseScrolledEvent &e) {
+        dispatcher.Dispatch<ash::MouseScrolledEvent>([this](const ash::MouseScrolledEvent &e) {
             handleMouseScroll(e);
             return true;
         });
@@ -39,11 +39,11 @@ namespace voxelity {
         m_playerController.handleEvent(event);
     }
 
-    void InputHandler::handleKeyPress(const pixl::KeyPressedEvent &event) {
+    void InputHandler::handleKeyPress(const ash::KeyPressedEvent &event) {
         // Échap : désactiver caméra ou quitter
-        if (event.GetKeyCode() == pixl::Key::Escape) {
+        if (event.GetKeyCode() == ash::Key::Escape) {
             if (m_playerController.isActive()) {
-                pixl::Input::SetCursorMode(pixl::CursorMode::Normal);
+                ash::Input::SetCursorMode(ash::CursorMode::Normal);
                 m_playerController.setActive(false);
             } else {
                 VoxelityApp::Get().Stop();
@@ -55,39 +55,39 @@ namespace voxelity {
         // if (event.GetKeyCode() == pixl::Key::U) { ... }
     }
 
-    void InputHandler::handleMouseButton(const pixl::MouseButtonPressedEvent &event) const {
+    void InputHandler::handleMouseButton(const ash::MouseButtonPressedEvent &event) const {
         const glm::vec3 cameraPos = m_playerController.getCamera()->GetPosition();
         const glm::vec3 cameraDir = m_playerController.getCamera()->GetFront();
 
-        if (event.GetMouseButton() == pixl::Mouse::ButtonLeft) {
+        if (event.GetMouseButton() == ash::Mouse::ButtonLeft) {
             if (m_playerController.isActive()) {
                 // Casser un bloc
                 if (m_worldInteractor.BreakBlock(cameraPos, cameraDir)) {
-                    pixl::Logger::info() << "Block broken!";
+                    ash::Logger::info() << "Block broken!";
                 } else {
-                    pixl::Logger::info() << "No block to break";
+                    ash::Logger::info() << "No block to break";
                 }
             } else {
                 // Activer le mode caméra
-                pixl::Input::SetCursorMode(pixl::CursorMode::Disabled);
+                ash::Input::SetCursorMode(ash::CursorMode::Disabled);
                 m_playerController.setActive(true);
             }
         }
 
-        if (event.GetMouseButton() == pixl::Mouse::ButtonRight && m_playerController.isActive()) {
+        if (event.GetMouseButton() == ash::Mouse::ButtonRight && m_playerController.isActive()) {
             // Placer un bloc
             if (m_worldInteractor.PlaceBlock(cameraPos, cameraDir)) {
-                pixl::Logger::info() << "Block placed!";
+                ash::Logger::info() << "Block placed!";
             } else {
-                pixl::Logger::info() << "Cannot place block here";
+                ash::Logger::info() << "Cannot place block here";
             }
         }
     }
 
-    void InputHandler::handleMouseScroll(const pixl::MouseScrolledEvent &event) const {
+    void InputHandler::handleMouseScroll(const ash::MouseScrolledEvent &event) const {
         static VoxelType voxelID = 0;
         voxelID += static_cast<VoxelType>(event.GetYOffset());
         m_worldInteractor.setSelectedVoxelID(voxelID);
-        pixl::Logger::info() << "block selected: " + getDisplayName(voxelID);
+        ash::Logger::info() << "block selected: " + getDisplayName(voxelID);
     }
 }

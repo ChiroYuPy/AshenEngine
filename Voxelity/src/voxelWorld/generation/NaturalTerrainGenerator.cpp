@@ -17,14 +17,14 @@ namespace voxelity {
 
     // Configuration des biomes
     const BiomeData biomeConfigs[] = {
-        {VoxelID::SAND,  VoxelID::SAND,  VoxelID::STONE, true, false, false, 0.0}, // BiomeType::OCEAN
-        {VoxelID::SAND,  VoxelID::SAND,  VoxelID::STONE, false, false, false, 0.0}, // BiomeType::BEACH
-        {VoxelID::GRASS, VoxelID::DIRT,  VoxelID::STONE, false, true, true, 0.02}, // BiomeType::PLAINS
-        {VoxelID::GRASS, VoxelID::DIRT,  VoxelID::STONE, false, true, true, 0.08}, // BiomeType::FOREST
-        {VoxelID::SAND,  VoxelID::SAND,  VoxelID::STONE, false, false, true, 0.001}, // BiomeType::DESERT
+        {VoxelID::SAND, VoxelID::SAND, VoxelID::STONE, true, false, false, 0.0}, // BiomeType::OCEAN
+        {VoxelID::SAND, VoxelID::SAND, VoxelID::STONE, false, false, false, 0.0}, // BiomeType::BEACH
+        {VoxelID::GRASS, VoxelID::DIRT, VoxelID::STONE, false, true, true, 0.02}, // BiomeType::PLAINS
+        {VoxelID::GRASS, VoxelID::DIRT, VoxelID::STONE, false, true, true, 0.08}, // BiomeType::FOREST
+        {VoxelID::SAND, VoxelID::SAND, VoxelID::STONE, false, false, true, 0.001}, // BiomeType::DESERT
         {VoxelID::STONE, VoxelID::STONE, VoxelID::STONE, false, false, true, 0.01}, // BiomeType::MOUNTAINS
-        {VoxelID::DIRT,  VoxelID::DIRT,  VoxelID::STONE, true, true, false, 0.03}, // BiomeType::SWAMP
-        {VoxelID::DIRT,  VoxelID::DIRT,  VoxelID::STONE, false, false, true, 0.005} // BiomeType::TUNDRA
+        {VoxelID::DIRT, VoxelID::DIRT, VoxelID::STONE, true, true, false, 0.03}, // BiomeType::SWAMP
+        {VoxelID::DIRT, VoxelID::DIRT, VoxelID::STONE, false, false, true, 0.005} // BiomeType::TUNDRA
     };
 
     BiomeType NaturalTerrainGenerator::getBiome(const glm::ivec3 &worldPos, double elevation) {

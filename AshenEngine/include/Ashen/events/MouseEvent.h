@@ -6,7 +6,7 @@
 #include "Ashen/events/Event.h"
 #include "Ashen/core/MouseCodes.h"
 
-namespace pixl {
+namespace ash {
     class MouseMovedEvent final : public Event {
     public:
         MouseMovedEvent(const float x, const float y)

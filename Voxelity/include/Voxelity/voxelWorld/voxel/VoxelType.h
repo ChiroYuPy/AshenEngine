@@ -20,27 +20,27 @@ namespace voxelity {
 
     struct VoxelDefinition {
         std::string displayName;
-        pixl::Color color;
+        ash::Color color;
         RenderMode renderMode;
         bool hasCollision;
 
         explicit VoxelDefinition(
             std::string_view displayName = "Unknown Block",
-            const pixl::Color &color = pixl::Color(255, 0, 255, 255),
+            const ash::Color &color = ash::Color(255, 0, 255, 255),
             RenderMode renderingMode = RenderMode::OPAQUE,
             bool hasCollision = true);
     };
 
     namespace VoxelID {
-        constexpr VoxelType AIR   = 0;
-        constexpr VoxelType DIRT  = 1;
+        constexpr VoxelType AIR = 0;
+        constexpr VoxelType DIRT = 1;
         constexpr VoxelType GRASS = 2;
         constexpr VoxelType STONE = 3;
-        constexpr VoxelType SAND  = 4;
+        constexpr VoxelType SAND = 4;
         constexpr VoxelType WATER = 5;
-        constexpr VoxelType LAVA  = 6;
+        constexpr VoxelType LAVA = 6;
         constexpr VoxelType GLASS = 7;
-        constexpr VoxelType WOOD  = 8;
+        constexpr VoxelType WOOD = 8;
         constexpr VoxelType LEAVES = 9;
     }
 
@@ -61,7 +61,7 @@ namespace voxelity {
         // Méthodes pour modifier les définitions
         void setDefinition(VoxelType voxelID, const VoxelDefinition &definition) noexcept;
 
-        void setColor(VoxelType voxelID, const pixl::Color &color) noexcept;
+        void setColor(VoxelType voxelID, const ash::Color &color) noexcept;
 
         void setRenderingMode(VoxelType voxelID, RenderMode mode) noexcept;
 
@@ -80,7 +80,7 @@ namespace voxelity {
 
     [[nodiscard]] const std::string &getDisplayName(VoxelType voxelID) noexcept;
 
-    [[nodiscard]] pixl::Color getVoxelColor(VoxelType voxelID) noexcept;
+    [[nodiscard]] ash::Color getVoxelColor(VoxelType voxelID) noexcept;
 
     [[nodiscard]] RenderMode getRenderMode(VoxelType voxelID) noexcept;
 
@@ -99,7 +99,7 @@ namespace voxelity {
     [[nodiscard]] bool shouldRenderVoxelFace(VoxelType currentVoxel, VoxelType neighborVoxel) noexcept;
 
     // Fonctions de convenance pour modifier les types de voxels
-    void modifyVoxelColor(VoxelType voxelID, const pixl::Color &newColor) noexcept;
+    void modifyVoxelColor(VoxelType voxelID, const ash::Color &newColor) noexcept;
 
     void modifyVoxelRenderingMode(VoxelType voxelID, RenderMode newMode) noexcept;
 

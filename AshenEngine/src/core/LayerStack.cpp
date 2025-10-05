@@ -1,7 +1,7 @@
 #include "Ashen/core/LayerStack.h"
 #include <ranges>
 
-namespace pixl {
+namespace ash {
     LayerStack::~LayerStack() {
         Clear();
     }
@@ -18,16 +18,6 @@ namespace pixl {
             layer->OnDetach();
 
         m_Layers.clear();
-    }
-
-    void LayerStack::OnUpdate(const float ts) const {
-        for (const auto &layer: m_Layers)
-            layer->OnUpdate(ts);
-    }
-
-    void LayerStack::OnRender() const {
-        for (const auto &layer: m_Layers)
-            layer->OnRender();
     }
 
     void LayerStack::OnEvent(Event &event) {

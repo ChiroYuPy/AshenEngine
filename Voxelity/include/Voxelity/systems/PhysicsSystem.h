@@ -84,11 +84,11 @@ namespace voxelity {
         glm::vec3 moveAndCollide(Entity &entity, const glm::vec3 &motion, const World &world) const;
 
         // Déplacement sur un seul axe avec collision
-        float sweepAxis(const pixl::AABB &aabb, float motion, int axis, const World &world,
+        float sweepAxis(const ash::AABB &aabb, float motion, int axis, const World &world,
                         CollisionResult &result) const;
 
         // Détection de tous les blocs potentiellement en collision
-        static void getBroadPhaseBlocks(const pixl::AABB &aabb, std::vector<glm::ivec3> &blocks, const World &world);
+        static void getBroadPhaseBlocks(const ash::AABB &aabb, std::vector<glm::ivec3> &blocks, const World &world);
 
         // Applique la friction
         void applyFriction(Entity &entity, float deltaTime) const;

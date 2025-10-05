@@ -6,7 +6,7 @@
 
 #include "Math.h"
 
-namespace pixl {
+namespace ash {
     struct AABB {
         Vec3 min;
         Vec3 max;

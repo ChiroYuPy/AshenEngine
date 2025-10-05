@@ -40,7 +40,7 @@ target_include_directories(Voxelity
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_libraries(Voxelity PRIVATE Core)
+target_link_libraries(Voxelity PRIVATE Ashen)
 
 add_custom_target(copy_resources
         COMMAND ${CMAKE_COMMAND} -E copy_directory

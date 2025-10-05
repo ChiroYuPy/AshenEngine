@@ -119,12 +119,12 @@ namespace voxelity {
         m_dirty = false;
     }
 
-    void Chunk::drawOpaque(pixl::ShaderProgram &shader) const {
+    void Chunk::drawOpaque(ash::ShaderProgram &shader) const {
         shader.SetVec3("u_ChunkPos", glm::vec3(getPosition() * VoxelArray::SIZE));
         m_opaqueMesh.draw();
     }
 
-    void Chunk::drawTransparent(pixl::ShaderProgram &shader) const {
+    void Chunk::drawTransparent(ash::ShaderProgram &shader) const {
         shader.SetVec3("u_ChunkPos", glm::vec3(getPosition() * VoxelArray::SIZE));
         m_transparentMesh.draw();
     }

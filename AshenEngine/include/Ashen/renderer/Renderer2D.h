@@ -9,7 +9,7 @@
 #include "Ashen/core/Types.h"
 #include "Ashen/math/Math.h"
 
-namespace pixl {
+namespace ash {
     struct QuadVertex {
         Vec3 Position;
         Vec4 Color;

@@ -3,7 +3,7 @@
 #include "Voxelity/voxelWorld/world/World.h"
 
 namespace voxelity {
-    Player::Player(std::shared_ptr<pixl::PerspectiveCamera> camera)
+    Player::Player(std::shared_ptr<ash::PerspectiveCamera> camera)
         : m_camera(std::move(camera)) {
         // Configuration de l'entité - dimensions standard Minecraft
         boundingBoxSize = glm::vec3(0.6f, 1.8f, 0.6f);

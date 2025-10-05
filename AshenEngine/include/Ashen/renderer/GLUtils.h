@@ -3,7 +3,7 @@
 
 #include <glad/glad.h>
 
-namespace pixl {
+namespace ash {
     enum class DebugSeverity : GLenum {
         High = GL_DEBUG_SEVERITY_HIGH,
         Medium = GL_DEBUG_SEVERITY_MEDIUM,

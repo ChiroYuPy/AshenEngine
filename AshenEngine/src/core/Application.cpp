@@ -10,35 +10,48 @@
 #include "Ashen/events/ApplicationEvent.h"
 #include "Ashen/renderer/GLUtils.h"
 #include "Ashen/renderer/Renderer.h"
-#include "Ashen/resources/ResourceSystem.h"
+#include "Ashen/resources/ResourceManager.h"
 
-namespace pixl {
+namespace ash {
     Application *Application::s_Instance = nullptr;
 
     Application::Application(ApplicationSettings settings)
-        : m_Settings(std::move(settings)), m_Running(true) {
+        : m_Settings(std::move(settings)), m_Running(false) {
         if (s_Instance) {
             Logger::error("Application already exists!");
             return;
         }
         s_Instance = this;
 
+        InitializeGLFW();
+        InitializeResourceSystem();
+        InitializeWindow();
+        InitializeRenderer();
+        InitializeInput();
+    }
+
+    Application::~Application() {
+        Shutdown();
+    }
+
+    void Application::InitializeGLFW() {
         if (!glfwInit()) {
             Logger::error("Failed to initialize GLFW");
-            return;
+            throw std::runtime_error("GLFW initialization failed");
         }
+    }
 
-        ResourcePaths::Instance().SetWorkingDirectory("resources");
+    void Application::InitializeResourceSystem() {
+        ResourcePaths::Instance().SetWorkingDirectory(m_Settings.ResourceDirectory);
         AssetLibrary::Initialize();
+    }
 
+    void Application::InitializeWindow() {
         WindowProperties windowProperties;
         windowProperties.Title = m_Settings.Name + " v" + m_Settings.Version;
-        m_Window = MakeScope<Window>(windowProperties);
-        m_Window->Create();
 
-        InitOpenGLDebugMessageCallback();
-        Renderer::Init();
-        Input::Init(*m_Window);
+        m_Window = std::make_unique<Window>(windowProperties);
+        m_Window->Create();
 
         m_Window->SetEventCallback([this](Event &e) {
             Input::OnEvent(e);
@@ -46,13 +59,28 @@ namespace pixl {
         });
     }
 
-    Application::~Application() {
+    void Application::InitializeRenderer() {
+        InitOpenGLDebugMessageCallback();
+        Renderer::Init();
+    }
+
+    void Application::InitializeInput() {
+        Input::Init(*m_Window);
+    }
+
+    void Application::Shutdown() {
+        AssetLibrary::ClearAll();
         Renderer::Shutdown();
-        m_Window->Destroy();
+
+        if (m_Window) {
+            m_Window->Destroy();
+        }
+
         glfwTerminate();
     }
 
-    void Application::Run() const {
+    void Application::Run() {
+        m_Running = true;
         float lastFrameTime = GetTime();
 
         while (m_Running && !m_Window->ShouldClose()) {
@@ -60,18 +88,30 @@ namespace pixl {
             const float deltaTime = time - lastFrameTime;
             lastFrameTime = time;
 
-            m_Window->PollEvents();
-
-            Input::Update();
-
-            m_LayerStack.OnUpdate(deltaTime);
-
-            Renderer::BeginFrame();
-            m_LayerStack.OnRender();
-            Renderer::EndFrame();
-
-            m_Window->SwapBuffers();
+            Tick(deltaTime);
         }
+    }
+
+    void Application::Tick(float deltaTime) {
+        ProcessEvents();
+        Update(deltaTime);
+        Render();
+        m_Window->SwapBuffers();
+    }
+
+    void Application::ProcessEvents() const {
+        m_Window->PollEvents();
+    }
+
+    void Application::Update(float deltaTime) const {
+        Input::Update();
+        UpdateLayers(deltaTime);
+    }
+
+    void Application::Render() const {
+        Renderer::BeginFrame();
+        RenderLayers();
+        Renderer::EndFrame();
     }
 
     void Application::Stop() {
@@ -104,5 +144,17 @@ namespace pixl {
         });
 
         m_LayerStack.OnEvent(event);
+    }
+
+    void Application::UpdateLayers(const float ts) const {
+        for (auto &layer: m_LayerStack) {
+            layer->OnUpdate(ts);
+        }
+    }
+
+    void Application::RenderLayers() const {
+        for (auto &layer: m_LayerStack) {
+            layer->OnRender();
+        }
     }
 }

@@ -5,7 +5,7 @@
 
 #include "Ashen/events/Event.h"
 
-namespace pixl {
+namespace ash {
     class WindowResizeEvent final : public Event {
     public:
         WindowResizeEvent(const unsigned int width, const unsigned int height)

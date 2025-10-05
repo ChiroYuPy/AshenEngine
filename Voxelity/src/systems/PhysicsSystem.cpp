@@ -59,7 +59,7 @@ namespace voxelity {
 
         entity.onGround = false;
 
-        pixl::AABB entityBox(entity.position, entity.boundingBoxSize);
+        ash::AABB entityBox(entity.position, entity.boundingBoxSize);
         glm::vec3 remainingMotion = motion;
         glm::vec3 actualMotion(0.0f);
 
@@ -96,7 +96,7 @@ namespace voxelity {
         return actualMotion;
     }
 
-    float PhysicsSystem::sweepAxis(const pixl::AABB &aabb, const float motion, const int axis,
+    float PhysicsSystem::sweepAxis(const ash::AABB &aabb, const float motion, const int axis,
                                    const World &world, CollisionResult &result) const {
         result.clear();
 
@@ -109,7 +109,7 @@ namespace voxelity {
             axis == 2 ? motion : 0.0f
         );
 
-        pixl::AABB sweepBox = aabb;
+        ash::AABB sweepBox = aabb;
         if (motion > 0.0f) {
             sweepBox.max[axis] += motion;
         } else {
@@ -128,10 +128,10 @@ namespace voxelity {
 
         // Tester chaque bloc
         for (const auto &blockPos: blocks) {
-            const pixl::AABB blockBox = pixl::AABB::fromBlock(blockPos);
+            const ash::AABB blockBox = ash::AABB::fromBlock(blockPos);
 
             // Tester l'intersection sur l'axe du mouvement
-            pixl::AABB testBox = aabb.offset(glm::vec3(
+            ash::AABB testBox = aabb.offset(glm::vec3(
                 axis == 0 ? closestHit : 0.0f,
                 axis == 1 ? closestHit : 0.0f,
                 axis == 2 ? closestHit : 0.0f
@@ -171,7 +171,7 @@ namespace voxelity {
         return closestHit - sign * m_config.collisionEpsilon;
     }
 
-    void PhysicsSystem::getBroadPhaseBlocks(const pixl::AABB &aabb, std::vector<glm::ivec3> &blocks,
+    void PhysicsSystem::getBroadPhaseBlocks(const ash::AABB &aabb, std::vector<glm::ivec3> &blocks,
                                             const World &world) {
         blocks.clear();
 

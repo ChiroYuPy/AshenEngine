@@ -4,13 +4,13 @@
 #include "Voxelity/layers/VoxelWorldLayer.h"
 
 namespace voxelity {
-    VoxelityApp::VoxelityApp(const pixl::ApplicationSettings &settings) : Application(settings) {
+    VoxelityApp::VoxelityApp(const ash::ApplicationSettings &settings) : Application(settings) {
         PushLayer<VoxelWorldLayer>();
         PushLayer<UILayer>();
     }
 }
 
-pixl::Application *pixl::CreateApplication(const ApplicationCommandLineArgs args) {
+ash::Application *ash::CreateApplication(const ApplicationCommandLineArgs args) {
     ApplicationSettings settings;
     settings.Name = "Sandbox";
     settings.Version = "0.0.3";

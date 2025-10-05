@@ -6,7 +6,7 @@
 
 #include "../Bindable.h"
 
-namespace pixl {
+namespace ash {
     enum class BufferType : GLenum {
         Vertex = GL_ARRAY_BUFFER,
         Index = GL_ELEMENT_ARRAY_BUFFER,

@@ -9,7 +9,7 @@
 #include "Ashen/events/Event.h"
 #include "Ashen/math/Math.h"
 
-namespace pixl {
+namespace ash {
     struct WindowProperties {
         std::string Title;
         uint32_t Width = 1280;

@@ -10,7 +10,7 @@
 #include "Ashen/events/MouseEvent.h"
 #include "Ashen/math/Math.h"
 
-namespace pixl {
+namespace ash {
     class Window;
 
     enum class CursorMode : GLint {

@@ -10,7 +10,7 @@
 #include "Ashen/math/Math.h"
 #include "Ashen/renderer/Bindable.h"
 
-namespace pixl {
+namespace ash {
     template<typename T>
     struct VertexAttrib {
         static constexpr GLint count = 1;

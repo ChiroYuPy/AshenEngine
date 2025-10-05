@@ -6,7 +6,7 @@
 #include "Ashen/core/Logger.h"
 
 namespace voxelity {
-    PlayerController::PlayerController(std::shared_ptr<pixl::PerspectiveCamera> camera)
+    PlayerController::PlayerController(std::shared_ptr<ash::PerspectiveCamera> camera)
         : m_camera(std::move(camera)), m_wantsJump(false), m_active(false) {
     }
 
@@ -21,13 +21,13 @@ namespace voxelity {
         updateCameraRotation(deltaTime);
     }
 
-    void PlayerController::handleEvent(pixl::Event &event) {
+    void PlayerController::handleEvent(ash::Event &event) {
         if (!m_active) return;
 
-        pixl::EventDispatcher dispatcher(event);
+        ash::EventDispatcher dispatcher(event);
 
-        dispatcher.Dispatch<pixl::KeyPressedEvent>([this](const pixl::KeyPressedEvent &e) {
-            if (e.GetKeyCode() == pixl::Key::Space)
+        dispatcher.Dispatch<ash::KeyPressedEvent>([this](const ash::KeyPressedEvent &e) {
+            if (e.GetKeyCode() == ash::Key::Space)
                 m_wantsJump = true;
 
             return false;
@@ -49,10 +49,10 @@ namespace voxelity {
 
         // Calculer le mouvement basé sur les inputs
         glm::vec3 moveDir(0.0f);
-        if (pixl::Input::IsKeyPressed(pixl::Key::W)) moveDir += forward;
-        if (pixl::Input::IsKeyPressed(pixl::Key::S)) moveDir -= forward;
-        if (pixl::Input::IsKeyPressed(pixl::Key::A)) moveDir -= right;
-        if (pixl::Input::IsKeyPressed(pixl::Key::D)) moveDir += right;
+        if (ash::Input::IsKeyPressed(ash::Key::W)) moveDir += forward;
+        if (ash::Input::IsKeyPressed(ash::Key::S)) moveDir -= forward;
+        if (ash::Input::IsKeyPressed(ash::Key::A)) moveDir -= right;
+        if (ash::Input::IsKeyPressed(ash::Key::D)) moveDir += right;
 
         // Normaliser pour éviter le mouvement diagonal plus rapide
         if (glm::length(moveDir) > 0.001f) {
@@ -61,22 +61,22 @@ namespace voxelity {
 
         // Déterminer la vitesse selon l'état
         float speed = m_settings.walkSpeed;
-        if (pixl::Input::IsKeyPressed(pixl::Key::LeftControl)) {
+        if (ash::Input::IsKeyPressed(ash::Key::LeftControl)) {
             speed = m_settings.sprintSpeed;
-        } else if (pixl::Input::IsKeyPressed(pixl::Key::LeftShift)) {
+        } else if (ash::Input::IsKeyPressed(ash::Key::LeftShift)) {
             speed = m_settings.crouchSpeed;
         }
 
         m_movementInput = moveDir * speed;
 
         // Saut
-        if (pixl::Input::IsKeyPressed(pixl::Key::Space)) {
+        if (ash::Input::IsKeyPressed(ash::Key::Space)) {
             m_wantsJump = true;
         }
     }
 
     void PlayerController::updateCameraRotation(const float deltaTime) const {
-        const glm::vec2 mouseDelta = pixl::Input::GetMouseDelta();
+        const glm::vec2 mouseDelta = ash::Input::GetMouseDelta();
         const glm::vec2 offset = mouseDelta * m_settings.mouseSensitivity;
 
         if (glm::length(offset) > 0.001f) {

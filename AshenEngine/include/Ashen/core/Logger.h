@@ -9,7 +9,7 @@
 #include <ctime>
 #include <sstream>
 
-namespace pixl {
+namespace ash {
     enum class LogLevel { TRACE, INFO, WARN, ERROR };
 
     class LogStream;

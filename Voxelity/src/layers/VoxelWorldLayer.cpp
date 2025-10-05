@@ -7,8 +7,7 @@
 #include "Ashen/renderer/RenderCommand.h"
 #include "Ashen/renderer/Renderer.h"
 #include "Ashen/renderer/Renderer2D.h"
-#include "Ashen/resources/ResourceSystem.h"
-#include "Ashen/utils/utils.h"
+#include "Ashen/resources/ResourceManager.h"
 
 namespace voxelity {
     VoxelWorldLayer::VoxelWorldLayer() {
@@ -27,7 +26,7 @@ namespace voxelity {
         m_world.reset();
     }
 
-    void VoxelWorldLayer::OnEvent(pixl::Event &event) {
+    void VoxelWorldLayer::OnEvent(ash::Event &event) {
         if (m_inputHandler) {
             m_inputHandler->handleEvent(event);
         }
@@ -66,8 +65,8 @@ namespace voxelity {
         if (!m_camera || !m_worldRenderer) return;
 
         // Configuration OpenGL spécifique à cette scène 3D
-        pixl::RenderCommand::EnableDepthTest(true);
-        pixl::RenderCommand::SetDepthFunc(pixl::RenderCommand::DepthFunc::Less);
+        ash::RenderCommand::EnableDepthTest(true);
+        ash::RenderCommand::SetDepthFunc(ash::RenderCommand::DepthFunc::Less);
 
         // 1. Skybox (rendu en premier avec depth trick)
         renderSkybox();
@@ -77,22 +76,22 @@ namespace voxelity {
     }
 
     void VoxelWorldLayer::setupCamera() {
-        m_camera = pixl::MakeRef<pixl::PerspectiveCamera>();
+        m_camera = ash::MakeRef<ash::PerspectiveCamera>();
         m_camera->SetPosition(World::toWorldPos({-RENDER_DISTANCE - 1, RENDER_HEIGHT, -RENDER_DISTANCE - 1}));
         m_camera->SetFov(70.f);
         m_camera->SetRotation(45.f, 0.f);
 
         // Caméra orthographique pour l'UI 2D
-        m_orthoCam = pixl::MakeRef<pixl::OrthographicCamera>(-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
+        m_orthoCam = ash::MakeRef<ash::OrthographicCamera>(-100.0f, 100.0f, -100.0f, 100.0f, -100.0f, 100.0f);
     }
 
     void VoxelWorldLayer::setupShader() {
-        m_shader = pixl::AssetLibrary::Shaders().Get("shaders/chunk");
+        m_shader = ash::AssetLibrary::Shaders().Get("shaders/chunk");
     }
 
     void VoxelWorldLayer::setupWorld() {
-        m_world = pixl::MakeScope<World>();
-        m_worldRenderer = pixl::MakeScope<WorldRenderer>(*m_world, *m_camera, *m_shader);
+        m_world = ash::MakeScope<World>();
+        m_worldRenderer = ash::MakeScope<WorldRenderer>(*m_world, *m_camera, *m_shader);
 
         m_world->generateArea(
             {-RENDER_DISTANCE, -RENDER_HEIGHT, -RENDER_DISTANCE},
@@ -102,21 +101,21 @@ namespace voxelity {
     }
 
     void VoxelWorldLayer::setupPlayer() {
-        m_player = pixl::MakeScope<Player>(m_camera);
+        m_player = ash::MakeScope<Player>(m_camera);
         m_player->position = World::toWorldPos({0, 1, 0}, {0, 0, 0});
         m_player->velocity = {0.0f, 0.0f, 0.0f};
     }
 
     void VoxelWorldLayer::setupWorldInteractor() {
-        m_worldInteractor = pixl::MakeScope<WorldInteractor>(*m_world, *m_worldRenderer);
+        m_worldInteractor = ash::MakeScope<WorldInteractor>(*m_world, *m_worldRenderer);
         m_worldInteractor->setMaxReach(64.0f);
         m_worldInteractor->setSelectedVoxelID(1);
     }
 
     void VoxelWorldLayer::setupSkybox() {
-        m_skyboxShader = pixl::AssetLibrary::Shaders().Get("shaders/mountain_skybox");
+        m_skyboxShader = ash::AssetLibrary::Shaders().Get("shaders/mountain_skybox");
 
-        std::array < float, 36 * 3 > skyboxVertices = {
+        std::array<float, 36 * 3> skyboxVertices = {
             -1, 1, -1, -1, -1, -1, 1, -1, -1,
             1, -1, -1, 1, 1, -1, -1, 1, -1,
             -1, -1, 1, -1, 1, 1, 1, 1, 1,
@@ -131,11 +130,11 @@ namespace voxelity {
             1, -1, 1, 1, -1, -1, -1, -1, -1
         };
 
-        m_skyboxVAO = pixl::MakeRef<pixl::VertexArray>();
-        m_skyboxVBO = pixl::MakeRef<pixl::VertexBuffer>();
-        m_skyboxVBO->SetData<float>(skyboxVertices, pixl::BufferUsage::Static);
+        m_skyboxVAO = ash::MakeRef<ash::VertexArray>();
+        m_skyboxVBO = ash::MakeRef<ash::VertexBuffer>();
+        m_skyboxVBO->SetData<float>(skyboxVertices, ash::BufferUsage::Static);
 
-        pixl::VertexBufferLayout layout(sizeof(glm::vec3));
+        ash::VertexBufferLayout layout(sizeof(glm::vec3));
         layout.AddAttribute<glm::vec3>(0, 0);
         m_skyboxVAO->AddVertexBuffer(m_skyboxVBO, layout);
 
@@ -147,14 +146,14 @@ namespace voxelity {
             "resources/textures/mountain_skybox/front.jpg",
             "resources/textures/mountain_skybox/back.jpg"
         };
-        m_skyboxTexture = pixl::MakeRef<pixl::TextureCubeMap>(pixl::LoadCubeMap(faces));
+        m_skyboxTexture = ash::MakeRef<ash::TextureCubeMap>(ash::LoadCubeMap(faces));
 
         m_skyboxShader->Bind();
         m_skyboxShader->SetInt("skybox", 0);
     }
 
     void VoxelWorldLayer::setupInputHandler() {
-        m_inputHandler = pixl::MakeScope<InputHandler>(
+        m_inputHandler = ash::MakeScope<InputHandler>(
             *this,
             m_player->getController(),
             *m_worldInteractor
@@ -163,8 +162,8 @@ namespace voxelity {
 
     void VoxelWorldLayer::renderSkybox() const {
         // Trick pour dessiner la skybox en dernier mais qu'elle apparaisse derrière tout
-        pixl::RenderCommand::SetDepthWrite(false);
-        pixl::RenderCommand::SetDepthFunc(pixl::RenderCommand::DepthFunc::LessEqual);
+        ash::RenderCommand::SetDepthWrite(false);
+        ash::RenderCommand::SetDepthFunc(ash::RenderCommand::DepthFunc::LessEqual);
 
         m_skyboxShader->Bind();
         const auto view = glm::mat4(glm::mat3(m_camera->GetViewMatrix()));
@@ -175,11 +174,11 @@ namespace voxelity {
         glActiveTexture(GL_TEXTURE0);
         m_skyboxTexture->Bind();
 
-        pixl::Renderer::DrawArrays(*m_skyboxVAO, 36);
+        ash::Renderer::DrawArrays(*m_skyboxVAO, 36);
 
         // Restaurer état normal
-        pixl::RenderCommand::SetDepthWrite(true);
-        pixl::RenderCommand::SetDepthFunc(pixl::RenderCommand::DepthFunc::Less);
+        ash::RenderCommand::SetDepthWrite(true);
+        ash::RenderCommand::SetDepthFunc(ash::RenderCommand::DepthFunc::Less);
     }
 
     void VoxelWorldLayer::renderWorld() const {

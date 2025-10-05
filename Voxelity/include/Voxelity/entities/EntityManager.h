@@ -22,7 +22,7 @@ namespace voxelity {
         template<typename T, typename... Args>
         T *createEntity(Args &&... args) {
             static_assert(std::is_base_of_v<Entity, T>, "T must derive from Entity");
-            auto entity = pixl::MakeScope<T>(std::forward<Args>(args)...);
+            auto entity = ash::MakeScope<T>(std::forward<Args>(args)...);
             T *ptr = entity.get();
             m_entities.push_back(std::move(entity));
             return ptr;
@@ -45,7 +45,7 @@ namespace voxelity {
         }
 
         // Accès aux entités
-        const std::vector<pixl::Scope<Entity> > &getEntities() const { return m_entities; }
+        const std::vector<ash::Scope<Entity> > &getEntities() const { return m_entities; }
 
         size_t getEntityCount() const { return m_entities.size(); }
 
@@ -77,7 +77,7 @@ namespace voxelity {
         }
 
     private:
-        std::vector<pixl::Scope<Entity> > m_entities;
+        std::vector<ash::Scope<Entity> > m_entities;
     };
 }
 

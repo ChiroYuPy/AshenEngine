@@ -11,7 +11,7 @@
 
 #include "Ashen/core/Logger.h"
 
-namespace pixl {
+namespace ash {
     Renderer2D::RenderData Renderer2D::s_Data{};
 
     void Renderer2D::Init() {

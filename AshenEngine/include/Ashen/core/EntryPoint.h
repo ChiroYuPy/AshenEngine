@@ -6,7 +6,7 @@
 #ifndef ASHEN_NO_ENTRY_POINT
 
 int main(const int argc, char **argv) {
-    const auto app = pixl::CreateApplication({argc, argv});
+    const auto app = ash::CreateApplication({argc, argv});
     app->Run();
     delete app;
 }

@@ -8,7 +8,7 @@
 #include "Window.h"
 #include "Ashen/math/Math.h"
 
-namespace pixl {
+namespace ash {
     struct ApplicationCommandLineArgs {
         int Count = 0;
         char **Args = nullptr;
@@ -32,12 +32,14 @@ namespace pixl {
         ~Application();
 
         Application(const Application &) = delete;
+
         Application &operator=(const Application &) = delete;
 
         Application(Application &&) = delete;
+
         Application &operator=(Application &&) = delete;
 
-        void Run() const;
+        void Run();
 
         void Stop();
 
@@ -58,7 +60,31 @@ namespace pixl {
         static float GetTime();
 
     private:
+        void InitializeGLFW();
+
+        void InitializeResourceSystem();
+
+        void InitializeWindow();
+
+        void InitializeRenderer();
+
+        void InitializeInput();
+
+        void Shutdown();
+
+        void Tick(float deltaTime);
+
+        void ProcessEvents() const;
+
+        void Update(float deltaTime) const;
+
+        void Render() const;
+
         void OnEvent(Event &event);
+
+        void UpdateLayers(float ts) const;
+
+        void RenderLayers() const;
 
         ApplicationSettings m_Settings;
         LayerStack m_LayerStack;

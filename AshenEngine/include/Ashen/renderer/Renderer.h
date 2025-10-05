@@ -3,7 +3,7 @@
 
 #include "Ashen/math/Math.h"
 
-namespace pixl {
+namespace ash {
     class VertexArray;
     class IndexBuffer;
     class ShaderProgram;

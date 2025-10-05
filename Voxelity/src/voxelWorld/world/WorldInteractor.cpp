@@ -30,7 +30,7 @@ namespace voxelity {
 
     bool WorldInteractor::placeBlockAt(const glm::ivec3 &position, const int blockType) const {
         if (m_world.getVoxel(position.x, position.y, position.z) != VoxelID::AIR) {
-            pixl::Logger::warn() << "Cannot place block: position already occupied";
+            ash::Logger::warn() << "Cannot place block: position already occupied";
             return false;
         }
 
@@ -38,13 +38,13 @@ namespace voxelity {
 
         m_chunkRenderer.buildAll();
 
-        pixl::Logger::info() << std::format("Block placed at ({}, {}, {})", position.x, position.y, position.z);
+        ash::Logger::info() << std::format("Block placed at ({}, {}, {})", position.x, position.y, position.z);
         return true;
     }
 
     bool WorldInteractor::breakBlockAt(const glm::ivec3 &position) const {
         if (m_world.getVoxel(position.x, position.y, position.z) == VoxelID::AIR) {
-            pixl::Logger::warn() << "Cannot break block: no block at position";
+            ash::Logger::warn() << "Cannot break block: no block at position";
             return false;
         }
 
@@ -52,7 +52,7 @@ namespace voxelity {
 
         m_chunkRenderer.buildAll();
 
-        pixl::Logger::info() << std::format("Block broken at ({}, {}, {})", position.x, position.y, position.z);
+        ash::Logger::info() << std::format("Block broken at ({}, {}, {})", position.x, position.y, position.z);
         return true;
     }
 

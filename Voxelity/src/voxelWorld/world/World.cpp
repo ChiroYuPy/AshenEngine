@@ -125,7 +125,7 @@ namespace voxelity {
         };
     }
 
-    void World::forEachChunk(const std::function<void(const ChunkCoord &, Chunk *)> &func) {
+    void World::forEachChunk(const std::function < void(const ChunkCoord &, Chunk *) > &func) {
         for (auto &[coord, chunk]: m_chunks)
             func(coord, chunk.get());
     }
@@ -147,8 +147,8 @@ namespace voxelity {
                     ++current;
 
                     const float progress = static_cast<float>(current) / static_cast<float>(total);
-                    pixl::Logger::info() << "Generation Percent: " << progress * 100 << "%";
+                    ash::Logger::info() << "Generation Percent: " << progress * 100 << "%";
                 }
-        pixl::Logger::info();
+        ash::Logger::info();
     }
 }

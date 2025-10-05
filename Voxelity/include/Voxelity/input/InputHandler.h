@@ -17,18 +17,18 @@ namespace voxelity {
                      PlayerController &playerController,
                      WorldInteractor &worldInteractor);
 
-        void handleEvent(pixl::Event &event);
+        void handleEvent(ash::Event &event);
 
     private:
         VoxelWorldLayer &m_layer;
         PlayerController &m_playerController;
         WorldInteractor &m_worldInteractor;
 
-        void handleKeyPress(const pixl::KeyPressedEvent &event);
+        void handleKeyPress(const ash::KeyPressedEvent &event);
 
-        void handleMouseButton(const pixl::MouseButtonPressedEvent &event) const;
+        void handleMouseButton(const ash::MouseButtonPressedEvent &event) const;
 
-        void handleMouseScroll(const pixl::MouseScrolledEvent &event) const;
+        void handleMouseScroll(const ash::MouseScrolledEvent &event) const;
     };
 }
 

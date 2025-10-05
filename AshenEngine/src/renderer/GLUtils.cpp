@@ -4,7 +4,7 @@
 
 #include "Ashen/core/Logger.h"
 
-namespace pixl {
+namespace ash {
     static auto s_MinSeverity = DebugSeverity::Medium;
 
     const char *GLDebugSourceToString(const GLenum source) {
@@ -67,7 +67,7 @@ namespace pixl {
         const char *severityStr = GLDebugSeverityToString(severity);
 
         Logger::error() << std::format("[OpenGL] [{}] {} (ID: {}) [{}]: {}",
-                                 severityStr, typeStr, id, sourceStr, message);
+                                       severityStr, typeStr, id, sourceStr, message);
     }
 
     void InitOpenGLDebugMessageCallback() {

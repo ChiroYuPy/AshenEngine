@@ -4,9 +4,9 @@
 #include "Ashen/core/Application.h"
 
 namespace voxelity {
-    class VoxelityApp : public pixl::Application {
+    class VoxelityApp : public ash::Application {
     public:
-        explicit VoxelityApp(const pixl::ApplicationSettings &settings);
+        explicit VoxelityApp(const ash::ApplicationSettings &settings);
 
         static VoxelityApp &Get() {
             return static_cast<VoxelityApp &>(Application::Get());

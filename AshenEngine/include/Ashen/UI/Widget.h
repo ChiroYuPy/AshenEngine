@@ -8,7 +8,7 @@
 #include "Ashen/core/Types.h"
 #include "Ashen/events/Event.h"
 
-namespace pixl {
+namespace ash {
     struct Bounds {
         glm::vec2 Position{0.0f};
         glm::vec2 Size{0.0f};

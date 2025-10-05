@@ -10,7 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-namespace pixl {
+namespace ash {
     // Vector
     using Vec2 = glm::vec2;
     using Vec3 = glm::vec3;

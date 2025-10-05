@@ -11,7 +11,7 @@ namespace voxelity {
 
     class WorldRenderer {
     public:
-        WorldRenderer(World &world, pixl::Camera &camera, pixl::ShaderProgram &shader);
+        WorldRenderer(World &world, ash::Camera &camera, ash::ShaderProgram &shader);
 
         void buildAll() const;
 
@@ -21,8 +21,8 @@ namespace voxelity {
 
     private:
         World &m_world;
-        pixl::Camera &m_camera;
-        pixl::ShaderProgram &m_shader;
+        ash::Camera &m_camera;
+        ash::ShaderProgram &m_shader;
 
         TextureColorPalette m_textureColorpalette;
 

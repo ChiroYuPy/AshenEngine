@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace pixl {
+namespace ash {
     using MouseCode = uint16_t;
 
     namespace Mouse {

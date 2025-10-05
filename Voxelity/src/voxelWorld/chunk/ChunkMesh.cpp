@@ -4,8 +4,8 @@
 
 namespace voxelity {
     ChunkMesh::ChunkMesh() {
-        m_vao = std::make_unique<pixl::VertexArray>();
-        m_instanceBuffer = std::make_shared<pixl::VertexBuffer>();
+        m_vao = std::make_unique<ash::VertexArray>();
+        m_instanceBuffer = std::make_shared<ash::VertexBuffer>();
 
         setupVertexAttributes();
     }
@@ -13,7 +13,7 @@ namespace voxelity {
     void ChunkMesh::setupVertexAttributes() const {
         m_vao->Bind();
 
-        pixl::VertexBufferLayout layout(sizeof(FaceInstance));
+        ash::VertexBufferLayout layout(sizeof(FaceInstance));
 
         layout.AddAttribute<unsigned int>(0, 0, 1); // index 0, offset 0, divisor = 1 (instancing)
 
@@ -27,7 +27,7 @@ namespace voxelity {
         if (m_instanceCount == 0) return;
 
         if (instances.size_bytes() > m_instanceBuffer->Size()) {
-            m_instanceBuffer->SetData(instances, pixl::BufferUsage::Dynamic);
+            m_instanceBuffer->SetData(instances, ash::BufferUsage::Dynamic);
         } else {
             m_instanceBuffer->Update(instances);
         }
@@ -36,6 +36,6 @@ namespace voxelity {
     void ChunkMesh::draw() const {
         if (IsEmpty()) return;
 
-        pixl::Renderer::DrawArraysInstanced(*m_vao, 6, m_instanceCount, 0);
+        ash::Renderer::DrawArraysInstanced(*m_vao, 6, m_instanceCount, 0);
     }
 }

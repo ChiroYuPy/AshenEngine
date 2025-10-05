@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace pixl {
+namespace ash {
     using KeyCode = uint16_t;
 
     namespace Key {

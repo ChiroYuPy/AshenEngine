@@ -61,8 +61,8 @@ namespace voxelity {
     private:
         void setupVertexAttributes() const;
 
-        pixl::Ref<pixl::VertexArray> m_vao;
-        pixl::Ref<pixl::VertexBuffer> m_instanceBuffer;
+        ash::Ref<ash::VertexArray> m_vao;
+        ash::Ref<ash::VertexBuffer> m_instanceBuffer;
         size_t m_instanceCount = 0;
     };
 }

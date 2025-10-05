@@ -48,9 +48,9 @@ namespace voxelity {
         void generateArea(const glm::ivec3 &startPos, const glm::ivec3 &endPos);
 
     private:
-        std::unordered_map<ChunkCoord, pixl::Scope<Chunk> > m_chunks;
+        std::unordered_map<ChunkCoord, ash::Scope<Chunk> > m_chunks;
 
-        pixl::Scope<ITerrainGenerator> m_generator;
+        ash::Scope<ITerrainGenerator> m_generator;
     };
 }
 

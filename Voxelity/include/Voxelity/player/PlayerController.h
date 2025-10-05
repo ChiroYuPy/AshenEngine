@@ -18,11 +18,11 @@ namespace voxelity {
             float mouseSensitivity = 0.33f;
         };
 
-        explicit PlayerController(pixl::Ref<pixl::PerspectiveCamera> camera);
+        explicit PlayerController(ash::Ref<ash::PerspectiveCamera> camera);
 
         void update(float deltaTime);
 
-        void handleEvent(pixl::Event &event);
+        void handleEvent(ash::Event &event);
 
         // Récupérer le mouvement calculé
         glm::vec3 getMovementInput() const { return m_movementInput; }
@@ -34,10 +34,10 @@ namespace voxelity {
         void setSettings(const MovementSettings &settings) { m_settings = settings; }
         const MovementSettings &getSettings() const { return m_settings; }
 
-        pixl::Ref<pixl::PerspectiveCamera> getCamera() const { return m_camera; }
+        ash::Ref<ash::PerspectiveCamera> getCamera() const { return m_camera; }
 
     private:
-        pixl::Ref<pixl::PerspectiveCamera> m_camera;
+        ash::Ref<ash::PerspectiveCamera> m_camera;
         MovementSettings m_settings;
 
         glm::vec3 m_movementInput{0.0f};

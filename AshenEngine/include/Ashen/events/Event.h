@@ -4,7 +4,7 @@
 #include <string>
 #include <functional>
 
-namespace pixl {
+namespace ash {
     enum class EventType {
         None = 0,
         WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,

@@ -16,11 +16,11 @@ namespace voxelity {
 
         virtual void Update() = 0;
 
-        [[nodiscard]] const pixl::Texture1D &GetTexture() const { return m_texture; }
+        [[nodiscard]] const ash::Texture1D &GetTexture() const { return m_texture; }
         [[nodiscard]] size_t GetEntryCount() const { return m_entryCount; }
 
     protected:
-        pixl::Texture1D m_texture;
+        ash::Texture1D m_texture;
         size_t m_entryCount = 0;
 
         TextureAtlas() {

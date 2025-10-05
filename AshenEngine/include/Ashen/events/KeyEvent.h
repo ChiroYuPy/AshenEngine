@@ -6,7 +6,7 @@
 #include "Ashen/events/Event.h"
 #include "Ashen/core/KeyCodes.h"
 
-namespace pixl {
+namespace ash {
     class KeyEvent : public Event {
     public:
         KeyCode GetKeyCode() const { return m_KeyCode; }

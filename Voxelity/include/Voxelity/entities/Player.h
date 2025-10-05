@@ -12,7 +12,7 @@
 namespace voxelity {
     class Player final : public Entity {
     public:
-        explicit Player(pixl::Ref<pixl::PerspectiveCamera> camera);
+        explicit Player(ash::Ref<ash::PerspectiveCamera> camera);
 
         void update(float deltaTime, const World &world) override;
 
@@ -21,7 +21,7 @@ namespace voxelity {
         const PlayerController &getController() const { return *m_controller; }
 
         // Caméra
-        pixl::Ref<pixl::PerspectiveCamera> getCamera() const { return m_camera; }
+        ash::Ref<ash::PerspectiveCamera> getCamera() const { return m_camera; }
 
         // Actions
         void jump();
@@ -31,9 +31,9 @@ namespace voxelity {
         float getJumpForce() const { return m_jumpForce; }
 
     private:
-        pixl::Ref<pixl::PerspectiveCamera> m_camera;
-        pixl::Scope<PlayerController> m_controller;
-        pixl::Scope<PhysicsSystem> m_physics;
+        ash::Ref<ash::PerspectiveCamera> m_camera;
+        ash::Scope<PlayerController> m_controller;
+        ash::Scope<PhysicsSystem> m_physics;
 
         float m_jumpForce = 9.0f;
 

@@ -3,9 +3,9 @@
 namespace voxelity {
     // Implémentation du constructeur
     VoxelDefinition::VoxelDefinition(const std::string_view displayName,
-                                             const pixl::Color &color,
-                                             const RenderMode renderingMode,
-                                             const bool hasCollision)
+                                     const ash::Color &color,
+                                     const RenderMode renderingMode,
+                                     const bool hasCollision)
         : displayName(displayName),
           color(color),
           renderMode(renderingMode),
@@ -37,7 +37,7 @@ namespace voxelity {
         }
     }
 
-    void VoxelTypeRegistry::setColor(const VoxelType voxelID, const pixl::Color &color) noexcept {
+    void VoxelTypeRegistry::setColor(const VoxelType voxelID, const ash::Color &color) noexcept {
         if (isValidVoxelID(voxelID)) {
             registry[voxelID].color = color;
         }
@@ -70,70 +70,70 @@ namespace voxelity {
         // Définir les types de base
         registry[VoxelID::AIR] = VoxelDefinition{
             "Air",
-            pixl::Color::fromHex("#000000"),
+            ash::Color::fromHex("#000000"),
             RenderMode::INVISIBLE,
             false
         };
 
         registry[VoxelID::DIRT] = VoxelDefinition{
             "Dirt Block",
-            pixl::Color::fromHex("#80522F"),
+            ash::Color::fromHex("#80522F"),
             RenderMode::OPAQUE,
             true
         };
 
         registry[VoxelID::GRASS] = VoxelDefinition{
             "Grass Block",
-            pixl::Color::fromHex("#7CAC17"),
+            ash::Color::fromHex("#7CAC17"),
             RenderMode::OPAQUE,
             true
         };
 
         registry[VoxelID::STONE] = VoxelDefinition{
             "Stone Block",
-            pixl::Color::fromHex("#7F7F7F"),
+            ash::Color::fromHex("#7F7F7F"),
             RenderMode::OPAQUE,
             true
         };
 
         registry[VoxelID::SAND] = VoxelDefinition{
             "Sand Block",
-            pixl::Color::fromHex("#FAF0CF"),
+            ash::Color::fromHex("#FAF0CF"),
             RenderMode::OPAQUE,
             true
         };
 
         registry[VoxelID::WATER] = VoxelDefinition{
             "Water",
-            pixl::Color::fromHex("#3F76E480"),
+            ash::Color::fromHex("#3F76E480"),
             RenderMode::TRANSPARENT,
             false
         };
 
         registry[VoxelID::LAVA] = VoxelDefinition{
             "Lava",
-            pixl::Color::fromHex("#CF4A0F80"),
+            ash::Color::fromHex("#CF4A0F80"),
             RenderMode::TRANSPARENT,
             false
         };
 
         registry[VoxelID::GLASS] = VoxelDefinition{
             "Glass Block",
-            pixl::Color::fromHex("#FFFFFF40"),
+            ash::Color::fromHex("#FFFFFF40"),
             RenderMode::TRANSPARENT,
             true
         };
 
         registry[VoxelID::WOOD] = VoxelDefinition{
             "Wood Log",
-            pixl::Color::fromHex("#6B4F2F"),
+            ash::Color::fromHex("#6B4F2F"),
             RenderMode::OPAQUE,
             true
         };
 
         registry[VoxelID::LEAVES] = VoxelDefinition{
             "Leaves",
-            pixl::Color::fromHex("#4C9B23A0"),
+            ash::Color::fromHex("#4C9B23A0"),
             RenderMode::TRANSPARENT,
             true
         };
@@ -152,7 +152,7 @@ namespace voxelity {
         return getVoxelTypeDefinition(voxelID).displayName;
     }
 
-    pixl::Color getVoxelColor(const VoxelType voxelID) noexcept {
+    ash::Color getVoxelColor(const VoxelType voxelID) noexcept {
         return getVoxelTypeDefinition(voxelID).color;
     }
 

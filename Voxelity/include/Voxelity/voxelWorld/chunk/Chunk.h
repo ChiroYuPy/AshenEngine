@@ -44,9 +44,9 @@ namespace voxelity {
 
         void buildMesh(const World &world);
 
-        void drawOpaque(pixl::ShaderProgram &shader) const;
+        void drawOpaque(ash::ShaderProgram &shader) const;
 
-        void drawTransparent(pixl::ShaderProgram &shader) const;
+        void drawTransparent(ash::ShaderProgram &shader) const;
 
     private:
         ChunkCoord m_position;

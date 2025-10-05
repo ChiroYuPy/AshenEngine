@@ -26,8 +26,8 @@ namespace voxelity {
         bool isActive = true;
         bool onGround = false;
 
-        pixl::AABB getAABB() const {
-            return pixl::AABB(position, boundingBoxSize);
+        ash::AABB getAABB() const {
+            return ash::AABB(position, boundingBoxSize);
         }
 
     protected:
