@@ -9,7 +9,7 @@
 #include "Ashen/resources/ResourceManager.h"
 
 namespace voxelity {
-    UILayer::UILayer() : m_3DCrosshair(false) {
+    UILayer::UILayer() : showCrosshair(false) {
         m_UICamera = std::make_shared<ash::UICamera>();
 
         m_CrosshairTexture = ash::AssetLibrary::Textures().Load("textures/crosshairs/crosshair.png");
@@ -27,9 +27,7 @@ namespace voxelity {
         ash::Renderer2D::BeginScene(*m_UICamera);
 
         if (m_CrosshairTexture) {
-            if (m_3DCrosshair) {
-
-            } else {
+            if (showCrosshair) {
                 constexpr float crosshairSize = 64.0f;
                 ash::Renderer2D::DrawQuad(center, {crosshairSize, crosshairSize}, m_CrosshairTexture, {1,1,1,1});
             }
@@ -42,7 +40,7 @@ namespace voxelity {
         ash::EventDispatcher dispatcher(event);
         dispatcher.Dispatch<ash::KeyPressedEvent>([this](const ash::KeyPressedEvent &e) {
             if (e.GetKeyCode() == ash::Key::F3)
-                m_3DCrosshair = !m_3DCrosshair;
+                showCrosshair = !showCrosshair;
             return false;
         });
 

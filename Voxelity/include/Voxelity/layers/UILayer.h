@@ -18,7 +18,7 @@ namespace voxelity {
         ash::Ref<ash::UICamera> m_UICamera;
         ash::Ref<ash::Texture2D> m_CrosshairTexture;
 
-        bool m_3DCrosshair;
+        bool showCrosshair;
     };
 }
 
