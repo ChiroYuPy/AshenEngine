@@ -5,6 +5,7 @@
 #include "Ashen/events/KeyEvent.h"
 #include "Ashen/renderer/RenderCommand.h"
 #include "Ashen/renderer/Renderer2D.h"
+#include "Ashen/renderer/Renderer3D.h"
 #include "Ashen/resources/ResourceManager.h"
 
 namespace voxelity {

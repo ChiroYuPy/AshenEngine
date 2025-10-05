@@ -23,6 +23,8 @@ set(CORE_SOURCES
         include/Ashen/resources/ResourceManager.h
         src/resources/ResourceManager.cpp
         include/Ashen/math/BoundingBox.h
+        src/renderer/Renderer3D.cpp
+        include/Ashen/renderer/Renderer3D.h
 
 )
 
