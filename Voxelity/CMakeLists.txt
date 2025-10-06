@@ -2,37 +2,38 @@ project(Voxelity LANGUAGES CXX)
 
 set(APP_SOURCES
         src/VoxelityApp.cpp
+
         src/voxelWorld/chunk/Chunk.cpp
         src/voxelWorld/chunk/ChunkMesh.cpp
+
         src/voxelWorld/generation/FlatTerrainGenerator.cpp
         src/voxelWorld/generation/NaturalTerrainGenerator.cpp
+
         src/voxelWorld/utils/DirectionUtils.cpp
+
         src/voxelWorld/voxel/VoxelArray.cpp
         src/voxelWorld/voxel/VoxelType.cpp
+
         src/voxelWorld/world/TextureColorPalette.cpp
         src/voxelWorld/world/VoxelRaycaster.cpp
         src/voxelWorld/world/World.cpp
         src/voxelWorld/world/WorldInteractor.cpp
         src/voxelWorld/world/WorldRenderer.cpp
-        src/layers/VoxelWorldLayer.cpp
-        src/entities/Player.cpp
-        include/Voxelity/entities/Entity.h
-        include/Voxelity/systems/PhysicsSystem.h
-        src/systems/PhysicsSystem.cpp
-        include/Voxelity/player/PlayerController.h
-        src/player/PlayerController.cpp
-        src/input/InputHandler.cpp
-        include/Voxelity/input/InputHandler.h
-        src/entities/EntityManager.cpp
-        include/Voxelity/entities/EntityManager.h
-        include/Voxelity/entities/FallingBlockEntity.h
-        src/entities/FallingBlockEntity.cpp
-        src/layers/UILayer.cpp
-        include/Voxelity/layers/UILayer.h
-        src/layers/DebugLayer.cpp
-        include/Voxelity/layers/DebugLayer.h
         src/voxelWorld/world/ChunkManager.cpp
-        include/Voxelity/voxelWorld/world/ChunkManager.h
+
+        src/layers/VoxelWorldLayer.cpp
+        src/layers/UILayer.cpp
+        src/layers/DebugLayer.cpp
+
+        src/systems/PhysicsSystem.cpp
+
+        src/input/InputHandler.cpp
+
+        src/entities/EntityManager.cpp
+        src/entities/FallingBlockEntity.cpp
+        src/entities/Player.cpp
+
+        src/player/PlayerController.cpp
 )
 
 add_executable(Voxelity ${APP_SOURCES})

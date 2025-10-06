@@ -7,10 +7,10 @@ namespace voxelity {
     }
 
     VoxelType World::getVoxel(const int worldX, const int worldY, const int worldZ) const {
-        const ChunkCoord chunkCoord = toChunkCoord(worldX, worldY, worldZ);
-        const ash::IVec3 localPos = toLocalCoord(worldX, worldY, worldZ);
+        ChunkCoord chunkCoord = toChunkCoord(worldX, worldY, worldZ);
+        ash::IVec3 localPos = toLocalCoord(worldX, worldY, worldZ);
 
-        const Chunk* chunk = m_chunkManager.get()->getChunk(chunkCoord);
+        Chunk* chunk = m_chunkManager.get()->getChunk(chunkCoord);
         if (chunk)
             return chunk->get(localPos.x, localPos.y, localPos.z);
 
@@ -21,23 +21,20 @@ namespace voxelity {
         return getVoxel(worldPos.x, worldPos.y, worldPos.z);
     }
 
-    void World::setVoxel(int worldX, int worldY, int worldZ, const VoxelType type) {
-        const ChunkCoord chunkCoord = toChunkCoord(worldX, worldY, worldZ);
-        const ash::IVec3 localPos = toLocalCoord(worldX, worldY, worldZ);
+    void World::setVoxel(const int worldX, const int worldY, const int worldZ, const VoxelType type) {
+        ChunkCoord chunkCoord = toChunkCoord(worldX, worldY, worldZ);
+        ash::IVec3 localPos = toLocalCoord(worldX, worldY, worldZ);
 
         Chunk* chunk = m_chunkManager->getOrCreateChunk(chunkCoord);
         if (!chunk) return;
 
-        const VoxelType oldType = chunk->get(localPos.x, localPos.y, localPos.z);
+        VoxelType oldType = chunk->get(localPos.x, localPos.y, localPos.z);
         if (oldType == type) return;
 
         chunk->set(localPos.x, localPos.y, localPos.z, type);
 
         // Marquer le chunk pour reconstruction de mesh
         m_chunkManager->markChunkForMeshRebuild(chunkCoord);
-
-        // Notifier les observateurs
-        notifyVoxelChanged({worldX, worldY, worldZ}, oldType, type);
 
         // Marquer les chunks voisins si on est sur un bord
         markNeighborChunksDirty(chunkCoord, localPos);
@@ -59,12 +56,14 @@ namespace voxelity {
         m_chunkManager->updateLoadedChunks(playerPos, renderDistance);
     }
 
-    void World::processChunkLoading(const int maxChunksPerFrame) const {
-        m_chunkManager->processLoadQueue(maxChunksPerFrame);
+    void World::processChunkLoading() const {
+        // Récupérer les chunks générés par les threads
+        m_chunkManager->processCompletedGeneration();
     }
 
-    void World::processMeshBuilding(const int maxBuildsPerFrame) const {
-        m_chunkManager->processMeshBuilds(*this, maxBuildsPerFrame);
+    void World::processMeshBuilding() const {
+        // Récupérer les meshes construits par les threads
+        m_chunkManager->processCompletedMeshes();
     }
 
     void World::forEachChunk(const std::function<void(const ChunkCoord&, Chunk*)>& func) const {
@@ -106,17 +105,6 @@ namespace voxelity {
         };
     }
 
-    void World::addObserver(IWorldObserver* observer) {
-        m_observers.push_back(observer);
-    }
-
-    void World::removeObserver(IWorldObserver* observer) {
-        m_observers.erase(
-            std::remove(m_observers.begin(), m_observers.end(), observer),
-            m_observers.end()
-        );
-    }
-
     size_t World::getLoadedChunkCount() const {
         return m_chunkManager->getLoadedChunkCount();
     }
@@ -133,13 +121,7 @@ namespace voxelity {
         m_chunkManager->clear();
     }
 
-    void World::notifyVoxelChanged(const ash::IVec3& worldPos, const VoxelType oldType, const VoxelType newType) const {
-        for (auto* observer : m_observers) {
-            observer->onVoxelChanged(worldPos, oldType, newType);
-        }
-    }
-
-    void World::markNeighborChunksDirty(const ChunkCoord& chunkCoord, const ash::IVec3& localPos) {
+    void World::markNeighborChunksDirty(const ChunkCoord& chunkCoord, const ash::IVec3& localPos) const {
         auto checkNeighbor = [&](const int lx, const int ly, const int lz, const int dx, const int dy, const int dz) {
             if ((lx == 0 && dx == -1) || (lx == VoxelArray::SIZE - 1 && dx == 1) ||
                 (ly == 0 && dy == -1) || (ly == VoxelArray::SIZE - 1 && dy == 1) ||

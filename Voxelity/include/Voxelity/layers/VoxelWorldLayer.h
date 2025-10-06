@@ -14,7 +14,7 @@ namespace voxelity {
     class Player;
 
     struct WorldConfig {
-        int renderDistance = 2;
+        int renderDistance = 4;
         int renderHeight = 2;
     };
 

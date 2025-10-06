@@ -42,18 +42,14 @@ namespace voxelity {
         if (!m_player || !m_world) return;
 
         // 1. Mise à jour du chargement des chunks
-        // m_world->updateLoadedChunks(m_player->position, m_config.renderDistance);
-        m_world->processChunkLoading(1);
+        m_world->updateLoadedChunks(m_player->position, m_config.renderDistance);
+        m_world->processChunkLoading();
 
         // 2. CRUCIAL: Construction des meshes (séparé du chargement)
-        m_world->processMeshBuilding(1);
+        m_world->processMeshBuilding();
 
         // 3. Mise à jour des entités
         m_entityManager->updateAll(ts, *m_world);
-
-        // 4. Mise à jour du renderer
-        if (m_worldRenderer)
-            m_worldRenderer->update(ts);
 
         // Debug: afficher les statistiques toutes les 60 frames
         static int frameCount = 0;
@@ -93,7 +89,6 @@ namespace voxelity {
         auto generator = std::make_unique<NaturalTerrainGenerator>(0);
         m_world = std::make_unique<World>(std::move(generator));
         m_worldRenderer = std::make_unique<WorldRenderer>(*m_world, *m_camera, *m_shader);
-        m_worldRenderer->setMaxMeshBuildsPerFrame(1);
     }
 
     void VoxelWorldLayer::setupEntityManager() {

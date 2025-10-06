@@ -1,5 +1,6 @@
 #include "Voxelity/voxelWorld/chunk/ChunkMesh.h"
 
+#include "Ashen/core/Logger.h"
 #include "Ashen/renderer/Renderer.h"
 
 namespace voxelity {
@@ -23,6 +24,7 @@ namespace voxelity {
     }
 
     void ChunkMesh::uploadInstances(const std::span<const FaceInstance> instances) {
+
         m_instanceCount = instances.size();
         if (m_instanceCount == 0) return;
 

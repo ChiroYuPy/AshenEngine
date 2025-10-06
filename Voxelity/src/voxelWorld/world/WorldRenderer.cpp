@@ -5,56 +5,15 @@ namespace voxelity {
     WorldRenderer::WorldRenderer(World& world, ash::Camera& camera, ash::ShaderProgram& shader)
         : m_world(world), m_camera(camera), m_shader(shader) {
         m_textureColorPalette.updateFromRegistry();
-        m_world.addObserver(this);
     }
 
-    WorldRenderer::~WorldRenderer() {
-        m_world.removeObserver(this);
-    }
-
-    void WorldRenderer::update(float deltaTime) {
-        processDirtyChunks();
-    }
+    WorldRenderer::~WorldRenderer() = default;
 
     void WorldRenderer::render() {
         setupMatrices();
         bindCommonResources();
         renderOpaquePass();
         renderTransparentPass();
-    }
-
-    void WorldRenderer::addDirtyChunks(const std::vector<ChunkCoord>& chunks) {
-        m_dirtyChunks.insert(chunks.begin(), chunks.end());
-    }
-
-    void WorldRenderer::onVoxelChanged(const glm::ivec3& worldPos, VoxelType oldType, VoxelType newType) {
-        const ChunkCoord coord = World::toChunkCoord(worldPos);
-        m_dirtyChunks.insert(coord);
-    }
-
-    void WorldRenderer::onChunkLoaded(const ChunkCoord& coord) {
-        m_dirtyChunks.insert(coord);
-    }
-
-    void WorldRenderer::onChunkUnloaded(const ChunkCoord& coord) {
-        m_dirtyChunks.erase(coord);
-    }
-
-    void WorldRenderer::processDirtyChunks() {
-        int processed = 0;
-        auto it = m_dirtyChunks.begin();
-
-        while (it != m_dirtyChunks.end() && processed < m_maxMeshBuildsPerFrame) {
-            ChunkCoord coord = *it;
-            Chunk* chunk = m_world.getChunk(coord);
-
-            if (chunk && chunk->isDirty()) {
-                chunk->buildMesh(m_world);
-                processed++;
-            }
-
-            it = m_dirtyChunks.erase(it);
-        }
     }
 
     void WorldRenderer::setupMatrices() {
@@ -76,7 +35,8 @@ namespace voxelity {
         ash::RenderCommand::EnableBlending(false);
 
         m_world.forEachChunk([&](const ChunkCoord&, const Chunk* chunk) {
-            if (chunk) chunk->drawOpaque(m_shader);
+            if (chunk && chunk->hasMesh())
+                chunk->drawOpaque(m_shader);
         });
     }
 
@@ -89,7 +49,8 @@ namespace voxelity {
         ash::RenderCommand::SetDepthWrite(false);
 
         m_world.forEachChunk([&](const ChunkCoord&, const Chunk* chunk) {
-            if (chunk) chunk->drawTransparent(m_shader);
+            if (chunk && chunk->hasMesh())
+                chunk->drawTransparent(m_shader);
         });
 
         ash::RenderCommand::SetDepthWrite(true);
