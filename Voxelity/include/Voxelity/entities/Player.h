@@ -16,8 +16,8 @@ namespace voxelity {
 
         void update(float deltaTime, const World &world) override;
 
-        // Mise à jour visuelle (appelée chaque frame)
-        void updateVisuals(float deltaTime);
+        // Mise à jour visuelle avec interpolation (appelée chaque frame)
+        void updateVisuals(float alpha);
 
         // Gestion du contrôleur
         PlayerController &getController() { return *m_controller; }
@@ -42,12 +42,11 @@ namespace voxelity {
         ash::Scope<PlayerController> m_controller;
         ash::Scope<PhysicsSystem> m_physics;
 
-        float m_jumpForce = 10.0f;       // Jump velocity Minecraft (permet de sauter ~1.25 blocs)
+        float m_jumpForce = 10.0f;
         bool m_isFlying = false;
-        float m_flySpeed = 10.92f;       // Fly speed Minecraft (10.92 blocks/s)
+        float m_flySpeed = 10.92f;
 
-        void updateCameraPosition() const;
-
+        void updateCameraPosition(float alpha) const;
         void handleMovement(float deltaTime);
     };
 }

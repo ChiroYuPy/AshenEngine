@@ -4,9 +4,7 @@
 #include "Ashen/core/Input.h"
 #include "Ashen/events/ApplicationEvent.h"
 #include "Ashen/renderer/RenderCommand.h"
-#include "Ashen/renderer/Renderer.h"
 #include "Ashen/resources/ResourceManager.h"
-#include "Voxelity/voxelWorld/generation/FlatTerrainGenerator.h"
 
 namespace voxelity {
     VoxelWorldLayer::VoxelWorldLayer() {
@@ -19,7 +17,7 @@ namespace voxelity {
         setupSkybox();
         setupInputHandler();
 
-        m_world->updateLoadedChunks(m_player->position, m_config.renderDistance);
+        m_world->updateLoadedChunks({}, m_config.renderDistance);
     }
 
     VoxelWorldLayer::~VoxelWorldLayer() {
@@ -42,7 +40,7 @@ namespace voxelity {
     void VoxelWorldLayer::OnUpdate(const float ts) {
         if (!m_player || !m_world) return;
 
-        // Fixed timestep loop (Minecraft-style) pour la physique
+        // Accumuler le temps
         m_tickAccumulator += ts;
 
         // Limiter pour éviter spiral of death
@@ -50,33 +48,34 @@ namespace voxelity {
             m_tickAccumulator = m_config.fixedDeltaTime * m_config.maxTicksPerFrame;
         }
 
-        // Exécuter les ticks avec delta fixe (physique/logique)
+        // Exécuter les ticks physiques avec delta fixe
         int ticksExecuted = 0;
         while (m_tickAccumulator >= m_config.fixedDeltaTime && ticksExecuted < m_config.maxTicksPerFrame) {
-            // Mise à jour des entités (physique, logique) avec fixed timestep
             m_entityManager->updateAll(m_config.fixedDeltaTime, *m_world);
-
             m_tickAccumulator -= m_config.fixedDeltaTime;
             ticksExecuted++;
         }
 
-        // Mise à jour VISUELLE du joueur (chaque frame pour fluidité)
-        m_player->updateVisuals(ts);
+        // Calculer l'alpha d'interpolation (entre 0 et 1)
+        // 0 = état précédent, 1 = état actuel
+        const float alpha = m_tickAccumulator / m_config.fixedDeltaTime;
 
-        // Mise à jour du chargement des chunks (chaque frame)
+        // Mise à jour visuelle du joueur avec interpolation
+        m_player->updateVisuals(alpha);
+
+        // Mise à jour du monde (chaque frame)
         m_world->updateLoadedChunks(m_player->position, m_config.renderDistance);
         m_world->processChunkLoading();
-
-        // Construction des meshes (chaque frame)
         m_world->processMeshBuilding();
 
-        // Debug: afficher les statistiques
+        // Debug stats
         static int frameCount = 0;
         if (++frameCount % 120 == 0) {
             ash::Logger::info() << "Chunks: " << m_world->getLoadedChunkCount()
                                << " | Pending Load: " << m_world->getPendingLoadCount()
                                << " | Pending Mesh: " << m_world->getPendingMeshCount()
-                               << " | Ticks: " << ticksExecuted;
+                               << " | Ticks: " << ticksExecuted
+                               << " | Alpha: " << alpha;
         }
     }
 
@@ -119,6 +118,8 @@ namespace voxelity {
         m_player = m_entityManager->createEntity<Player>(m_camera);
         m_player->position = {0, 70, 0};
         m_player->velocity = {0.0f, 0.0f, 0.0f};
+        // Initialiser previousPosition pour éviter un saut au démarrage
+        m_player->previousPosition = m_player->position;
     }
 
     void VoxelWorldLayer::setupWorldInteractor() {

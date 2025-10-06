@@ -35,12 +35,12 @@ namespace voxelity {
     }
 
     Chunk* ChunkManager::getChunk(const ChunkCoord& coord) {
-        auto it = m_chunks.find(coord);
+        const auto it = m_chunks.find(coord);
         return it != m_chunks.end() ? it->second.get() : nullptr;
     }
 
     Chunk* ChunkManager::getOrCreateChunk(const ChunkCoord& coord) {
-        auto it = m_chunks.find(coord);
+        const auto it = m_chunks.find(coord);
         if (it != m_chunks.end())
             return it->second.get();
 
@@ -116,7 +116,7 @@ namespace voxelity {
         }
 
         if (!newlyGeneratedChunks.empty()) {
-            ash::Logger::info() << "Processed " << newlyGeneratedChunks.size() << " generated chunks";
+            // ash::Logger::info() << "Processed " << newlyGeneratedChunks.size() << " generated chunks";
 
             // Après avoir ajouté les nouveaux chunks, vérifier tous les chunks qui peuvent maintenant être meshés
             // (y compris ceux qui ont été générés précédemment mais n'avaient pas tous leurs voisins)
@@ -172,7 +172,7 @@ namespace voxelity {
         }
 
         if (processedCount > 0) {
-            ash::Logger::info() << "Uploaded " << processedCount << " chunk meshes";
+            // ash::Logger::info() << "Uploaded " << processedCount << " chunk meshes";
         }
     }
 
@@ -242,7 +242,7 @@ namespace voxelity {
     }
 
     void ChunkManager::generationWorker() {
-        ash::Logger::info("ChunkManager::generationWorker");
+        // ash::Logger::info("ChunkManager::generationWorker");
         while (m_running.load()) {
             ChunkLoadRequest request;
 
@@ -271,7 +271,7 @@ namespace voxelity {
     }
 
     void ChunkManager::meshWorker() {
-        ash::Logger::info("ChunkManager::meshWorker");
+        // ash::Logger::info("ChunkManager::meshWorker");
         while (m_running.load()) {
             ChunkCoord coord;
 
@@ -324,35 +324,35 @@ namespace voxelity {
         MeshData meshData;
         meshData.coord = coord;
 
-        Chunk* chunk = getChunk(coord);
+        const Chunk* chunk = getChunk(coord);
         if (!chunk) return meshData;
 
         for (int x = 0; x < VoxelArray::SIZE; ++x) {
             for (int y = 0; y < VoxelArray::SIZE; ++y) {
                 for (int z = 0; z < VoxelArray::SIZE; ++z) {
-                    VoxelType voxelID = chunk->get(x, y, z);
+                    const VoxelType voxelID = chunk->get(x, y, z);
                     if (voxelID == VoxelID::AIR) continue;
 
-                    RenderMode type = getRenderMode(voxelID);
+                    const RenderMode type = getRenderMode(voxelID);
 
                     for (uint8_t faceID = 0; faceID < 6; ++faceID) {
-                        CubicDirection dir = DirectionUtils::fromIndex(faceID);
-                        glm::ivec3 offset = DirectionUtils::getOffset(dir);
-                        int nx = x + offset.x, ny = y + offset.y, nz = z + offset.z;
+                        const CubicDirection dir = DirectionUtils::fromIndex(faceID);
+                        const glm::ivec3 offset = DirectionUtils::getOffset(dir);
+                        const int nx = x + offset.x, ny = y + offset.y, nz = z + offset.z;
 
                         VoxelType neighborVoxelID;
                         if (nx >= 0 && ny >= 0 && nz >= 0 &&
                             nx < VoxelArray::SIZE && ny < VoxelArray::SIZE && nz < VoxelArray::SIZE) {
                             neighborVoxelID = chunk->get(nx, ny, nz);
                         } else {
-                            int wx = coord.x * VoxelArray::SIZE + nx;
-                            int wy = coord.y * VoxelArray::SIZE + ny;
-                            int wz = coord.z * VoxelArray::SIZE + nz;
+                            const int wx = coord.x * VoxelArray::SIZE + nx;
+                            const int wy = coord.y * VoxelArray::SIZE + ny;
+                            const int wz = coord.z * VoxelArray::SIZE + nz;
                             neighborVoxelID = getVoxelSafe(wx, wy, wz);
                         }
 
                         bool visible = false;
-                        RenderMode neighborType = getRenderMode(neighborVoxelID);
+                        const RenderMode neighborType = getRenderMode(neighborVoxelID);
 
                         if (neighborVoxelID == VoxelID::AIR) {
                             visible = true;

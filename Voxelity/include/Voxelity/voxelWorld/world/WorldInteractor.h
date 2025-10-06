@@ -29,7 +29,7 @@ namespace voxelity {
         void setSelectedVoxelID(const VoxelType blockType) { m_selectedBlockType = blockType; }
         int getSelectedBlockType() const { return m_selectedBlockType; }
 
-        std::optional<RaycastHit> getTargetedBlock(const glm::vec3 &cameraPos,
+        [[nodiscard]] std::optional<RaycastHit> getTargetedBlock(const glm::vec3 &cameraPos,
                                                    const glm::vec3 &cameraDirection) const;
 
     private:
