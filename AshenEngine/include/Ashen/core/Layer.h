@@ -1,7 +1,6 @@
 #ifndef ASHEN_LAYER_H
 #define ASHEN_LAYER_H
 
-#include "Ashen/UI/Widget.h"
 #include "Ashen/events/Event.h"
 
 namespace ash {
