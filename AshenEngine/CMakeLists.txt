@@ -19,6 +19,8 @@ set(CORE_SOURCES
         src/Utils/ImageLoader.cpp
         src/Resources/ResourceManager.cpp
         src/Graphics/Rendering/Renderer3D.cpp
+        include/Ashen/Config/IConfig.h
+        include/Ashen/Config/JsonConfig.h
 
 )
 
