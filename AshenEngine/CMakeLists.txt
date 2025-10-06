@@ -27,6 +27,7 @@ set(CORE_SOURCES
         include/Ashen/renderer/Renderer3D.h
         include/Ashen/graphics/skybox/ISkybox.h
         include/Ashen/graphics/skybox/SkyboxCubeMap.h
+        include/Ashen/renderer/gfx/GLEnums.h
 
 )
 

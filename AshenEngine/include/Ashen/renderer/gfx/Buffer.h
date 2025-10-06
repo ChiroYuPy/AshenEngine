@@ -4,30 +4,43 @@
 #include <span>
 #include <glad/glad.h>
 
-#include "../Bindable.h"
+#include "GLEnums.h"
+#include "Ashen/renderer/GLObject.h"
 
 namespace ash {
-    enum class BufferType : GLenum {
-        Vertex = GL_ARRAY_BUFFER,
-        Index = GL_ELEMENT_ARRAY_BUFFER,
-        Uniform = GL_UNIFORM_BUFFER
-    };
 
-    enum class BufferUsage : GLenum {
-        Static = GL_STATIC_DRAW,
-        Dynamic = GL_DYNAMIC_DRAW,
-        Stream = GL_STREAM_DRAW
+    struct BufferConfig {
+        BufferUsage usage = BufferUsage::StaticDraw;
+
+        static BufferConfig Static() {
+            BufferConfig config;
+            config.usage = BufferUsage::StaticDraw;
+            return config;
+        }
+
+        static BufferConfig Dynamic() {
+            BufferConfig config;
+            config.usage = BufferUsage::DynamicDraw;
+            return config;
+        }
+
+        static BufferConfig Stream() {
+            BufferConfig config;
+            config.usage = BufferUsage::StreamDraw;
+            return config;
+        }
     };
 
     class Buffer : public Bindable {
     public:
-        explicit Buffer(BufferType type)
-            : m_Type(static_cast<GLenum>(type)) {
+        explicit Buffer(const BufferTarget target, const BufferConfig &config = BufferConfig::Static())
+            : m_Target(target), m_Config(config) {
             glGenBuffers(1, &m_ID);
         }
 
         ~Buffer() override {
-            if (m_ID) glDeleteBuffers(1, &m_ID);
+            if (m_ID)
+                glDeleteBuffers(1, &m_ID);
         }
 
         Buffer(const Buffer &) = delete;
@@ -35,39 +48,73 @@ namespace ash {
         Buffer &operator=(const Buffer &) = delete;
 
         Buffer(Buffer &&other) noexcept
-            : m_ID(other.m_ID), m_Type(other.m_Type), m_Size(other.m_Size) {
+            : m_Target(other.m_Target), m_Size(other.m_Size), m_Config(other.m_Config) {
+            m_ID = other.m_ID;
             other.m_ID = 0;
             other.m_Size = 0;
         }
 
         Buffer &operator=(Buffer &&other) noexcept {
             if (this != &other) {
-                if (m_ID) glDeleteBuffers(1, &m_ID);
+                if (m_ID)
+                    glDeleteBuffers(1, &m_ID);
                 m_ID = other.m_ID;
-                m_Type = other.m_Type;
+                m_Target = other.m_Target;
                 m_Size = other.m_Size;
+                m_Config = other.m_Config;
                 other.m_ID = 0;
                 other.m_Size = 0;
             }
             return *this;
         }
 
-        void Bind() const override { glBindBuffer(m_Type, m_ID); }
-        void Unbind() const override { glBindBuffer(m_Type, 0); }
+        void Bind() const override {
+            glBindBuffer(static_cast<GLenum>(m_Target), m_ID);
+        }
 
-        size_t Size() const { return m_Size; }
+        void Unbind() const override {
+            glBindBuffer(static_cast<GLenum>(m_Target), 0);
+        }
+
+        void BindBase(const GLuint index) const {
+            glBindBufferBase(static_cast<GLenum>(m_Target), index, m_ID);
+        }
+
+        void BindRange(const GLuint index, const GLintptr offset, const GLsizeiptr size) const {
+            glBindBufferRange(static_cast<GLenum>(m_Target), index, m_ID, offset, size);
+        }
+
+        [[nodiscard]] size_t Size() const { return m_Size; }
+        [[nodiscard]] BufferTarget Target() const { return m_Target; }
+        [[nodiscard]] const BufferConfig &GetConfig() const { return m_Config; }
+
+        void *Map(BufferAccess access) const {
+            Bind();
+            return glMapBuffer(static_cast<GLenum>(m_Target), static_cast<GLenum>(access));
+        }
+
+        void Unmap() const {
+            Bind();
+            glUnmapBuffer(static_cast<GLenum>(m_Target));
+        }
 
     protected:
-        void AllocateEmpty(const size_t sizeInBytes, BufferUsage usage = BufferUsage::Dynamic) {
+        BufferTarget m_Target;
+        size_t m_Size = 0;
+        BufferConfig m_Config;
+
+        void AllocateEmpty(const size_t sizeInBytes) {
             Bind();
-            glBufferData(m_Type, static_cast<GLsizeiptr>(sizeInBytes), nullptr, static_cast<GLenum>(usage));
+            glBufferData(static_cast<GLenum>(m_Target), static_cast<GLsizeiptr>(sizeInBytes),
+                         nullptr, static_cast<GLenum>(m_Config.usage));
             m_Size = sizeInBytes;
         }
 
         template<typename T>
-        void UploadData(const std::span<const T> &data, BufferUsage usage = BufferUsage::Static) {
+        void UploadData(const std::span<const T> &data) {
             Bind();
-            glBufferData(m_Type, data.size_bytes(), data.data(), static_cast<GLenum>(usage));
+            glBufferData(static_cast<GLenum>(m_Target), data.size_bytes(),
+                         data.data(), static_cast<GLenum>(m_Config.usage));
             m_Size = data.size_bytes();
         }
 
@@ -75,28 +122,25 @@ namespace ash {
         void UpdateData(const std::span<const T> &data, const size_t offset = 0) {
             assert(offset + data.size_bytes() <= m_Size && "Buffer overflow in UpdateData!");
             Bind();
-            glBufferSubData(m_Type, static_cast<GLintptr>(offset), data.size_bytes(), data.data());
+            glBufferSubData(static_cast<GLenum>(m_Target), static_cast<GLintptr>(offset),
+                            data.size_bytes(), data.data());
         }
-
-        GLuint m_ID = 0;
-        GLenum m_Type;
-        size_t m_Size = 0;
     };
 
     class VertexBuffer final : public Buffer {
     public:
-        VertexBuffer() : Buffer(BufferType::Vertex) {
+        explicit VertexBuffer(const BufferConfig &config = BufferConfig::Static())
+            : Buffer(BufferTarget::Array, config) {
         }
 
         template<typename T>
-        void SetData(const std::span<const T> &data, BufferUsage usage = BufferUsage::Static) {
-            UploadData(data, usage);
+        void SetData(const std::span<const T> &data) {
+            UploadData(data);
             m_Count = data.size();
         }
 
-        template<typename T>
-        void SetEmpty(const size_t count, const BufferUsage usage = BufferUsage::Dynamic) {
-            AllocateEmpty(count * sizeof(T), usage);
+        void SetEmpty(const size_t count, const size_t elementSize) {
+            AllocateEmpty(count * elementSize);
             m_Count = count;
         }
 
@@ -105,7 +149,14 @@ namespace ash {
             UpdateData(data, offset);
         }
 
-        size_t Count() const { return m_Count; }
+        [[nodiscard]] size_t Count() const { return m_Count; }
+
+        static VertexBuffer Create(const std::span<const float> &data,
+                                   const BufferConfig &config = BufferConfig::Static()) {
+            VertexBuffer vbo(config);
+            vbo.SetData(data);
+            return vbo;
+        }
 
     private:
         size_t m_Count = 0;
@@ -113,18 +164,31 @@ namespace ash {
 
     class IndexBuffer final : public Buffer {
     public:
-        IndexBuffer() : Buffer(BufferType::Index) {
+        explicit IndexBuffer(const IndexType type = IndexType::UnsignedInt,
+                             const BufferConfig &config = BufferConfig::Static())
+            : Buffer(BufferTarget::ElementArray, config), m_IndexType(type) {
         }
 
         template<typename T = uint32_t>
-        void SetData(const std::span<const T> &data, BufferUsage usage = BufferUsage::Static) {
-            UploadData(data, usage);
+        void SetData(const std::span<const T> &data) {
+            static_assert(std::is_same_v<T, uint8_t> ||
+                          std::is_same_v<T, uint16_t> ||
+                          std::is_same_v<T, uint32_t>,
+                          "Index type must be uint8_t, uint16_t, or uint32_t");
+
+            if constexpr (std::is_same_v<T, uint8_t>)
+                m_IndexType = IndexType::UnsignedByte;
+            else if constexpr (std::is_same_v<T, uint16_t>)
+                m_IndexType = IndexType::UnsignedShort;
+            else
+                m_IndexType = IndexType::UnsignedInt;
+
+            UploadData(data);
             m_Count = data.size();
         }
 
-        template<typename T = uint32_t>
-        void SetEmpty(const size_t count, const BufferUsage usage = BufferUsage::Dynamic) {
-            AllocateEmpty(count * sizeof(T), usage);
+        void SetEmpty(const size_t count, const size_t indexSize) {
+            AllocateEmpty(count * indexSize);
             m_Count = count;
         }
 
@@ -133,29 +197,84 @@ namespace ash {
             UpdateData(data, offset);
         }
 
-        size_t Count() const { return m_Count; }
+        [[nodiscard]] size_t Count() const { return m_Count; }
+        [[nodiscard]] IndexType GetIndexType() const { return m_IndexType; }
+
+        static IndexBuffer Create(const std::span<const uint32_t> &data,
+                                  const BufferConfig &config = BufferConfig::Static()) {
+            IndexBuffer ibo(IndexType::UnsignedInt, config);
+            ibo.SetData(data);
+            return ibo;
+        }
 
     private:
         size_t m_Count = 0;
+        IndexType m_IndexType;
     };
 
     class UniformBuffer final : public Buffer {
     public:
-        UniformBuffer() : Buffer(BufferType::Uniform) {
-        }
-
-        void BindBase(const GLuint bindingPoint) const {
-            glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, m_ID);
+        explicit UniformBuffer(const BufferConfig &config = BufferConfig::Dynamic())
+            : Buffer(BufferTarget::Uniform, config) {
         }
 
         template<typename T>
-        void SetData(const std::span<const T> &data, BufferUsage usage = BufferUsage::Static) {
-            UploadData(data, usage);
+        void SetData(const std::span<const T> &data) {
+            UploadData(data);
+        }
+
+        template<typename T>
+        void SetData(const T &data) {
+            SetData(std::span<const T>(&data, 1));
         }
 
         template<typename T>
         void Update(const std::span<const T> &data, size_t offset = 0) {
             UpdateData(data, offset);
+        }
+
+        template<typename T>
+        void Update(const T &data, size_t offset = 0) {
+            Update(std::span<const T>(&data, 1), offset);
+        }
+
+        void Allocate(const size_t size) {
+            AllocateEmpty(size);
+        }
+
+        static UniformBuffer Create(const size_t size,
+                                    const BufferConfig &config = BufferConfig::Dynamic()) {
+            UniformBuffer ubo(config);
+            ubo.Allocate(size);
+            return ubo;
+        }
+    };
+
+    class ShaderStorageBuffer final : public Buffer {
+    public:
+        explicit ShaderStorageBuffer(const BufferConfig &config = BufferConfig::Dynamic())
+            : Buffer(BufferTarget::ShaderStorage, config) {
+        }
+
+        template<typename T>
+        void SetData(const std::span<const T> &data) {
+            UploadData(data);
+        }
+
+        template<typename T>
+        void Update(const std::span<const T> &data, size_t offset = 0) {
+            UpdateData(data, offset);
+        }
+
+        void Allocate(const size_t size) {
+            AllocateEmpty(size);
+        }
+
+        static ShaderStorageBuffer Create(const size_t size,
+                                          const BufferConfig &config = BufferConfig::Dynamic()) {
+            ShaderStorageBuffer ssbo(config);
+            ssbo.Allocate(size);
+            return ssbo;
         }
     };
 }

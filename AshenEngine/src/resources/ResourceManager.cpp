@@ -48,8 +48,8 @@ namespace ash {
         const std::string vertSource = FileSystem::ReadFileAsString(vertPath);
         const std::string fragSource = FileSystem::ReadFileAsString(fragPath);
 
-        const ShaderUnit vertex(ShaderType::Vertex, vertSource);
-        const ShaderUnit fragment(ShaderType::Fragment, fragSource);
+        const ShaderUnit vertex(ShaderStage::Vertex, vertSource);
+        const ShaderUnit fragment(ShaderStage::Fragment, fragSource);
 
         auto shader = std::make_shared<ShaderProgram>();
         shader->AttachShader(vertex);
@@ -81,10 +81,10 @@ namespace ash {
     // ========== TextureManager ==========
 
     std::shared_ptr<Texture2D> TextureManager::Load(const std::string &id) {
-        if (auto existing = m_Resources.find(id); existing != m_Resources.end())
+        if (const auto existing = m_Resources.find(id); existing != m_Resources.end())
             return existing->second;
 
-        fs::path texPath = FindTexturePath(id);
+        const fs::path texPath = FindTexturePath(id);
         if (texPath.empty())
             throw std::runtime_error("Texture not found: " + id);
 
@@ -117,21 +117,33 @@ namespace ash {
     std::shared_ptr<Texture2D> TextureManager::CreateTextureFromImage(const ImageData &imageData) {
         auto texture = std::make_shared<Texture2D>();
 
-        const GLenum format = (imageData.channels == 3) ? GL_RGB : GL_RGBA;
+        Logger::info() << "Texture size: " << imageData.width << "x" << imageData.height;
+
+        TextureFormat internalFormat;
+        TextureFormat format;
+        constexpr auto type = PixelDataType::UnsignedByte;
+
+        switch (imageData.channels) {
+            case 1: internalFormat = TextureFormat::R8; format = TextureFormat::Red; break;
+            case 3: internalFormat = TextureFormat::RGB8; format = TextureFormat::RGB; break;
+            case 4: internalFormat = TextureFormat::RGBA8; format = TextureFormat::RGBA; break;
+            default:
+                throw std::runtime_error("Unsupported number of channels: " + std::to_string(imageData.channels));
+        }
 
         texture->SetData(
-            0,
-            static_cast<GLint>(format),
+            internalFormat,
             imageData.width,
             imageData.height,
             format,
-            GL_UNSIGNED_BYTE,
+            type,
             imageData.pixels.data()
         );
 
-        texture->SetFilter(GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR);
-        texture->SetWrap(GL_REPEAT, GL_REPEAT);
-        glGenerateMipmap(GL_TEXTURE_2D);
+        texture->SetFilter(TextureFilter::Nearest, TextureFilter::Nearest);
+        texture->SetWrap(TextureWrap::Repeat, TextureWrap::Repeat);
+
+        texture->GenerateMipmap();
 
         return texture;
     }

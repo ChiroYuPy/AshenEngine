@@ -15,18 +15,17 @@
 #include "Ashen/renderer/gfx/VertexArray.h"
 
 namespace ash {
-
     class SkyboxCubeMap final : public ISkybox {
     public:
-        SkyboxCubeMap(const std::array<std::string, 6>& facesPaths, Ref<ShaderProgram> shader)
+        SkyboxCubeMap(const std::array<std::string, 6> &facesPaths, Ref<ShaderProgram> shader)
             : m_shader(std::move(shader)) {
             setupMesh();
-            m_texture = MakeRef<TextureCubeMap>(LoadCubeMap(facesPaths));
+            m_texture = TextureCubeMap::LoadFromFiles(facesPaths);
             m_shader->Bind();
             m_shader->SetInt("skybox", 0);
         }
 
-        void Render(const glm::mat4& view, const glm::mat4& projection) override {
+        void Render(const glm::mat4 &view, const glm::mat4 &projection) override {
             RenderCommand::SetDepthWrite(false);
             RenderCommand::SetDepthFunc(RenderCommand::DepthFunc::LessEqual);
 
@@ -53,26 +52,28 @@ namespace ash {
 
         void setupMesh() {
             constexpr std::array<float, 36 * 3> vertices = {
-                -1,  1, -1,  -1, -1, -1,   1, -1, -1,
-                 1, -1, -1,   1,  1, -1,  -1,  1, -1,
-                -1, -1,  1,  -1,  1,  1,   1,  1,  1,
-                 1,  1,  1,   1, -1,  1,  -1, -1,  1,
-                -1,  1, -1,  -1,  1,  1,  -1, -1,  1,
-                -1, -1,  1,  -1, -1, -1,  -1,  1, -1,
-                 1,  1,  1,   1,  1, -1,   1, -1, -1,
-                 1, -1, -1,   1, -1,  1,   1,  1,  1,
-                -1,  1,  1,  -1,  1, -1,   1,  1, -1,
-                 1,  1, -1,   1,  1,  1,  -1,  1,  1,
-                -1, -1, -1,  -1, -1,  1,   1, -1,  1,
-                 1, -1,  1,   1, -1, -1,  -1, -1, -1
+                -1, 1, -1, -1, -1, -1, 1, -1, -1,
+                1, -1, -1, 1, 1, -1, -1, 1, -1,
+                -1, -1, 1, -1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, -1, 1, -1, -1, 1,
+                -1, 1, -1, -1, 1, 1, -1, -1, 1,
+                -1, -1, 1, -1, -1, -1, -1, 1, -1,
+                1, 1, 1, 1, 1, -1, 1, -1, -1,
+                1, -1, -1, 1, -1, 1, 1, 1, 1,
+                -1, 1, 1, -1, 1, -1, 1, 1, -1,
+                1, 1, -1, 1, 1, 1, -1, 1, 1,
+                -1, -1, -1, -1, -1, 1, 1, -1, 1,
+                1, -1, 1, 1, -1, -1, -1, -1, -1
             };
 
             m_vao = MakeRef<VertexArray>();
-            m_vbo = MakeRef<VertexBuffer>();
-            m_vbo->SetData<float>(vertices, BufferUsage::Static);
+            m_vbo = MakeRef<VertexBuffer>(BufferConfig::Static());
+            m_vbo->SetData<float>(vertices);
 
-            VertexBufferLayout layout(sizeof(glm::vec3));
-            layout.AddAttribute<glm::vec3>(0, 0);
+            const VertexBufferLayout layout({
+                VertexAttribute::Vec3(0, 0),
+            });
+
             m_vao->AddVertexBuffer(m_vbo, layout);
         }
     };

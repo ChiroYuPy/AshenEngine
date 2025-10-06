@@ -3,7 +3,8 @@
 #include "Ashen/core/Logger.h"
 
 namespace voxelity {
-    Chunk::Chunk(ChunkCoord coord) : m_position(coord) {}
+    Chunk::Chunk(ChunkCoord coord) : m_position(coord) {
+    }
 
     bool Chunk::isInBounds(int x, int y, int z) {
         return x >= 0 && x < VoxelArray::SIZE &&
@@ -22,8 +23,7 @@ namespace voxelity {
     }
 
     void Chunk::set(int x, int y, int z, VoxelType voxel) {
-        if (!isInBounds(x, y, z)) return;
-        {
+        if (!isInBounds(x, y, z)) return; {
             std::lock_guard lock(m_storageMutex);
             m_storage.set(x, y, z, voxel);
         }
@@ -34,8 +34,7 @@ namespace voxelity {
         set(pos.x, pos.y, pos.z, voxel);
     }
 
-    void Chunk::fill(VoxelType ID) {
-        {
+    void Chunk::fill(VoxelType ID) { {
             std::lock_guard lock(m_storageMutex);
             m_storage.fill(ID);
         }
@@ -51,8 +50,8 @@ namespace voxelity {
         return {m_position.x, m_position.y, m_position.z};
     }
 
-    void Chunk::uploadMesh(const std::vector<FaceInstance>& opaqueFaces,
-                          const std::vector<FaceInstance>& transparentFaces) {
+    void Chunk::uploadMesh(const std::vector<FaceInstance> &opaqueFaces,
+                           const std::vector<FaceInstance> &transparentFaces) {
         m_opaqueMesh.uploadInstances(opaqueFaces);
         m_transparentMesh.uploadInstances(transparentFaces);
         m_dirty = false;

@@ -26,12 +26,12 @@ namespace voxelity {
         m_world.reset();
     }
 
-    void VoxelWorldLayer::OnEvent(ash::Event& event) {
+    void VoxelWorldLayer::OnEvent(ash::Event &event) {
         if (m_inputHandler)
             m_inputHandler->handleEvent(event);
 
         ash::EventDispatcher dispatcher(event);
-        dispatcher.Dispatch<ash::WindowResizeEvent>([this](const ash::WindowResizeEvent& e) {
+        dispatcher.Dispatch<ash::WindowResizeEvent>([this](const ash::WindowResizeEvent &e) {
             m_camera->OnResize(e.GetWidth(), e.GetHeight());
             return false;
         });
@@ -72,10 +72,10 @@ namespace voxelity {
         static int frameCount = 0;
         if (++frameCount % 120 == 0) {
             ash::Logger::info() << "Chunks: " << m_world->getLoadedChunkCount()
-                               << " | Pending Load: " << m_world->getPendingLoadCount()
-                               << " | Pending Mesh: " << m_world->getPendingMeshCount()
-                               << " | Ticks: " << ticksExecuted
-                               << " | Alpha: " << alpha;
+                    << " | Pending Load: " << m_world->getPendingLoadCount()
+                    << " | Pending Mesh: " << m_world->getPendingMeshCount()
+                    << " | Ticks: " << ticksExecuted
+                    << " | Alpha: " << alpha;
         }
     }
 

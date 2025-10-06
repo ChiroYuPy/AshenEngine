@@ -10,14 +10,14 @@ namespace voxelity {
         const ChunkCoord chunkCoord = toChunkCoord(worldX, worldY, worldZ);
         const ash::IVec3 localPos = toLocalCoord(worldX, worldY, worldZ);
 
-        const Chunk* chunk = m_chunkManager.get()->getChunk(chunkCoord);
+        const Chunk *chunk = m_chunkManager.get()->getChunk(chunkCoord);
         if (chunk)
             return chunk->get(localPos.x, localPos.y, localPos.z);
 
         return VoxelID::AIR;
     }
 
-    VoxelType World::getVoxel(const ash::IVec3& worldPos) const {
+    VoxelType World::getVoxel(const ash::IVec3 &worldPos) const {
         return getVoxel(worldPos.x, worldPos.y, worldPos.z);
     }
 
@@ -25,7 +25,7 @@ namespace voxelity {
         ChunkCoord chunkCoord = toChunkCoord(worldX, worldY, worldZ);
         ash::IVec3 localPos = toLocalCoord(worldX, worldY, worldZ);
 
-        Chunk* chunk = m_chunkManager->getOrCreateChunk(chunkCoord);
+        Chunk *chunk = m_chunkManager->getOrCreateChunk(chunkCoord);
         if (!chunk) return;
 
         VoxelType oldType = chunk->get(localPos.x, localPos.y, localPos.z);
@@ -40,19 +40,19 @@ namespace voxelity {
         markNeighborChunksDirty(chunkCoord, localPos);
     }
 
-    void World::setVoxel(const ash::IVec3& worldPos, const VoxelType type) {
+    void World::setVoxel(const ash::IVec3 &worldPos, const VoxelType type) {
         setVoxel(worldPos.x, worldPos.y, worldPos.z, type);
     }
 
-    Chunk* World::getChunk(const ChunkCoord& coord) const {
+    Chunk *World::getChunk(const ChunkCoord &coord) const {
         return m_chunkManager->getChunk(coord);
     }
 
-    Chunk* World::getChunk(const int x, const int y, const int z) const {
+    Chunk *World::getChunk(const int x, const int y, const int z) const {
         return m_chunkManager->getChunk(ChunkCoord{x, y, z});
     }
 
-    void World::updateLoadedChunks(const glm::vec3& playerPos, const int renderDistance) const {
+    void World::updateLoadedChunks(const glm::vec3 &playerPos, const int renderDistance) const {
         m_chunkManager->updateLoadedChunks(playerPos, renderDistance);
     }
 
@@ -66,12 +66,14 @@ namespace voxelity {
         m_chunkManager->processCompletedMeshes();
     }
 
-    void World::forEachChunk(const std::function<void(const ChunkCoord&, Chunk*)>& func) const {
+    void World::forEachChunk(const std::function < void(const ChunkCoord &, Chunk *) > &func)
+    const
+ {
         m_chunkManager->forEachChunk(func);
     }
 
-    void World::forEachChunkInRadius(const glm::vec3& center, const int radius,
-                                      const std::function<void(const ChunkCoord&, Chunk*)>& func) const {
+    void World::forEachChunkInRadius(const glm::vec3 &center, const int radius,
+                                     const std::function<void(const ChunkCoord &, Chunk *)> &func) const {
         m_chunkManager->forEachChunkInRadius(center, radius, func);
     }
 
@@ -82,7 +84,7 @@ namespace voxelity {
         return {divFloor(x), divFloor(y), divFloor(z)};
     }
 
-    ash::IVec3 World::toChunkCoord(const ash::IVec3& worldPos) {
+    ash::IVec3 World::toChunkCoord(const ash::IVec3 &worldPos) {
         return toChunkCoord(worldPos.x, worldPos.y, worldPos.z);
     }
 
@@ -93,11 +95,11 @@ namespace voxelity {
         return {mod(x), mod(y), mod(z)};
     }
 
-    ash::IVec3 World::toLocalCoord(const ash::IVec3& position) {
+    ash::IVec3 World::toLocalCoord(const ash::IVec3 &position) {
         return toLocalCoord(position.x, position.y, position.z);
     }
 
-    ash::IVec3 World::toWorldPos(const ash::IVec3& chunkCoord, const ash::IVec3& localPos) {
+    ash::IVec3 World::toWorldPos(const ash::IVec3 &chunkCoord, const ash::IVec3 &localPos) {
         return {
             chunkCoord.x * VoxelArray::SIZE + localPos.x,
             chunkCoord.y * VoxelArray::SIZE + localPos.y,
@@ -121,14 +123,13 @@ namespace voxelity {
         m_chunkManager->clear();
     }
 
-    void World::markNeighborChunksDirty(const ChunkCoord& chunkCoord, const ash::IVec3& localPos) const {
+    void World::markNeighborChunksDirty(const ChunkCoord &chunkCoord, const ash::IVec3 &localPos) const {
         auto checkNeighbor = [&](const int lx, const int ly, const int lz, const int dx, const int dy, const int dz) {
             if ((lx == 0 && dx == -1) || (lx == VoxelArray::SIZE - 1 && dx == 1) ||
                 (ly == 0 && dy == -1) || (ly == VoxelArray::SIZE - 1 && dy == 1) ||
                 (lz == 0 && dz == -1) || (lz == VoxelArray::SIZE - 1 && dz == 1)) {
-
                 ChunkCoord neighborCoord = {chunkCoord.x + dx, chunkCoord.y + dy, chunkCoord.z + dz};
-                Chunk* neighbor = getChunk(neighborCoord);
+                Chunk *neighbor = getChunk(neighborCoord);
                 if (neighbor) {
                     m_chunkManager->markChunkForMeshRebuild(neighborCoord);
                 }

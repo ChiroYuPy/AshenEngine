@@ -1,7 +1,3 @@
-//
-// Created by adrian on 05/10/2025.
-//
-
 #ifndef ASHEN_MATH_H
 #define ASHEN_MATH_H
 
@@ -11,7 +7,6 @@
 #include <glm/gtx/quaternion.hpp>
 
 namespace ash {
-    // Vector
     using Vec2 = glm::vec2;
     using Vec3 = glm::vec3;
     using Vec4 = glm::vec4;
@@ -28,12 +23,10 @@ namespace ash {
     using BVec3 = glm::bvec3;
     using BVec4 = glm::bvec4;
 
-    // Matrix
     using Mat2 = glm::mat2;
     using Mat3 = glm::mat3;
     using Mat4 = glm::mat4;
 
-    // Quaternion
     using Quat = glm::quat;
 
     inline constexpr float PI = 3.14159265358979323846f;

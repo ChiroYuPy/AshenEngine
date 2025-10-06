@@ -25,29 +25,25 @@ namespace ash {
 
         static void OnEvent(Event &event);
 
-        static void Update(); // Call once per frame
+        static void Update();
 
-        // Key state queries
         static bool IsKeyPressed(int keycode);
 
-        static bool IsKeyJustPressed(int keycode); // True only on first frame
+        static bool IsKeyJustPressed(int keycode);
         static bool IsKeyJustReleased(int keycode);
 
-        // Mouse button queries
         static bool IsMouseButtonPressed(int button);
 
         static bool IsMouseButtonJustPressed(int button);
 
         static bool IsMouseButtonJustReleased(int button);
 
-        // Mouse position & movement
         static Vec2 GetMousePosition();
 
         static Vec2 GetMouseDelta();
 
         static float GetMouseScrollDelta();
 
-        // Cursor control
         static void SetCursorMode(CursorMode mode);
 
         static void ResetMouseDelta();
@@ -64,15 +60,12 @@ namespace ash {
 
         inline static GLFWwindow *s_Window = nullptr;
 
-        // Current frame state
         inline static std::bitset<MAX_KEYS> s_Keys;
         inline static std::bitset<MAX_MOUSE_BUTTONS> s_MouseButtons;
 
-        // Previous frame state (for "just pressed/released" detection)
         inline static std::bitset<MAX_KEYS> s_KeysPrevious;
         inline static std::bitset<MAX_MOUSE_BUTTONS> s_MouseButtonsPrevious;
 
-        // Mouse state
         inline static Vec2 s_MousePosition{0.0f};
         inline static Vec2 s_MousePositionPrevious{0.0f};
         inline static Vec2 s_MouseDelta{0.0f};

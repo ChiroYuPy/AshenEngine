@@ -14,6 +14,7 @@ namespace voxelity {
     class EntityManager {
     public:
         EntityManager() = default;
+
         ~EntityManager() = default;
 
         template<typename T, typename... Args>
@@ -40,7 +41,7 @@ namespace voxelity {
             }
         }
 
-        const std::vector<ash::Scope<Entity>> &getEntities() const { return m_entities; }
+        const std::vector<ash::Scope<Entity> > &getEntities() const { return m_entities; }
         size_t getEntityCount() const { return m_entities.size(); }
 
         template<typename T>
@@ -71,7 +72,7 @@ namespace voxelity {
         }
 
     private:
-        std::vector<ash::Scope<Entity>> m_entities;
+        std::vector<ash::Scope<Entity> > m_entities;
     };
 }
 

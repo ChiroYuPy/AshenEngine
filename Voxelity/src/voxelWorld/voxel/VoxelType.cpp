@@ -2,7 +2,7 @@
 
 namespace voxelity {
     VoxelDefinition::VoxelDefinition(const std::string_view displayName,
-                                     const ash::Color& color,
+                                     const ash::Color &color,
                                      const RenderMode renderingMode,
                                      const bool hasCollision)
         : displayName(displayName),
@@ -11,30 +11,30 @@ namespace voxelity {
           hasCollision(hasCollision) {
     }
 
-    VoxelTypeRegistry* VoxelTypeRegistry::instance = nullptr;
+    VoxelTypeRegistry *VoxelTypeRegistry::instance = nullptr;
 
     VoxelTypeRegistry::VoxelTypeRegistry() {
         resetToDefaults();
     }
 
-    VoxelTypeRegistry& VoxelTypeRegistry::getInstance() {
+    VoxelTypeRegistry &VoxelTypeRegistry::getInstance() {
         if (instance == nullptr) {
             instance = new VoxelTypeRegistry();
         }
         return *instance;
     }
 
-    const VoxelDefinition& VoxelTypeRegistry::getDefinition(const VoxelType voxelID) const noexcept {
+    const VoxelDefinition &VoxelTypeRegistry::getDefinition(const VoxelType voxelID) const noexcept {
         return registry[voxelID];
     }
 
-    void VoxelTypeRegistry::setDefinition(const VoxelType voxelID, const VoxelDefinition& definition) noexcept {
+    void VoxelTypeRegistry::setDefinition(const VoxelType voxelID, const VoxelDefinition &definition) noexcept {
         if (isValidVoxelID(voxelID)) {
             registry[voxelID] = definition;
         }
     }
 
-    void VoxelTypeRegistry::setColor(const VoxelType voxelID, const ash::Color& color) noexcept {
+    void VoxelTypeRegistry::setColor(const VoxelType voxelID, const ash::Color &color) noexcept {
         if (isValidVoxelID(voxelID)) {
             registry[voxelID].color = color;
         }
@@ -71,7 +71,7 @@ namespace voxelity {
     }
 
     void VoxelTypeRegistry::resetToDefaults() noexcept {
-        for (auto& def : registry) {
+        for (auto &def: registry) {
             def = VoxelDefinition{};
         }
 
@@ -183,11 +183,11 @@ namespace voxelity {
         return voxelID <= MAX_TYPE_ID;
     }
 
-    const VoxelDefinition& getVoxelTypeDefinition(const VoxelType voxelID) noexcept {
+    const VoxelDefinition &getVoxelTypeDefinition(const VoxelType voxelID) noexcept {
         return VoxelTypeRegistry::getInstance().getDefinition(voxelID);
     }
 
-    const std::string& getDisplayName(const VoxelType voxelID) noexcept {
+    const std::string &getDisplayName(const VoxelType voxelID) noexcept {
         return getVoxelTypeDefinition(voxelID).displayName;
     }
 

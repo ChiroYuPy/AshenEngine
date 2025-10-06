@@ -24,7 +24,7 @@ namespace ash {
 
     struct CircleVertex {
         Vec3 WorldPosition;
-        Vec3 LocalPosition; // Pour le fragment shader
+        Vec3 LocalPosition;
         Vec4 Color;
         float Thickness;
         float Fade;
@@ -47,7 +47,6 @@ namespace ash {
 
         static void EndScene();
 
-        // =============== QUADS ===============
         static void DrawQuad(const Vec2 &position, const Vec2 &size, const Vec4 &color);
 
         static void DrawQuad(const Vec3 &position, const Vec2 &size, const Vec4 &color);
@@ -82,19 +81,16 @@ namespace ash {
                                     const Ref<Texture2D> &texture,
                                     const Vec4 &tintColor = Vec4(1.0f));
 
-        // =============== LINES ===============
         static void DrawLine(const Vec2 &p0, const Vec2 &p1, const Vec4 &color);
 
         static void DrawLine(const Vec3 &p0, const Vec3 &p1, const Vec4 &color);
 
-        // Dessine un rectangle en wireframe
         static void DrawRect(const Vec2 &position, const Vec2 &size, const Vec4 &color);
 
         static void DrawRect(const Vec3 &position, const Vec2 &size, const Vec4 &color);
 
         static void DrawRect(const Mat4 &transform, const Vec4 &color);
 
-        // =============== CIRCLES ===============
         static void DrawCircle(const Vec2 &center, float radius, const Vec4 &color,
                                float thickness = 1.0f, float fade = 0.005f);
 
@@ -104,24 +100,18 @@ namespace ash {
         static void DrawCircle(const Mat4 &transform, const Vec4 &color,
                                float thickness = 1.0f, float fade = 0.005f);
 
-        // Cercle rempli (en utilisant un quad avec shader)
         static void DrawFilledCircle(const Vec2 &center, float radius, const Vec4 &color);
 
         static void DrawFilledCircle(const Vec3 &center, float radius, const Vec4 &color);
 
-        // =============== POLYGONS ===============
-        // Dessine un polygone rempli (triangulé automatiquement)
         static void DrawPolygon(const std::vector<Vec2> &points, const Vec4 &color);
 
         static void DrawPolygon(const std::vector<Vec3> &points, const Vec4 &color);
 
-        // Dessine un polygone en wireframe
         static void DrawPolygonOutline(const std::vector<Vec2> &points, const Vec4 &color);
 
         static void DrawPolygonOutline(const std::vector<Vec3> &points, const Vec4 &color);
 
-        // =============== UTILITY ===============
-        // Change l'épaisseur des lignes (pour DrawLine, DrawRect, etc.)
         static void SetLineWidth(float width);
 
     private:

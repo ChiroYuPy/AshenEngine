@@ -197,7 +197,7 @@ namespace voxelity {
                     const int worldZ = chunkPos.z * VoxelArray::SIZE + z;
                     const int groundHeight = heightMap[x][z];
                     const BiomeType biome = biomeMap[x][z];
-                    const BiomeData& biomeData = biomeConfigs[static_cast<int>(biome)];
+                    const BiomeData &biomeData = biomeConfigs[static_cast<int>(biome)];
 
                     VoxelType voxelID = VoxelID::AIR;
 
@@ -238,7 +238,7 @@ namespace voxelity {
                 const int surfaceLocalY = groundHeight - worldY;
                 if (surfaceLocalY >= 0 && surfaceLocalY < VoxelArray::SIZE - 6) {
                     const BiomeType biome = biomeMap[x][z];
-                    const BiomeData& biomeData = biomeConfigs[static_cast<int>(biome)];
+                    const BiomeData &biomeData = biomeConfigs[static_cast<int>(biome)];
 
                     const int worldX = chunkPos.x * VoxelArray::SIZE + x;
                     const int worldZ = chunkPos.z * VoxelArray::SIZE + z;

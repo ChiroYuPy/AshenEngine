@@ -24,8 +24,8 @@ namespace voxelity {
         size_t m_entryCount = 0;
 
         TextureAtlas() {
-            m_texture.SetWrap(GL_CLAMP_TO_EDGE);
-            m_texture.SetFilter(GL_NEAREST, GL_NEAREST);
+            m_texture.SetWrap(ash::TextureWrap::ClampToEdge);
+            m_texture.SetFilter(ash::TextureFilter::Nearest, ash::TextureFilter::Nearest);
         }
     };
 
@@ -47,7 +47,8 @@ namespace voxelity {
                 m_colors[i] = c.toVec4();
             }
 
-            m_texture.SetData(0, GL_RGBA32F, MAX_COLORS, GL_RGBA, GL_FLOAT, m_colors.data());
+            m_texture.SetData(ash::TextureFormat::RGBA32F, MAX_COLORS, ash::TextureFormat::RGBA,
+                              ash::PixelDataType::Float, m_colors.data());
         }
 
         // Accès direct aux couleurs si nécessaire

@@ -19,30 +19,34 @@ namespace voxelity {
         int renderHeight = 2;
 
         // Fixed timestep Minecraft-style (20 ticks/second)
-        float tickRate = 20.0f;              // 20 TPS comme Minecraft
+        float tickRate = 20.0f; // 20 TPS comme Minecraft
         float fixedDeltaTime = 1.0f / 20.0f; // 0.05s par tick
-        int maxTicksPerFrame = 10;           // Limite pour éviter spiral of death
+        int maxTicksPerFrame = 10; // Limite pour éviter spiral of death
     };
 
     class VoxelWorldLayer final : public ash::Layer {
     public:
         VoxelWorldLayer();
+
         ~VoxelWorldLayer() override;
 
-        void OnEvent(ash::Event& event) override;
+        void OnEvent(ash::Event &event) override;
+
         void OnUpdate(float ts) override;
+
         void OnRender() override;
 
         // Configuration
         void setRenderDistance(int distance);
+
         int getRenderDistance() const { return m_config.renderDistance; }
 
         // Accès pour InputHandler
-        World& getWorld() const { return *m_world; }
-        WorldRenderer& getWorldRenderer() const { return *m_worldRenderer; }
-        WorldInteractor& getWorldInteractor() const { return *m_worldInteractor; }
-        Player& getPlayer() const { return *m_player; }
-        EntityManager& getEntityManager() const { return *m_entityManager; }
+        World &getWorld() const { return *m_world; }
+        WorldRenderer &getWorldRenderer() const { return *m_worldRenderer; }
+        WorldInteractor &getWorldInteractor() const { return *m_worldInteractor; }
+        Player &getPlayer() const { return *m_player; }
+        EntityManager &getEntityManager() const { return *m_entityManager; }
 
     private:
         WorldConfig m_config;
@@ -55,7 +59,7 @@ namespace voxelity {
         ash::Scope<WorldRenderer> m_worldRenderer;
         ash::Scope<WorldInteractor> m_worldInteractor;
         ash::Scope<EntityManager> m_entityManager;
-        Player* m_player; // Géré par EntityManager
+        Player *m_player; // Géré par EntityManager
         ash::Scope<InputHandler> m_inputHandler;
 
         // Caméra et shaders
@@ -67,16 +71,24 @@ namespace voxelity {
 
         // Initialisation
         void setupCamera();
+
         void setupShader();
+
         void setupWorld();
+
         void setupPlayer();
+
         void setupEntityManager();
+
         void setupWorldInteractor();
+
         void setupSkybox();
+
         void setupInputHandler();
 
         // Rendu
         void renderSkybox() const;
+
         void renderWorld() const;
     };
 }

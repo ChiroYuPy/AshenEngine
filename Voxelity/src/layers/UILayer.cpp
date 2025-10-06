@@ -5,7 +5,6 @@
 #include "Ashen/events/KeyEvent.h"
 #include "Ashen/renderer/RenderCommand.h"
 #include "Ashen/renderer/Renderer2D.h"
-#include "Ashen/renderer/Renderer3D.h"
 #include "Ashen/resources/ResourceManager.h"
 
 namespace voxelity {
@@ -29,7 +28,7 @@ namespace voxelity {
         if (m_CrosshairTexture) {
             if (showCrosshair) {
                 constexpr float crosshairSize = 64.0f;
-                ash::Renderer2D::DrawQuad(center, {crosshairSize, crosshairSize}, m_CrosshairTexture, {1,1,1,1});
+                ash::Renderer2D::DrawQuad(center, {crosshairSize, crosshairSize}, m_CrosshairTexture, {1, 1, 1, 1});
             }
         }
 

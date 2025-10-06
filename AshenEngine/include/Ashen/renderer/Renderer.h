@@ -29,14 +29,12 @@ namespace ash {
 
         static void Shutdown();
 
-        // Gestion du frame - appelé par Application
         static void BeginFrame();
 
         static void EndFrame();
 
         static void OnWindowResize(uint32_t width, uint32_t height);
 
-        // Méthodes de dessin bas niveau (utilisées par les renderers spécialisés)
         static void DrawIndexed(const VertexArray &vao, uint32_t indexCount);
 
         static void DrawArrays(const VertexArray &vao, uint32_t vertexCount, uint32_t first = 0);
@@ -46,7 +44,6 @@ namespace ash {
         static void DrawArraysInstanced(const VertexArray &vao, uint32_t vertexCount, uint32_t instanceCount,
                                         uint32_t first = 0);
 
-        // Statistiques
         [[nodiscard]] static const Statistics &GetStats() { return s_Stats; }
 
         static void ResetStats();

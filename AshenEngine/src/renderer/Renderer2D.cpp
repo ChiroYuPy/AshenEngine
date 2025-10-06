@@ -20,14 +20,16 @@ namespace ash {
             auto &quads = s_Data.Quads;
 
             quads.VertexArray2D = MakeRef<VertexArray>();
-            quads.VertexBuffer2D = MakeRef<VertexBuffer>();
-            quads.VertexBuffer2D->SetEmpty<QuadVertex>(QuadData::MaxVertices, BufferUsage::Dynamic);
+            quads.VertexBuffer2D = MakeRef<VertexBuffer>(BufferConfig::Dynamic());
+            quads.VertexBuffer2D->SetEmpty(QuadData::MaxVertices, sizeof(QuadVertex));
 
-            VertexBufferLayout layout(sizeof(QuadVertex));
-            layout.AddAttribute<Vec3>(0, offsetof(QuadVertex, Position));
-            layout.AddAttribute<Vec4>(1, offsetof(QuadVertex, Color));
-            layout.AddAttribute<Vec2>(2, offsetof(QuadVertex, TexCoord));
-            layout.AddAttribute<float>(3, offsetof(QuadVertex, TexIndex));
+            const VertexBufferLayout layout({
+                VertexAttribute::Vec3(0, offsetof(QuadVertex, Position)),
+                VertexAttribute::Vec4(1, offsetof(QuadVertex, Color)),
+                VertexAttribute::Vec2(2, offsetof(QuadVertex, TexCoord)),
+                VertexAttribute::Float(3, offsetof(QuadVertex, TexIndex)),
+            });
+
             quads.VertexArray2D->AddVertexBuffer(quads.VertexBuffer2D, layout);
 
             quads.IndexBuffer2D = MakeRef<IndexBuffer>();
@@ -47,9 +49,10 @@ namespace ash {
 
             quads.WhiteTexture = MakeRef<Texture2D>();
             constexpr uint32_t white = 0xFFFFFFFF;
-            quads.WhiteTexture->SetData(0, GL_RGBA, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &white);
-            quads.WhiteTexture->SetFilter(GL_LINEAR, GL_LINEAR);
-            quads.WhiteTexture->SetWrap(GL_REPEAT, GL_REPEAT);
+            quads.WhiteTexture->SetData(TextureFormat::RGBA, 1, 1, TextureFormat::RGBA, PixelDataType::UnsignedByte,
+                                        &white);
+            quads.WhiteTexture->SetFilter(TextureFilter::Linear, TextureFilter::Linear);
+            quads.WhiteTexture->SetWrap(TextureWrap::Repeat, TextureWrap::Repeat);
             quads.TextureSlots[0] = quads.WhiteTexture;
 
             const std::string quadVertSrc = R"(
@@ -85,8 +88,8 @@ namespace ash {
             )";
 
             quads.Shader = MakeRef<ShaderProgram>();
-            quads.Shader->AttachShader(ShaderUnit(ShaderType::Vertex, quadVertSrc));
-            quads.Shader->AttachShader(ShaderUnit(ShaderType::Fragment, quadFragSrc));
+            quads.Shader->AttachShader(ShaderUnit(ShaderStage::Vertex, quadVertSrc));
+            quads.Shader->AttachShader(ShaderUnit(ShaderStage::Fragment, quadFragSrc));
             quads.Shader->Link();
 
             quads.Shader->Bind();
@@ -112,12 +115,14 @@ namespace ash {
             auto &lines = s_Data.Lines;
 
             lines.VertexArray2D = MakeRef<VertexArray>();
-            lines.VertexBuffer2D = MakeRef<VertexBuffer>();
-            lines.VertexBuffer2D->SetEmpty<LineVertex>(LineData::MaxVertices, BufferUsage::Dynamic);
+            lines.VertexBuffer2D = MakeRef<VertexBuffer>(BufferConfig::Dynamic());
+            lines.VertexBuffer2D->SetEmpty(LineData::MaxVertices, sizeof(LineVertex));
 
-            VertexBufferLayout layout(sizeof(LineVertex));
-            layout.AddAttribute<Vec3>(0, offsetof(LineVertex, Position));
-            layout.AddAttribute<Vec4>(1, offsetof(LineVertex, Color));
+            const VertexBufferLayout layout({
+                VertexAttribute::Vec3(0, offsetof(LineVertex, Position)),
+                VertexAttribute::Vec4(1, offsetof(LineVertex, Color)),
+            });
+
             lines.VertexArray2D->AddVertexBuffer(lines.VertexBuffer2D, layout);
 
             const std::string lineVertSrc = R"(
@@ -142,8 +147,8 @@ namespace ash {
             )";
 
             lines.Shader = MakeRef<ShaderProgram>();
-            lines.Shader->AttachShader(ShaderUnit(ShaderType::Vertex, lineVertSrc));
-            lines.Shader->AttachShader(ShaderUnit(ShaderType::Fragment, lineFragSrc));
+            lines.Shader->AttachShader(ShaderUnit(ShaderStage::Vertex, lineVertSrc));
+            lines.Shader->AttachShader(ShaderUnit(ShaderStage::Fragment, lineFragSrc));
             lines.Shader->Link();
 
             lines.VertexBufferBase = new LineVertex[LineData::MaxVertices];
@@ -154,15 +159,17 @@ namespace ash {
             auto &circles = s_Data.Circles;
 
             circles.VertexArray2D = MakeRef<VertexArray>();
-            circles.VertexBuffer2D = MakeRef<VertexBuffer>();
-            circles.VertexBuffer2D->SetEmpty<CircleVertex>(CircleData::MaxVertices, BufferUsage::Dynamic);
+            circles.VertexBuffer2D = MakeRef<VertexBuffer>(BufferConfig::Dynamic());
+            circles.VertexBuffer2D->SetEmpty(CircleData::MaxVertices, sizeof(CircleVertex));
 
-            VertexBufferLayout layout(sizeof(CircleVertex));
-            layout.AddAttribute<Vec3>(0, offsetof(CircleVertex, WorldPosition));
-            layout.AddAttribute<Vec3>(1, offsetof(CircleVertex, LocalPosition));
-            layout.AddAttribute<Vec4>(2, offsetof(CircleVertex, Color));
-            layout.AddAttribute<float>(3, offsetof(CircleVertex, Thickness));
-            layout.AddAttribute<float>(4, offsetof(CircleVertex, Fade));
+            const VertexBufferLayout layout({
+                VertexAttribute::Vec3(0, offsetof(CircleVertex, WorldPosition)),
+                VertexAttribute::Vec3(1, offsetof(CircleVertex, LocalPosition)),
+                VertexAttribute::Vec4(1, offsetof(CircleVertex, Color)),
+                VertexAttribute::Float(1, offsetof(CircleVertex, Thickness)),
+                VertexAttribute::Float(1, offsetof(CircleVertex, Fade)),
+            });
+
             circles.VertexArray2D->AddVertexBuffer(circles.VertexBuffer2D, layout);
 
             circles.IndexBuffer2D = MakeRef<IndexBuffer>();
@@ -222,8 +229,8 @@ namespace ash {
             )";
 
             circles.Shader = MakeRef<ShaderProgram>();
-            circles.Shader->AttachShader(ShaderUnit(ShaderType::Vertex, circleVertSrc));
-            circles.Shader->AttachShader(ShaderUnit(ShaderType::Fragment, circleFragSrc));
+            circles.Shader->AttachShader(ShaderUnit(ShaderStage::Vertex, circleVertSrc));
+            circles.Shader->AttachShader(ShaderUnit(ShaderStage::Fragment, circleFragSrc));
             circles.Shader->Link();
 
             circles.VertexPositions[0] = {-1.0f, -1.0f, 0.0f, 1.0f};

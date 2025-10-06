@@ -4,15 +4,63 @@
 #include <array>
 #include <stdexcept>
 #include <string>
+#include <optional>
+#include <stb_image.h>
+#include <glad/glad.h>
 
-#include "Ashen/renderer/Bindable.h"
-#include "stb_image.h"
-#include "glad/glad.h"
+#include "GLEnums.h"
+#include "Ashen/core/Types.h"
+#include "Ashen/math/Math.h"
+#include "Ashen/renderer/GLObject.h"
 
 namespace ash {
+
+    struct TextureConfig {
+        TextureWrap wrapS = TextureWrap::Repeat;
+        TextureWrap wrapT = TextureWrap::Repeat;
+        TextureWrap wrapR = TextureWrap::Repeat;
+        TextureFilter minFilter = TextureFilter::Linear;
+        TextureFilter magFilter = TextureFilter::Linear;
+        std::optional<Vec4> borderColor = std::nullopt;
+        bool generateMipmaps = false;
+        int maxAnisotropy = 1;
+
+        static TextureConfig Default() { return {}; }
+
+        static TextureConfig Pixelated() {
+            TextureConfig config;
+            config.minFilter = TextureFilter::Nearest;
+            config.magFilter = TextureFilter::Nearest;
+            return config;
+        }
+
+        static TextureConfig Smooth() {
+            TextureConfig config;
+            config.minFilter = TextureFilter::Linear;
+            config.magFilter = TextureFilter::Linear;
+            return config;
+        }
+
+        static TextureConfig Mipmapped() {
+            TextureConfig config;
+            config.minFilter = TextureFilter::LinearMipmapLinear;
+            config.magFilter = TextureFilter::Linear;
+            config.generateMipmaps = true;
+            return config;
+        }
+
+        static TextureConfig Clamped() {
+            TextureConfig config;
+            config.wrapS = TextureWrap::ClampToEdge;
+            config.wrapT = TextureWrap::ClampToEdge;
+            config.wrapR = TextureWrap::ClampToEdge;
+            return config;
+        }
+    };
+
     class Texture : public Bindable {
     public:
-        explicit Texture(const GLenum target)
+        explicit Texture(const TextureTarget target)
             : m_Target(target) {
             glGenTextures(1, &m_ID);
         }
@@ -27,7 +75,8 @@ namespace ash {
         Texture &operator=(const Texture &) = delete;
 
         Texture(Texture &&other) noexcept
-            : m_ID(other.m_ID), m_Target(other.m_Target) {
+            : m_Target(other.m_Target), m_Config(other.m_Config) {
+            m_ID = other.m_ID;
             other.m_ID = 0;
         }
 
@@ -37,164 +86,233 @@ namespace ash {
                     glDeleteTextures(1, &m_ID);
                 m_ID = other.m_ID;
                 m_Target = other.m_Target;
+                m_Config = other.m_Config;
                 other.m_ID = 0;
             }
             return *this;
         }
 
         void Bind() const override {
-            glBindTexture(m_Target, m_ID);
+            glBindTexture(static_cast<GLenum>(m_Target), m_ID);
         }
 
         void Unbind() const override {
-            glBindTexture(m_Target, 0);
+            glBindTexture(static_cast<GLenum>(m_Target), 0);
         }
 
-        [[nodiscard]] GLuint ID() const { return m_ID; }
-        [[nodiscard]] GLenum Target() const { return m_Target; }
+        void BindToUnit(const uint32_t unit) const {
+            glActiveTexture(GL_TEXTURE0 + unit);
+            Bind();
+        }
+
+        [[nodiscard]] TextureTarget Target() const { return m_Target; }
+        [[nodiscard]] const TextureConfig &GetConfig() const { return m_Config; }
+
+        void SetWrap(TextureWrap s, TextureWrap t, TextureWrap r) {
+            m_Config.wrapS = s;
+            m_Config.wrapT = t;
+            m_Config.wrapR = r;
+            Bind();
+            glTexParameteri(static_cast<GLenum>(m_Target), GL_TEXTURE_WRAP_S, static_cast<GLint>(s));
+            glTexParameteri(static_cast<GLenum>(m_Target), GL_TEXTURE_WRAP_T, static_cast<GLint>(t));
+            glTexParameteri(static_cast<GLenum>(m_Target), GL_TEXTURE_WRAP_R, static_cast<GLint>(r));
+        }
+
+        void SetFilter(TextureFilter minFilter, TextureFilter magFilter) {
+            m_Config.minFilter = minFilter;
+            m_Config.magFilter = magFilter;
+            Bind();
+            glTexParameteri(static_cast<GLenum>(m_Target), GL_TEXTURE_MIN_FILTER, static_cast<GLint>(minFilter));
+            glTexParameteri(static_cast<GLenum>(m_Target), GL_TEXTURE_MAG_FILTER, static_cast<GLint>(magFilter));
+        }
+
+        void SetBorderColor(const Vec4 &color) {
+            m_Config.borderColor = color;
+            Bind();
+            glTexParameterfv(static_cast<GLenum>(m_Target), GL_TEXTURE_BORDER_COLOR, glm::value_ptr(color));
+        }
+
+        void SetMaxAnisotropy(const int level) {
+            m_Config.maxAnisotropy = level;
+            Bind();
+            glTexParameteri(static_cast<GLenum>(m_Target), GL_TEXTURE_MAX_ANISOTROPY, level);
+        }
+
+        void GenerateMipmap() {
+            Bind();
+            glGenerateMipmap(static_cast<GLenum>(m_Target));
+            m_Config.generateMipmaps = true;
+        }
+
+        void ApplyConfig(const TextureConfig &config) {
+            m_Config = config;
+            Bind();
+
+            glTexParameteri(static_cast<GLenum>(m_Target), GL_TEXTURE_WRAP_S, static_cast<GLint>(config.wrapS));
+            glTexParameteri(static_cast<GLenum>(m_Target), GL_TEXTURE_WRAP_T, static_cast<GLint>(config.wrapT));
+            glTexParameteri(static_cast<GLenum>(m_Target), GL_TEXTURE_WRAP_R, static_cast<GLint>(config.wrapR));
+            glTexParameteri(static_cast<GLenum>(m_Target), GL_TEXTURE_MIN_FILTER, static_cast<GLint>(config.minFilter));
+            glTexParameteri(static_cast<GLenum>(m_Target), GL_TEXTURE_MAG_FILTER, static_cast<GLint>(config.magFilter));
+
+            if (config.borderColor.has_value()) {
+                glTexParameterfv(static_cast<GLenum>(m_Target), GL_TEXTURE_BORDER_COLOR,
+                                 glm::value_ptr(config.borderColor.value()));
+            }
+
+            if (config.maxAnisotropy > 1) {
+                glTexParameteri(static_cast<GLenum>(m_Target), GL_TEXTURE_MAX_ANISOTROPY, config.maxAnisotropy);
+            }
+
+            if (config.generateMipmaps) {
+                glGenerateMipmap(static_cast<GLenum>(m_Target));
+            }
+        }
 
     protected:
-        GLuint m_ID = 0;
-        GLenum m_Target;
+        TextureTarget m_Target;
+        TextureConfig m_Config;
     };
 
     class Texture1D final : public Texture {
     public:
-        Texture1D() : Texture(GL_TEXTURE_1D) {
+        Texture1D() : Texture(TextureTarget::Texture1D) {
         }
 
-        void SetData(const GLint level, const GLint internalFormat,
-                     const GLsizei width,
-                     const GLenum format, const GLenum type,
-                     const void *data) const {
+        void SetData(TextureFormat internalFormat, const GLsizei width,
+                     TextureFormat format, PixelDataType type,
+                     const void *data, const GLint level = 0) {
             Bind();
-            glTexImage1D(GL_TEXTURE_1D, level, internalFormat,
-                         width, 0, format, type, data);
+            glTexImage1D(GL_TEXTURE_1D, level, static_cast<GLint>(internalFormat),
+                         width, 0, static_cast<GLenum>(format), static_cast<GLenum>(type), data);
+
+            if (m_Config.generateMipmaps && level == 0)
+                GenerateMipmap();
         }
 
-        void SetWrap(const GLenum s) const {
-            Bind();
-            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, s);
-        }
-
-        void SetFilter(const GLenum minFilter, const GLenum magFilter) const {
-            Bind();
-            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, minFilter);
-            glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, magFilter);
+        void SetWrap(const TextureWrap s) {
+            Texture::SetWrap(s, s, s);
         }
     };
 
     class Texture2D final : public Texture {
     public:
-        Texture2D() : Texture(GL_TEXTURE_2D) {
+        Texture2D() : Texture(TextureTarget::Texture2D) {
         }
 
-        void SetData(const GLint level, const GLint internalFormat,
+        void SetData(TextureFormat internalFormat,
                      const GLsizei width, const GLsizei height,
-                     const GLenum format, const GLenum type,
-                     const void *data) const {
+                     TextureFormat format, PixelDataType type,
+                     const void *data, const GLint level = 0) {
             Bind();
-            glTexImage2D(GL_TEXTURE_2D, level, internalFormat,
-                         width, height, 0, format, type, data);
+            glTexImage2D(GL_TEXTURE_2D, level, static_cast<GLint>(internalFormat),
+                         width, height, 0, static_cast<GLenum>(format),
+                         static_cast<GLenum>(type), data);
+
+            if (m_Config.generateMipmaps && level == 0)
+                GenerateMipmap();
         }
 
-        void SetWrap(const GLenum s, const GLenum t) const {
-            Bind();
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, s);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, t);
+        void SetWrap(const TextureWrap s, const TextureWrap t) {
+            Texture::SetWrap(s, t, s);
         }
 
-        void SetFilter(const GLenum minFilter, const GLenum magFilter) const {
-            Bind();
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+        static Texture2D LoadFromFile(const std::string &path,
+                                      const TextureConfig &config = TextureConfig::Default()) {
+            Texture2D tex;
+
+            int width, height, channels;
+            stbi_set_flip_vertically_on_load(true);
+            unsigned char *data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+
+            if (!data)
+                throw std::runtime_error("Failed to load texture: " + path);
+
+            auto format = TextureFormat::RGBA8;
+            auto dataFormat = TextureFormat::RGBA;
+
+            if (channels == 1) {
+                format = TextureFormat::R8;
+                dataFormat = TextureFormat::Red;
+            } else if (channels == 3) {
+                format = TextureFormat::RGB8;
+                dataFormat = TextureFormat::RGB;
+            } else if (channels == 4) {
+                format = TextureFormat::RGBA8;
+                dataFormat = TextureFormat::RGBA;
+            }
+
+            tex.SetData(format, width, height, dataFormat, PixelDataType::UnsignedByte, data);
+            tex.ApplyConfig(config);
+
+            stbi_image_free(data);
+            return tex;
         }
     };
 
     class Texture3D final : public Texture {
     public:
-        Texture3D() : Texture(GL_TEXTURE_3D) {
+        Texture3D() : Texture(TextureTarget::Texture3D) {
         }
 
-        void SetData(const GLint level, const GLint internalFormat,
+        void SetData(TextureFormat internalFormat,
                      const GLsizei width, const GLsizei height, const GLsizei depth,
-                     const GLenum format, const GLenum type,
-                     const void *data) const {
+                     TextureFormat format, PixelDataType type,
+                     const void *data, const GLint level = 0) {
             Bind();
-            glTexImage3D(GL_TEXTURE_3D, level, internalFormat,
-                         width, height, depth, 0, format, type, data);
-        }
+            glTexImage3D(GL_TEXTURE_3D, level, static_cast<GLint>(internalFormat),
+                         width, height, depth, 0, static_cast<GLenum>(format),
+                         static_cast<GLenum>(type), data);
 
-        void SetWrap(const GLenum s, const GLenum t, const GLenum r) const {
-            Bind();
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, s);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, t);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, r);
-        }
-
-        void SetFilter(const GLenum minFilter, const GLenum magFilter) const {
-            Bind();
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, minFilter);
-            glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, magFilter);
+            if (m_Config.generateMipmaps && level == 0)
+                GenerateMipmap();
         }
     };
 
     class TextureCubeMap final : public Texture {
     public:
-        TextureCubeMap() : Texture(GL_TEXTURE_CUBE_MAP) {
+        TextureCubeMap() : Texture(TextureTarget::CubeMap) {
         }
 
-        void SetFace(const GLenum faceTarget, const GLint level, const GLint internalFormat,
+        void SetFace(CubeMapFace face, TextureFormat internalFormat,
                      const GLsizei width, const GLsizei height,
-                     const GLenum format, const GLenum type,
-                     const void *data) const {
+                     TextureFormat format, PixelDataType type,
+                     const void *data, const GLint level = 0) const {
             Bind();
-            glTexImage2D(faceTarget, level, internalFormat,
-                         width, height, 0, format, type, data);
+            glTexImage2D(static_cast<GLenum>(face), level, static_cast<GLint>(internalFormat),
+                         width, height, 0, static_cast<GLenum>(format),
+                         static_cast<GLenum>(type), data);
         }
 
-        void SetWrap(const GLenum wrap) const {
-            Bind();
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, wrap);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, wrap);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, wrap);
-        }
+        static Ref<TextureCubeMap> LoadFromFiles(
+            const std::array<std::string, 6> &facesPaths,
+            const TextureConfig &config = TextureConfig::Clamped()) {
+            auto cubemap = std::make_shared<TextureCubeMap>();
+            int width, height, channels;
 
-        void SetFilter(const GLenum minFilter, const GLenum magFilter) const {
-            Bind();
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, minFilter);
-            glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, magFilter);
+            constexpr CubeMapFace faces[6] = {
+                CubeMapFace::PositiveX, CubeMapFace::NegativeX,
+                CubeMapFace::PositiveY, CubeMapFace::NegativeY,
+                CubeMapFace::PositiveZ, CubeMapFace::NegativeZ
+            };
+
+            for (int i = 0; i < 6; ++i) {
+                unsigned char *data = stbi_load(facesPaths[i].c_str(), &width, &height, &channels, 0);
+                if (!data)
+                    throw std::runtime_error("Failed to load cubemap face: " + facesPaths[i]);
+
+                const TextureFormat format = (channels == 3) ? TextureFormat::RGB8 : TextureFormat::RGBA8;
+                const TextureFormat dataFormat = (channels == 3) ? TextureFormat::RGB : TextureFormat::RGBA;
+
+                cubemap->SetFace(faces[i], format, width, height, dataFormat,
+                                 PixelDataType::UnsignedByte, data);
+
+                stbi_image_free(data);
+            }
+
+            cubemap->ApplyConfig(config);
+            return cubemap;
         }
     };
-
-    inline TextureCubeMap LoadCubeMap(const std::array<std::string, 6> &facesPaths) {
-        TextureCubeMap cubemap;
-        int width, height, channels;
-
-        static const GLenum faceTargets[6] = {
-            GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-            GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-            GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-            GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-            GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-            GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-        };
-
-        for (int i = 0; i < 6; ++i) {
-            unsigned char *data = stbi_load(facesPaths[i].c_str(), &width, &height, &channels, 0);
-            if (!data) throw std::runtime_error("Failed to load cubemap face: " + facesPaths[i]);
-
-            const GLenum format = (channels == 3) ? GL_RGB : GL_RGBA;
-
-            cubemap.SetFace(faceTargets[i], 0, format, width, height, format, GL_UNSIGNED_BYTE, data);
-            stbi_image_free(data);
-        }
-
-        cubemap.SetWrap(GL_CLAMP_TO_EDGE);
-        cubemap.SetFilter(GL_LINEAR, GL_LINEAR);
-
-        return cubemap;
-    }
 }
 
 #endif //ASHEN_TEXTURE_H

@@ -4,11 +4,11 @@
 #include <cmath>
 
 namespace voxelity {
-    PhysicsSystem::PhysicsSystem(const PhysicsConfig& config)
+    PhysicsSystem::PhysicsSystem(const PhysicsConfig &config)
         : m_config(config) {
     }
 
-    void PhysicsSystem::step(Entity& entity, const float deltaTime, const World& world) const {
+    void PhysicsSystem::step(Entity &entity, const float deltaTime, const World &world) const {
         if (!entity.isActive) return;
 
         // 1. Gravité et air drag
@@ -23,7 +23,7 @@ namespace voxelity {
         applyFriction(entity, deltaTime, world);
     }
 
-    void PhysicsSystem::integrate(Entity& entity, const float deltaTime, const World& world) const {
+    void PhysicsSystem::integrate(Entity &entity, const float deltaTime, const World &world) const {
         if (!entity.useGravity) return;
 
         // Dans Minecraft, la gravité s'applique AVANT le drag
@@ -38,8 +38,8 @@ namespace voxelity {
         }
     }
 
-    glm::vec3 PhysicsSystem::moveAndCollide(Entity& entity, const glm::vec3& motion,
-                                            const World& world) const {
+    glm::vec3 PhysicsSystem::moveAndCollide(Entity &entity, const glm::vec3 &motion,
+                                            const World &world) const {
         if (!entity.hasCollisions) return motion;
 
         entity.onGround = false;
@@ -50,7 +50,7 @@ namespace voxelity {
 
         constexpr int axisOrder[3] = {1, 0, 2};
 
-        for (const int axis : axisOrder) {
+        for (const int axis: axisOrder) {
             if (std::abs(remainingMotion[axis]) < m_config.collisionEpsilon) continue;
 
             CollisionResult collisions;
@@ -90,8 +90,8 @@ namespace voxelity {
         return actualMotion;
     }
 
-    float PhysicsSystem::sweepAxis(const ash::BoundingBox3D& aabb, const float motion, const int axis,
-                                   const World& world, CollisionResult& result) const {
+    float PhysicsSystem::sweepAxis(const ash::BoundingBox3D &aabb, const float motion, const int axis,
+                                   const World &world, CollisionResult &result) const {
         result.clear();
 
         if (std::abs(motion) < m_config.collisionEpsilon) return 0.0f;
@@ -111,7 +111,7 @@ namespace voxelity {
         float closestHit = motion;
         bool hitFound = false;
 
-        for (const auto& blockPos : blocks) {
+        for (const auto &blockPos: blocks) {
             const ash::BoundingBox3D blockBox = ash::BoundingBox3D::fromBlock(blockPos);
 
             float hitDist;
@@ -151,8 +151,8 @@ namespace voxelity {
         return closestHit - sign * m_config.collisionEpsilon;
     }
 
-    void PhysicsSystem::getBroadPhaseBlocks(const ash::BoundingBox3D& aabb, std::vector<glm::ivec3>& blocks,
-                                            const World& world) {
+    void PhysicsSystem::getBroadPhaseBlocks(const ash::BoundingBox3D &aabb, std::vector<glm::ivec3> &blocks,
+                                            const World &world) {
         blocks.clear();
 
         const int minX = static_cast<int>(std::floor(aabb.min.x));
@@ -174,7 +174,7 @@ namespace voxelity {
         }
     }
 
-    void PhysicsSystem::applyFriction(Entity& entity, const float deltaTime, const World& world) const {
+    void PhysicsSystem::applyFriction(Entity &entity, const float deltaTime, const World &world) const {
         if (entity.onGround) {
             // Friction au sol (Minecraft style)
             float friction = m_config.groundFriction;
@@ -196,7 +196,7 @@ namespace voxelity {
         }
     }
 
-    float PhysicsSystem::getGroundFriction(const Entity& entity, const World& world) const {
+    float PhysicsSystem::getGroundFriction(const Entity &entity, const World &world) const {
         // Vérifier le bloc juste sous les pieds
         const glm::vec3 feetPos = entity.position - glm::vec3(0, entity.boundingBoxSize.y * 0.5f + 0.1f, 0);
         const glm::ivec3 blockPos = glm::floor(feetPos);

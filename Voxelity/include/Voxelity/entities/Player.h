@@ -47,6 +47,7 @@ namespace voxelity {
         float m_flySpeed = 10.92f;
 
         void updateCameraPosition(float alpha) const;
+
         void handleMovement(float deltaTime);
     };
 }

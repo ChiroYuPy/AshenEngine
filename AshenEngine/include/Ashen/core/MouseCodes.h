@@ -8,7 +8,6 @@ namespace ash {
 
     namespace Mouse {
         enum : MouseCode {
-            // From glfw3.h
             Button0 = 0,
             Button1 = 1,
             Button2 = 2,

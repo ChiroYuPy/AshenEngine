@@ -1,10 +1,22 @@
-#ifndef ASHEN_BINDABLE_H
-#define ASHEN_BINDABLE_H
+#ifndef ASHEN_GLOBJECT_H
+#define ASHEN_GLOBJECT_H
+
+#include "glad/glad.h"
 
 namespace ash {
-    class Bindable {
+    class GLObject {
     public:
-        virtual ~Bindable() = default;
+        virtual ~GLObject() = default;
+
+        GLuint ID() const { return m_ID; }
+
+    protected:
+        GLuint m_ID = 0;
+    };
+
+    class Bindable : public GLObject {
+    public:
+        ~Bindable() override = default;
 
         virtual void Bind() const = 0;
 
@@ -24,13 +36,9 @@ namespace ash {
 
     class BindGuard {
     public:
-        explicit BindGuard(const Bindable &bindable) : m_Bindable(bindable) {
-            m_Bindable.Bind();
-        }
+        explicit BindGuard(const Bindable &bindable) : m_Bindable(bindable) { m_Bindable.Bind(); }
 
-        ~BindGuard() {
-            m_Bindable.Unbind();
-        }
+        ~BindGuard() { m_Bindable.Unbind(); }
 
         BindGuard(const BindGuard &) = delete;
 
@@ -45,4 +53,4 @@ namespace ash {
     };
 }
 
-#endif //ASHEN_BINDABLE_H
+#endif //ASHEN_GLOBJECT_H

@@ -11,9 +11,9 @@ namespace voxelity {
     class PlayerController {
     public:
         struct MovementSettings {
-            float walkSpeed = 4.317f;      // Minecraft walking speed (4.317 blocks/s)
-            float sprintSpeed = 5.612f;    // Minecraft sprinting speed (5.612 blocks/s)
-            float crouchSpeed = 1.295f;    // Minecraft sneaking speed (1.295 blocks/s)
+            float walkSpeed = 4.317f; // Minecraft walking speed (4.317 blocks/s)
+            float sprintSpeed = 5.612f; // Minecraft sprinting speed (5.612 blocks/s)
+            float crouchSpeed = 1.295f; // Minecraft sneaking speed (1.295 blocks/s)
             float jumpForce = 8.0f;
             float mouseSensitivity = 0.33f;
         };

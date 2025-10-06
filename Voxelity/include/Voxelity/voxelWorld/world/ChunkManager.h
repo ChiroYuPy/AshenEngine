@@ -20,7 +20,7 @@ namespace voxelity {
         ChunkCoord coord;
         int priority;
 
-        bool operator<(const ChunkLoadRequest& other) const {
+        bool operator<(const ChunkLoadRequest &other) const {
             return priority > other.priority;
         }
     };
@@ -40,7 +40,7 @@ namespace voxelity {
         ChunkCoord coord;
         int priority;
 
-        bool operator<(const MeshBuildRequest& other) const {
+        bool operator<(const MeshBuildRequest &other) const {
             return priority > other.priority; // Priority queue: smaller priority = higher priority
         }
     };
@@ -48,37 +48,46 @@ namespace voxelity {
     class ChunkManager {
     public:
         explicit ChunkManager(ash::Scope<ITerrainGenerator> generator, int threadCount = 2);
+
         ~ChunkManager();
 
-        ChunkManager(const ChunkManager&) = delete;
-        ChunkManager& operator=(const ChunkManager&) = delete;
+        ChunkManager(const ChunkManager &) = delete;
 
-        Chunk* getChunk(const ChunkCoord& coord);
-        Chunk* getOrCreateChunk(const ChunkCoord& coord);
-        void unloadChunk(const ChunkCoord& coord);
+        ChunkManager &operator=(const ChunkManager &) = delete;
 
-        void updateLoadedChunks(const glm::vec3& playerPos, int renderDistance);
+        Chunk *getChunk(const ChunkCoord &coord);
+
+        Chunk *getOrCreateChunk(const ChunkCoord &coord);
+
+        void unloadChunk(const ChunkCoord &coord);
+
+        void updateLoadedChunks(const glm::vec3 &playerPos, int renderDistance);
 
         // Thread principal - récupération des résultats asynchrones
         void processCompletedGeneration();
+
         void processCompletedMeshes();
 
-        void markChunkForMeshRebuild(const ChunkCoord& coord, int priority = 9999);
+        void markChunkForMeshRebuild(const ChunkCoord &coord, int priority = 9999);
 
-        void forEachChunk(const std::function<void(const ChunkCoord&, Chunk*)>& func);
-        void forEachChunkInRadius(const glm::vec3& center, int radius,
-                                   const std::function<void(const ChunkCoord&, Chunk*)>& func);
+        void forEachChunk(const std::function<void(const ChunkCoord &, Chunk *)> &func);
+
+        void forEachChunkInRadius(const glm::vec3 &center, int radius,
+                                  const std::function<void(const ChunkCoord &, Chunk *)> &func);
 
         size_t getLoadedChunkCount() const { return m_chunks.size(); }
+
         size_t getPendingLoadCount();
+
         size_t getPendingMeshCount();
 
         void clear();
+
         void shutdown();
 
     private:
         // Données principales (thread principal uniquement)
-        std::unordered_map<ChunkCoord, ash::Scope<Chunk>> m_chunks;
+        std::unordered_map<ChunkCoord, ash::Scope<Chunk> > m_chunks;
         ash::Scope<ITerrainGenerator> m_generator;
 
         // Files thread-safe pour communication inter-threads
@@ -98,7 +107,7 @@ namespace voxelity {
 
         // État
         std::unordered_set<ChunkCoord> m_chunksInQueue;
-        std::atomic<bool> m_running { true };
+        std::atomic<bool> m_running{true};
 
         glm::ivec3 m_lastPlayerChunk{0, 0, 0};
         int m_lastRenderDistance = 0;
@@ -109,17 +118,21 @@ namespace voxelity {
 
         // Fonctions de travail des threads
         void generationWorker();
+
         void meshWorker();
 
-        void queueChunkLoad(const ChunkCoord& coord, int priority);
-        static std::vector<ChunkCoord> getChunksInRadius(const glm::ivec3& center, int radius);
+        void queueChunkLoad(const ChunkCoord &coord, int priority);
+
+        static std::vector<ChunkCoord> getChunksInRadius(const glm::ivec3 &center, int radius);
 
         // Génération et construction de mesh (appelées depuis les threads)
-        std::unique_ptr<VoxelArray> generateChunkData(const ChunkCoord& coord) const;
-        MeshData buildChunkMesh(const ChunkCoord& coord);
+        std::unique_ptr<VoxelArray> generateChunkData(const ChunkCoord &coord) const;
+
+        MeshData buildChunkMesh(const ChunkCoord &coord);
 
         // Helper pour vérifier les voisins (thread-safe)
-        bool areNeighborsLoaded(const ChunkCoord& coord);
+        bool areNeighborsLoaded(const ChunkCoord &coord);
+
         VoxelType getVoxelSafe(int worldX, int worldY, int worldZ) const;
     };
 }

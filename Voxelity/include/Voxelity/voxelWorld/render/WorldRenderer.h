@@ -7,10 +7,10 @@
 #include "Voxelity/voxelWorld/world/World.h"
 
 namespace voxelity {
-
     class WorldRenderer {
     public:
-        WorldRenderer(World& world, ash::Camera& camera, ash::ShaderProgram& shader);
+        WorldRenderer(World &world, ash::Camera &camera, ash::ShaderProgram &shader);
+
         ~WorldRenderer();
 
         void render();
@@ -20,17 +20,20 @@ namespace voxelity {
         [[nodiscard]] float getChunkSpacing() const { return m_chunkSpacing; }
 
     private:
-        World& m_world;
-        ash::Camera& m_camera;
-        ash::ShaderProgram& m_shader;
+        World &m_world;
+        ash::Camera &m_camera;
+        ash::ShaderProgram &m_shader;
         TextureColorPalette m_textureColorPalette;
 
         float m_chunkSpacing = 1.0f;
         glm::mat4 m_viewProjection{};
 
         void setupMatrices();
+
         void bindCommonResources() const;
+
         void renderOpaquePass() const;
+
         void renderTransparentPass() const;
     };
 }

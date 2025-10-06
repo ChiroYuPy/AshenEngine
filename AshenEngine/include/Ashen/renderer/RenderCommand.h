@@ -74,7 +74,6 @@ namespace ash {
             Always = GL_ALWAYS
         };
 
-        // ---- Clear ----
         static void Clear();
 
         static void Clear(bool color, bool depth, bool stencil);
@@ -89,7 +88,6 @@ namespace ash {
 
         static void ClearStencilBuffer();
 
-        // ---- Viewport / Scissor ----
         static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
         static void SetViewport(uint32_t width, uint32_t height);
@@ -98,14 +96,12 @@ namespace ash {
 
         static void SetScissor(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
-        // ---- Depth ----
         static void EnableDepthTest(bool enable);
 
         static void SetDepthFunc(DepthFunc func = DepthFunc::Less);
 
         static void SetDepthWrite(bool enable);
 
-        // ---- Blending / Transparency ----
         static void EnableBlending(bool enable);
 
         static void SetBlendFunc(BlendFactor src = BlendFactor::SrcAlpha,
@@ -118,14 +114,12 @@ namespace ash {
 
         static void SetBlendColor(const Vec4 &color);
 
-        // ---- Face Culling ----
         static void EnableCulling(bool enable);
 
         static void SetCullFace(CullFace mode = CullFace::Back);
 
         static void SetFrontFace(FrontFace orientation = FrontFace::CCW);
 
-        // ---- Polygon / Rasterization ----
         static void SetWireframe(bool enable);
 
         static void SetPointSize(float size);
@@ -136,7 +130,6 @@ namespace ash {
 
         static void SetPolygonOffset(float factor, float units);
 
-        // ---- Stencil ----
         static void EnableStencil(bool enable);
 
         static void SetStencilFunc(StencilFunc func, int ref, uint32_t mask);
@@ -145,13 +138,10 @@ namespace ash {
 
         static void SetStencilMask(uint32_t mask);
 
-        // ---- Color / Depth mask ----
         static void SetColorMask(bool r, bool g, bool b, bool a);
 
-        // ---- Multisample / Misc ----
         static void EnableMultisample(bool enable);
 
-        // ---- Query state ----
         [[nodiscard]] static bool IsDepthTestEnabled() { return s_DepthEnabled; }
         [[nodiscard]] static bool IsBlendingEnabled() { return s_BlendEnabled; }
         [[nodiscard]] static bool IsCullingEnabled() { return s_CullingEnabled; }

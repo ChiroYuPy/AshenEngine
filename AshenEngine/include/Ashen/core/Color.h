@@ -68,7 +68,6 @@ namespace ash {
             return ss.str();
         }
 
-        // === Operators ===
         constexpr Color operator+(const Color &other) const noexcept {
             return Color(r + other.r, g + other.g, b + other.b, a + other.a);
         }
@@ -110,7 +109,6 @@ namespace ash {
             );
         }
 
-        // === Utility ===
         static constexpr Color lerp(const Color &a, const Color &b, const float t) noexcept {
             return Color(
                 a.r + (b.r - a.r) * t,
@@ -120,7 +118,6 @@ namespace ash {
             );
         }
 
-        // === Preset Colors ===
         static constexpr Color black() noexcept { return Color(0.f, 0.f, 0.f); }
         static constexpr Color white() noexcept { return Color(1.f, 1.f, 1.f); }
         static constexpr Color red() noexcept { return Color(1.f, 0.f, 0.f); }

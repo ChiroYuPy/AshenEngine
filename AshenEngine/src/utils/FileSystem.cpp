@@ -54,7 +54,8 @@ namespace ash {
         if (!Exists(dir) || !IsDirectory(dir))
             return {};
 
-        if (recursive) return CollectFiles(fs::recursive_directory_iterator(dir), fs::recursive_directory_iterator(), extensions);
+        if (recursive) return CollectFiles(fs::recursive_directory_iterator(dir), fs::recursive_directory_iterator(),
+                                           extensions);
         return CollectFiles(fs::directory_iterator(dir), fs::directory_iterator(), extensions);
     }
 

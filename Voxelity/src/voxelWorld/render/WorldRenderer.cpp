@@ -2,7 +2,7 @@
 #include "Ashen/renderer/RenderCommand.h"
 
 namespace voxelity {
-    WorldRenderer::WorldRenderer(World& world, ash::Camera& camera, ash::ShaderProgram& shader)
+    WorldRenderer::WorldRenderer(World &world, ash::Camera &camera, ash::ShaderProgram &shader)
         : m_world(world), m_camera(camera), m_shader(shader) {
         m_textureColorPalette.updateFromRegistry();
     }
@@ -34,7 +34,7 @@ namespace voxelity {
         ash::RenderCommand::SetDepthWrite(true);
         ash::RenderCommand::EnableBlending(false);
 
-        m_world.forEachChunk([&](const ChunkCoord&, const Chunk* chunk) {
+        m_world.forEachChunk([&](const ChunkCoord &, const Chunk *chunk) {
             if (chunk && chunk->hasMesh())
                 chunk->drawOpaque(m_shader);
         });
@@ -48,7 +48,7 @@ namespace voxelity {
         );
         ash::RenderCommand::SetDepthWrite(false);
 
-        m_world.forEachChunk([&](const ChunkCoord&, const Chunk* chunk) {
+        m_world.forEachChunk([&](const ChunkCoord &, const Chunk *chunk) {
             if (chunk && chunk->hasMesh())
                 chunk->drawTransparent(m_shader);
         });

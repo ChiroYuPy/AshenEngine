@@ -47,21 +47,21 @@ namespace ash {
 
         // position
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void *) 0);
         // color
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)(sizeof(float) * 3));
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void *) (sizeof(float) * 3));
 
         glBindVertexArray(0);
 
         // Compile simple shader
-        auto compile = [](uint32_t type, const char* src) -> uint32_t {
+        auto compile = [](uint32_t type, const char *src) -> uint32_t {
             uint32_t shader = glCreateShader(type);
             glShaderSource(shader, 1, &src, nullptr);
             glCompileShader(shader);
             int success;
             glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-            if(!success){
+            if (!success) {
                 char infoLog[512];
                 glGetShaderInfoLog(shader, 512, nullptr, infoLog);
                 std::cerr << "Shader compile error: " << infoLog << std::endl;
@@ -95,7 +95,7 @@ namespace ash {
         glDeleteProgram(s_ShaderProgram);
     }
 
-    void Renderer3D::BeginScene(const Camera& camera) {
+    void Renderer3D::BeginScene(const Camera &camera) {
         s_ViewProjection = camera.GetProjectionMatrix() * camera.GetViewMatrix();
     }
 
@@ -104,19 +104,19 @@ namespace ash {
         s_Lines.clear();
     }
 
-    void Renderer3D::DrawLine(const glm::vec3& start, const glm::vec3& end, const glm::vec4& color) {
+    void Renderer3D::DrawLine(const glm::vec3 &start, const glm::vec3 &end, const glm::vec4 &color) {
         s_Lines.push_back({start, end, color});
     }
 
     void Renderer3D::FlushLines() {
-        if(s_Lines.empty()) return;
+        if (s_Lines.empty()) return;
 
         glBindVertexArray(s_VAO);
         glBindBuffer(GL_ARRAY_BUFFER, s_VBO);
 
         std::vector<float> bufferData;
         bufferData.reserve(s_Lines.size() * 7 * 2);
-        for(const auto&[start, end, color] : s_Lines){
+        for (const auto &[start, end, color]: s_Lines) {
             // start vertex
             bufferData.push_back(start.x);
             bufferData.push_back(start.y);
@@ -138,7 +138,8 @@ namespace ash {
         glBufferSubData(GL_ARRAY_BUFFER, 0, bufferData.size() * sizeof(float), bufferData.data());
 
         glUseProgram(s_ShaderProgram);
-        glUniformMatrix4fv(glGetUniformLocation(s_ShaderProgram, "u_ViewProjection"), 1, GL_FALSE, glm::value_ptr(s_ViewProjection));
+        glUniformMatrix4fv(glGetUniformLocation(s_ShaderProgram, "u_ViewProjection"), 1, GL_FALSE,
+                           glm::value_ptr(s_ViewProjection));
 
         glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(s_Lines.size() * 2));
 
