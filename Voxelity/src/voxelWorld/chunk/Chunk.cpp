@@ -1,18 +1,18 @@
 #include "Voxelity/voxelWorld/chunk/Chunk.h"
 
-#include "Ashen/core/Logger.h"
+#include "Ashen/Core/Logger.h"
 
 namespace voxelity {
-    Chunk::Chunk(ChunkCoord coord) : m_position(coord) {
+    Chunk::Chunk(const ChunkCoord coord) : m_position(coord) {
     }
 
-    bool Chunk::isInBounds(int x, int y, int z) {
+    bool Chunk::isInBounds(const int x, const int y, const int z) {
         return x >= 0 && x < VoxelArray::SIZE &&
                y >= 0 && y < VoxelArray::SIZE &&
                z >= 0 && z < VoxelArray::SIZE;
     }
 
-    VoxelType Chunk::get(int x, int y, int z) const {
+    VoxelType Chunk::get(const int x, const int y, const int z) const {
         if (!isInBounds(x, y, z)) return VoxelID::AIR;
         std::lock_guard lock(m_storageMutex);
         return m_storage.get(x, y, z);
@@ -22,7 +22,7 @@ namespace voxelity {
         return get(pos.x, pos.y, pos.z);
     }
 
-    void Chunk::set(int x, int y, int z, VoxelType voxel) {
+    void Chunk::set(const int x, const int y, const int z, const VoxelType voxel) {
         if (!isInBounds(x, y, z)) return; {
             std::lock_guard lock(m_storageMutex);
             m_storage.set(x, y, z, voxel);
@@ -30,11 +30,11 @@ namespace voxelity {
         markDirty();
     }
 
-    void Chunk::set(const glm::ivec3 &pos, VoxelType voxel) {
+    void Chunk::set(const glm::ivec3 &pos, const VoxelType voxel) {
         set(pos.x, pos.y, pos.z, voxel);
     }
 
-    void Chunk::fill(VoxelType ID) { {
+    void Chunk::fill(const VoxelType ID) { {
             std::lock_guard lock(m_storageMutex);
             m_storage.fill(ID);
         }

@@ -1,7 +1,8 @@
 #ifndef VOXELITY_WORLD_H
 #define VOXELITY_WORLD_H
 
-#include "Ashen/core/Types.h"
+#include "Ashen/Core/Types.h"
+
 #include "Voxelity/voxelWorld/chunk/Chunk.h"
 #include "Voxelity/voxelWorld/voxel/VoxelType.h"
 #include "Voxelity/voxelWorld/world/ChunkManager.h"

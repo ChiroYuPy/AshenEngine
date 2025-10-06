@@ -1,13 +1,14 @@
 #ifndef VOXELITY_WORLDRENDERLAYER_H
 #define VOXELITY_WORLDRENDERLAYER_H
 
-#include "Ashen/renderer/Camera.h"
-#include "Ashen/core/Types.h"
+#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/Graphics/Skybox/SkyboxCubeMap.h"
+#include "Ashen/Core/Types.h"
+
 #include "Voxelity/VoxelityApp.h"
 #include "Voxelity/voxelWorld/world/World.h"
 #include "Voxelity/voxelWorld/world/WorldInteractor.h"
-#include "../voxelWorld/render/WorldRenderer.h"
-#include "Ashen/graphics/skybox/SkyboxCubeMap.h"
+#include "Voxelity/voxelWorld/render/WorldRenderer.h"
 #include "Voxelity/input/InputHandler.h"
 #include "Voxelity/entities/EntityManager.h"
 

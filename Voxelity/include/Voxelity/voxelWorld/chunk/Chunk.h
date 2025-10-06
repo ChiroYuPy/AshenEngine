@@ -5,7 +5,7 @@
 #include <mutex>
 #include "Voxelity/voxelWorld/voxel/VoxelArray.h"
 #include "Voxelity/voxelWorld/chunk/ChunkMesh.h"
-#include "Ashen/renderer/gfx/Shader.h"
+#include "Ashen/GraphicsAPI/Shader.h"
 
 namespace voxelity {
     class World;

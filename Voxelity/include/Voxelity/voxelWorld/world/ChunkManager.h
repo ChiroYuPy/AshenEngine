@@ -9,7 +9,9 @@
 #include <mutex>
 #include <condition_variable>
 #include <atomic>
-#include "Ashen/core/Types.h"
+
+#include "Ashen/Core/Types.h"
+
 #include "Voxelity/voxelWorld/chunk/Chunk.h"
 
 namespace voxelity {

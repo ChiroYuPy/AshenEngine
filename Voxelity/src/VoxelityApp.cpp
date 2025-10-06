@@ -19,4 +19,4 @@ ash::Application *ash::CreateApplication(const ApplicationCommandLineArgs args) 
     return new voxelity::VoxelityApp(settings);
 }
 
-#include "Ashen/core/EntryPoint.h"
+#include "Ashen/Core/EntryPoint.h"

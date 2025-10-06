@@ -3,7 +3,7 @@
 
 #include <glm/glm.hpp>
 
-#include "Ashen/math/BoundingBox.h"
+#include "Ashen/Math/BoundingBox.h"
 
 namespace voxelity {
     class World;

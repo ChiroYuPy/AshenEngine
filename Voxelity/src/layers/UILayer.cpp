@@ -1,11 +1,12 @@
 #include "Voxelity/layers/UILayer.h"
 
+#include "Ashen/Events/ApplicationEvent.h"
+#include "Ashen/Events/KeyEvent.h"
+#include "Ashen/GraphicsAPI/RenderCommand.h"
+#include "Ashen/Graphics/Rendering/Renderer2D.h"
+#include "Ashen/Resources/ResourceManager.h"
+
 #include "Voxelity/VoxelityApp.h"
-#include "Ashen/events/ApplicationEvent.h"
-#include "Ashen/events/KeyEvent.h"
-#include "Ashen/renderer/RenderCommand.h"
-#include "Ashen/renderer/Renderer2D.h"
-#include "Ashen/resources/ResourceManager.h"
 
 namespace voxelity {
     UILayer::UILayer() : showCrosshair(true) {

@@ -1,5 +1,6 @@
-#include <format>
 #include "Voxelity/voxelWorld/generation/NaturalTerrainGenerator.h"
+
+#include <format>
 
 namespace voxelity {
     // Optimisé : échelles ajustées pour moins de calculs

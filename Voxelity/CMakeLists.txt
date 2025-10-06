@@ -14,7 +14,6 @@ set(APP_SOURCES
         src/voxelWorld/voxel/VoxelArray.cpp
         src/voxelWorld/voxel/VoxelType.cpp
 
-        src/voxelWorld/render/TextureColorPalette.cpp
         src/voxelWorld/world/VoxelRaycaster.cpp
         src/voxelWorld/world/World.cpp
         src/voxelWorld/world/WorldInteractor.cpp
@@ -29,7 +28,6 @@ set(APP_SOURCES
 
         src/input/InputHandler.cpp
 
-        src/entities/EntityManager.cpp
         src/entities/FallingBlockEntity.cpp
         src/entities/Player.cpp
 

@@ -1,7 +1,7 @@
 #ifndef VOXELITY_WORLDINTERACTOR_H
 #define VOXELITY_WORLDINTERACTOR_H
 
-#include "Ashen/core/Types.h"
+#include "Ashen/Core/Types.h"
 
 #include "Voxelity/voxelWorld/world/VoxelRaycaster.h"
 #include "Voxelity/voxelWorld/voxel/VoxelType.h"

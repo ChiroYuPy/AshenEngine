@@ -1,9 +1,9 @@
 #ifndef VOXELITY_CHUNKMESH_H
 #define VOXELITY_CHUNKMESH_H
 
-#include "Ashen/core/Types.h"
-#include "Ashen/renderer/gfx/VertexArray.h"
-#include "Ashen/renderer/gfx/Buffer.h"
+#include "Ashen/Core/Types.h"
+#include "Ashen/GraphicsAPI/VertexArray.h"
+#include "Ashen/GraphicsAPI/Buffer.h"
 
 namespace voxelity {
     struct FaceInstance {

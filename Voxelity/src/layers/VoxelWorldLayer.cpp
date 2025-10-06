@@ -1,10 +1,12 @@
 #include "Voxelity/layers/VoxelWorldLayer.h"
+
+#include "Ashen/Core/Input.h"
+#include "Ashen/Events/ApplicationEvent.h"
+#include "Ashen/GraphicsAPI/RenderCommand.h"
+#include "Ashen/Resources/ResourceManager.h"
+
 #include "Voxelity/entities/Player.h"
 #include "Voxelity/voxelWorld/generation/NaturalTerrainGenerator.h"
-#include "Ashen/core/Input.h"
-#include "Ashen/events/ApplicationEvent.h"
-#include "Ashen/renderer/RenderCommand.h"
-#include "Ashen/resources/ResourceManager.h"
 
 namespace voxelity {
     VoxelWorldLayer::VoxelWorldLayer() {

@@ -1,13 +1,15 @@
 #include "Voxelity/input/InputHandler.h"
+
+#include "Ashen/Core/Input.h"
+#include "Ashen/Core/Logger.h"
+#include "Ashen/Events/KeyEvent.h"
+#include "Ashen/Events/MouseEvent.h"
+
 #include "Voxelity/voxelWorld/world/WorldInteractor.h"
-#include "Voxelity/layers/VoxelWorldLayer.h"
 #include "Voxelity/VoxelityApp.h"
-#include "Ashen/core/Input.h"
-#include "Ashen/core/Logger.h"
-#include "Ashen/events/KeyEvent.h"
-#include "Ashen/events/MouseEvent.h"
 #include "Voxelity/entities/Player.h"
 #include "Voxelity/player/PlayerController.h"
+#include "Voxelity/layers/VoxelWorldLayer.h"
 
 namespace voxelity {
     InputHandler::InputHandler(VoxelWorldLayer &layer,

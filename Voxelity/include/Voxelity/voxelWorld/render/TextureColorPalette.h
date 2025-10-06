@@ -3,7 +3,7 @@
 
 #include <array>
 
-#include "Ashen/renderer/gfx/Texture.h"
+#include "Ashen/GraphicsAPI/Texture.h"
 
 #include "Voxelity/voxelWorld/voxel/VoxelType.h"
 

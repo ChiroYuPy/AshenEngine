@@ -1,5 +1,6 @@
-#include <stdexcept>
 #include "Voxelity/voxelWorld/voxel/VoxelArray.h"
+
+#include <stdexcept>
 
 namespace voxelity {
     VoxelArray::VoxelArray() : voxels{} {

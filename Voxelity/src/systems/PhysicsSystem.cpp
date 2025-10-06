@@ -1,7 +1,8 @@
 #include "Voxelity/systems/PhysicsSystem.h"
-#include "Voxelity/voxelWorld/world/World.h"
-#include <algorithm>
+
 #include <cmath>
+
+#include "Voxelity/voxelWorld/world/World.h"
 
 namespace voxelity {
     PhysicsSystem::PhysicsSystem(const PhysicsConfig &config)

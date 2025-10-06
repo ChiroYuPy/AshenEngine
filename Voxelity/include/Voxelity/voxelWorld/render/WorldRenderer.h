@@ -1,8 +1,8 @@
 #ifndef VOXELITY_WORLDRENDERER_H
 #define VOXELITY_WORLDRENDERER_H
 
-#include "Ashen/renderer/Camera.h"
-#include "Ashen/renderer/gfx/Shader.h"
+#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/GraphicsAPI/Shader.h"
 #include "TextureColorPalette.h"
 #include "Voxelity/voxelWorld/world/World.h"
 

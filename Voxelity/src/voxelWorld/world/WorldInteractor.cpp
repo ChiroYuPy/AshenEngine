@@ -1,10 +1,11 @@
-#include <format>
-
 #include "Voxelity/voxelWorld/world/WorldInteractor.h"
 
-#include "Ashen/core/Logger.h"
+#include <format>
+
+#include "Ashen/Core/Logger.h"
+
 #include "Voxelity/voxelWorld/world/World.h"
-#include "../../../include/Voxelity/voxelWorld/render/WorldRenderer.h"
+#include "Voxelity/voxelWorld/render/WorldRenderer.h"
 
 namespace voxelity {
     WorldInteractor::WorldInteractor(World &world, WorldRenderer &chunkRenderer)

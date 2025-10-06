@@ -1,9 +1,8 @@
 #include "Voxelity/player/PlayerController.h"
 
-#include "Ashen/core/Input.h"
-#include "Ashen/events/KeyEvent.h"
-
-#include "Ashen/core/Logger.h"
+#include "Ashen/Core/Input.h"
+#include "Ashen/Events/KeyEvent.h"
+#include "Ashen/Core/Logger.h"
 
 namespace voxelity {
     PlayerController::PlayerController(std::shared_ptr<ash::PerspectiveCamera> camera)

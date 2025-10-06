@@ -1,5 +1,6 @@
 #include "Voxelity/voxelWorld/render/WorldRenderer.h"
-#include "Ashen/renderer/RenderCommand.h"
+
+#include "Ashen/GraphicsAPI/RenderCommand.h"
 
 namespace voxelity {
     WorldRenderer::WorldRenderer(World &world, ash::Camera &camera, ash::ShaderProgram &shader)

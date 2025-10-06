@@ -4,7 +4,8 @@
 #include <cstdint>
 #include <string>
 #include <array>
-#include "Ashen/core/Color.h"
+
+#include "Ashen/Core/Color.h"
 
 namespace voxelity {
     using VoxelType = uint8_t;

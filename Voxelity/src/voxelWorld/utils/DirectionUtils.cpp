@@ -1,5 +1,6 @@
-#include <stdexcept>
 #include "Voxelity/voxelWorld/utils/DirectionUtils.h"
+
+#include <stdexcept>
 
 namespace voxelity::DirectionUtils {
     CubicDirection getOpposite(const CubicDirection direction) {

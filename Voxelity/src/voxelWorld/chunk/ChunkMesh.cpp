@@ -1,7 +1,7 @@
 #include "Voxelity/voxelWorld/chunk/ChunkMesh.h"
 
-#include "Ashen/core/Logger.h"
-#include "Ashen/renderer/Renderer.h"
+#include "Ashen/Core/Logger.h"
+#include "Ashen/Graphics/Rendering/Renderer.h"
 
 namespace voxelity {
     ChunkMesh::ChunkMesh() {

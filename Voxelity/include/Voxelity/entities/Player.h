@@ -4,8 +4,8 @@
 #include "Entity.h"
 #include <memory>
 
-#include "Ashen/core/Types.h"
-#include "Ashen/renderer/Camera.h"
+#include "Ashen/Core/Types.h"
+#include "Ashen/Graphics/Camera/Camera.h"
 #include "Voxelity/player/PlayerController.h"
 #include "Voxelity/systems/PhysicsSystem.h"
 

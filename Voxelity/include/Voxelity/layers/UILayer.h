@@ -1,9 +1,9 @@
 #ifndef VOXELITY_UILAYER_H
 #define VOXELITY_UILAYER_H
 
-#include "Ashen/core/Layer.h"
-#include "Ashen/renderer/Camera.h"
-#include "Ashen/renderer/gfx/Texture.h"
+#include "Ashen/Core/Layer.h"
+#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/GraphicsAPI/Texture.h"
 
 namespace voxelity {
     class UILayer final : public ash::Layer {

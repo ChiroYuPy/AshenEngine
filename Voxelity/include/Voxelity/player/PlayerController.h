@@ -3,9 +3,9 @@
 
 #include <memory>
 
-#include "Ashen/core/Types.h"
-#include "Ashen/renderer/Camera.h"
-#include "Ashen/events/Event.h"
+#include "Ashen/Core/Types.h"
+#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/Events/Event.h"
 
 namespace voxelity {
     class PlayerController {

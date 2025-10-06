@@ -1,9 +1,12 @@
 #include "Voxelity/voxelWorld/world/ChunkManager.h"
+
+#include <ranges>
+
+#include "Ashen/Core/Logger.h"
+
 #include "Voxelity/voxelWorld/generation/ITerrainGenerator.h"
 #include "Voxelity/voxelWorld/world/World.h"
 #include "Voxelity/voxelWorld/utils/DirectionUtils.h"
-#include "Ashen/core/Logger.h"
-#include <ranges>
 
 namespace voxelity {
     ChunkManager::ChunkManager(ash::Scope<ITerrainGenerator> generator, const int threadCount)

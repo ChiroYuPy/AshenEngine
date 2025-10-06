@@ -1,7 +1,7 @@
 #ifndef VOXELITY_APPLICATION_H
 #define VOXELITY_APPLICATION_H
 
-#include "Ashen/core/Application.h"
+#include "Ashen/Core/Application.h"
 
 namespace voxelity {
     class VoxelityApp : public ash::Application {

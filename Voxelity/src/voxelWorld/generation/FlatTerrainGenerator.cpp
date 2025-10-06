@@ -1,7 +1,8 @@
-#include <format>
 #include "Voxelity/voxelWorld/generation/FlatTerrainGenerator.h"
 
-#include "Ashen/core/Logger.h"
+#include <format>
+
+#include "Ashen/Core/Logger.h"
 
 namespace voxelity {
     VoxelType FlatTerrainGenerator::generateVoxel(const glm::ivec3 &worldPos) {

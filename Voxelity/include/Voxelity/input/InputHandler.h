@@ -1,9 +1,9 @@
 #ifndef VOXELITY_INPUTHANDLER_H
 #define VOXELITY_INPUTHANDLER_H
 
-#include "Ashen/events/Event.h"
-#include "Ashen/events/KeyEvent.h"
-#include "Ashen/events/MouseEvent.h"
+#include "Ashen/Events/Event.h"
+#include "Ashen/Events/KeyEvent.h"
+#include "Ashen/Events/MouseEvent.h"
 
 namespace voxelity {
     class PlayerController;

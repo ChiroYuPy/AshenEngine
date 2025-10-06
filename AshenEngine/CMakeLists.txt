@@ -4,30 +4,21 @@ set(CORE_SOURCES
         vendor/src/IMG.cpp
         vendor/src/OpenSimplex2S.cpp
 
-        src/core/Application.cpp
-        src/core/Input.cpp
-        src/core/LayerStack.cpp
-        src/core/Platform.cpp
-        src/core/Window.cpp
+        src/Core/Application.cpp
+        src/Core/Input.cpp
+        src/Core/LayerStack.cpp
+        src/Core/Platform.cpp
+        src/Core/Window.cpp
 
-        src/renderer/GLUtils.cpp
-        src/renderer/RenderCommand.cpp
-        src/renderer/Renderer.cpp
-        src/renderer/Renderer2D.cpp
+        src/GraphicsAPI/GLUtils.cpp
+        src/GraphicsAPI/RenderCommand.cpp
+        src/Graphics/Rendering/Renderer.cpp
+        src/Graphics/Rendering/Renderer2D.cpp
 
-        include/Ashen/math/Math.h
-        include/Ashen/utils/FileSystem.h
-        src/utils/FileSystem.cpp
-        include/Ashen/utils/ImageLoader.h
-        src/utils/ImageLoader.cpp
-        include/Ashen/resources/ResourceManager.h
-        src/resources/ResourceManager.cpp
-        include/Ashen/math/BoundingBox.h
-        src/renderer/Renderer3D.cpp
-        include/Ashen/renderer/Renderer3D.h
-        include/Ashen/graphics/skybox/ISkybox.h
-        include/Ashen/graphics/skybox/SkyboxCubeMap.h
-        include/Ashen/renderer/gfx/GLEnums.h
+        src/Utils/FileSystem.cpp
+        src/Utils/ImageLoader.cpp
+        src/Resources/ResourceManager.cpp
+        src/Graphics/Rendering/Renderer3D.cpp
 
 )
 

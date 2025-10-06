@@ -5,7 +5,7 @@
 #include <memory>
 #include <algorithm>
 
-#include "Ashen/core/Types.h"
+#include "Ashen/Core/Types.h"
 #include "Voxelity/entities/Entity.h"
 
 namespace voxelity {

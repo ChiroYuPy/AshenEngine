@@ -1,6 +1,8 @@
 #include "Voxelity/voxelWorld/world/VoxelRaycaster.h"
-#include "Voxelity/voxelWorld/world/World.h"
+
 #include <algorithm>
+
+#include "Voxelity/voxelWorld/world/World.h"
 
 namespace voxelity {
     VoxelRaycaster::VoxelRaycaster(World &world)

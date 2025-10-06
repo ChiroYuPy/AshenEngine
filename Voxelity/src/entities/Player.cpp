@@ -1,6 +1,6 @@
 #include "Voxelity/entities/Player.h"
-#include "Voxelity/voxelWorld/world/World.h"
-#include "Ashen/core/Input.h"
+
+#include "Ashen/Core/Input.h"
 
 namespace voxelity {
     Player::Player(std::shared_ptr<ash::PerspectiveCamera> camera)
