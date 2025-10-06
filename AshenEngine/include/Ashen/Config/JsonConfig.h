@@ -85,7 +85,6 @@ private:
         file >> m_json;
     }
 
-    // Dot notation
     const nlohmann::json* GetJsonNode(const std::string& key, const bool throwIfMissing = true) const {
         const nlohmann::json* node = &m_json;
         std::istringstream ss(key);
