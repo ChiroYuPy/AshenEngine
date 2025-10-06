@@ -8,6 +8,7 @@
 #include "Voxelity/voxelWorld/voxel/VoxelType.h"
 
 namespace voxelity {
+    constexpr size_t MAX_COLORS = 256;
 
     class TextureAtlas {
     public:
@@ -31,7 +32,7 @@ namespace voxelity {
     class TextureColorPalette final : public TextureAtlas {
     public:
         TextureColorPalette() : m_colors() {
-            m_entryCount = MAX_TYPE_ID;
+            m_entryCount = MAX_COLORS;
         }
 
         ~TextureColorPalette() override = default;
@@ -41,12 +42,12 @@ namespace voxelity {
         }
 
         void updateFromRegistry() {
-            for (size_t i = 0; i < MAX_TYPE_ID; ++i) {
+            for (size_t i = 0; i < MAX_COLORS; ++i) {
                 const auto &c = getVoxelColor(static_cast<VoxelType>(i));
                 m_colors[i] = c.toVec4();
             }
 
-            m_texture.SetData(ash::TextureFormat::RGBA32F, MAX_TYPE_ID, ash::TextureFormat::RGBA,
+            m_texture.SetData(ash::TextureFormat::RGBA32F, MAX_COLORS, ash::TextureFormat::RGBA,
                               ash::PixelDataType::Float, m_colors.data());
         }
 
@@ -55,12 +56,12 @@ namespace voxelity {
         }
 
         void SetColor(const size_t index, const glm::vec4 &color) {
-            if (index < MAX_TYPE_ID)
+            if (index < MAX_COLORS)
                 m_colors[index] = color;
         }
 
     private:
-        std::array<glm::vec4, MAX_TYPE_ID> m_colors;
+        std::array<glm::vec4, MAX_COLORS> m_colors;
     };
 }
 
