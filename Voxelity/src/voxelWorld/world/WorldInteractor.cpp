@@ -4,7 +4,7 @@
 
 #include "Ashen/core/Logger.h"
 #include "Voxelity/voxelWorld/world/World.h"
-#include "Voxelity/voxelWorld/world/WorldRenderer.h"
+#include "../../../include/Voxelity/voxelWorld/render/WorldRenderer.h"
 
 namespace voxelity {
     WorldInteractor::WorldInteractor(World &world, WorldRenderer &chunkRenderer)

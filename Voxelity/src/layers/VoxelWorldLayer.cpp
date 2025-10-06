@@ -6,6 +6,7 @@
 #include "Ashen/renderer/RenderCommand.h"
 #include "Ashen/renderer/Renderer.h"
 #include "Ashen/resources/ResourceManager.h"
+#include "Voxelity/voxelWorld/generation/FlatTerrainGenerator.h"
 
 namespace voxelity {
     VoxelWorldLayer::VoxelWorldLayer() {
@@ -41,22 +42,41 @@ namespace voxelity {
     void VoxelWorldLayer::OnUpdate(const float ts) {
         if (!m_player || !m_world) return;
 
-        // 1. Mise à jour du chargement des chunks
+        // Fixed timestep loop (Minecraft-style) pour la physique
+        m_tickAccumulator += ts;
+
+        // Limiter pour éviter spiral of death
+        if (m_tickAccumulator > m_config.fixedDeltaTime * m_config.maxTicksPerFrame) {
+            m_tickAccumulator = m_config.fixedDeltaTime * m_config.maxTicksPerFrame;
+        }
+
+        // Exécuter les ticks avec delta fixe (physique/logique)
+        int ticksExecuted = 0;
+        while (m_tickAccumulator >= m_config.fixedDeltaTime && ticksExecuted < m_config.maxTicksPerFrame) {
+            // Mise à jour des entités (physique, logique) avec fixed timestep
+            m_entityManager->updateAll(m_config.fixedDeltaTime, *m_world);
+
+            m_tickAccumulator -= m_config.fixedDeltaTime;
+            ticksExecuted++;
+        }
+
+        // Mise à jour VISUELLE du joueur (chaque frame pour fluidité)
+        m_player->updateVisuals(ts);
+
+        // Mise à jour du chargement des chunks (chaque frame)
         m_world->updateLoadedChunks(m_player->position, m_config.renderDistance);
         m_world->processChunkLoading();
 
-        // 2. CRUCIAL: Construction des meshes (séparé du chargement)
+        // Construction des meshes (chaque frame)
         m_world->processMeshBuilding();
 
-        // 3. Mise à jour des entités
-        m_entityManager->updateAll(ts, *m_world);
-
-        // Debug: afficher les statistiques toutes les 60 frames
+        // Debug: afficher les statistiques
         static int frameCount = 0;
-        if (++frameCount % 60 == 0) {
+        if (++frameCount % 120 == 0) {
             ash::Logger::info() << "Chunks: " << m_world->getLoadedChunkCount()
                                << " | Pending Load: " << m_world->getPendingLoadCount()
-                               << " | Pending Mesh: " << m_world->getPendingMeshCount();
+                               << " | Pending Mesh: " << m_world->getPendingMeshCount()
+                               << " | Ticks: " << ticksExecuted;
         }
     }
 
@@ -108,30 +128,7 @@ namespace voxelity {
     }
 
     void VoxelWorldLayer::setupSkybox() {
-        m_skyboxShader = ash::AssetLibrary::Shaders().Get("shaders/mountain_skybox");
-
-        std::array<float, 36 * 3> skyboxVertices = {
-            -1, 1, -1, -1, -1, -1, 1, -1, -1,
-            1, -1, -1, 1, 1, -1, -1, 1, -1,
-            -1, -1, 1, -1, 1, 1, 1, 1, 1,
-            1, 1, 1, 1, -1, 1, -1, -1, 1,
-            -1, 1, -1, -1, 1, 1, -1, -1, 1,
-            -1, -1, 1, -1, -1, -1, -1, 1, -1,
-            1, 1, 1, 1, 1, -1, 1, -1, -1,
-            1, -1, -1, 1, -1, 1, 1, 1, 1,
-            -1, 1, 1, -1, 1, -1, 1, 1, -1,
-            1, 1, -1, 1, 1, 1, -1, 1, 1,
-            -1, -1, -1, -1, -1, 1, 1, -1, 1,
-            1, -1, 1, 1, -1, -1, -1, -1, -1
-        };
-
-        m_skyboxVAO = ash::MakeRef<ash::VertexArray>();
-        m_skyboxVBO = ash::MakeRef<ash::VertexBuffer>();
-        m_skyboxVBO->SetData<float>(skyboxVertices, ash::BufferUsage::Static);
-
-        ash::VertexBufferLayout layout(sizeof(glm::vec3));
-        layout.AddAttribute<glm::vec3>(0, 0);
-        m_skyboxVAO->AddVertexBuffer(m_skyboxVBO, layout);
+        auto shader = ash::AssetLibrary::Shaders().Get("shaders/mountain_skybox");
 
         const std::array<std::string, 6> faces = {
             "resources/textures/mountain_skybox/right.jpg",
@@ -141,10 +138,8 @@ namespace voxelity {
             "resources/textures/mountain_skybox/front.jpg",
             "resources/textures/mountain_skybox/back.jpg"
         };
-        m_skyboxTexture = ash::MakeRef<ash::TextureCubeMap>(ash::LoadCubeMap(faces));
 
-        m_skyboxShader->Bind();
-        m_skyboxShader->SetInt("skybox", 0);
+        m_skybox = ash::MakeRef<ash::SkyboxCubeMap>(faces, shader);
     }
 
     void VoxelWorldLayer::setupInputHandler() {
@@ -156,25 +151,12 @@ namespace voxelity {
     }
 
     void VoxelWorldLayer::renderSkybox() const {
-        ash::RenderCommand::SetDepthWrite(false);
-        ash::RenderCommand::SetDepthFunc(ash::RenderCommand::DepthFunc::LessEqual);
-
-        m_skyboxShader->Bind();
-        const auto view = glm::mat4(glm::mat3(m_camera->GetViewMatrix()));
-        const glm::mat4 projection = m_camera->GetProjectionMatrix();
-        m_skyboxShader->SetMat4("uView", view);
-        m_skyboxShader->SetMat4("uProjection", projection);
-
-        glActiveTexture(GL_TEXTURE0);
-        m_skyboxTexture->Bind();
-
-        ash::Renderer::DrawArrays(*m_skyboxVAO, 36);
-
-        ash::RenderCommand::SetDepthWrite(true);
-        ash::RenderCommand::SetDepthFunc(ash::RenderCommand::DepthFunc::Less);
+        if (m_skybox)
+            m_skybox->Render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
     }
 
     void VoxelWorldLayer::renderWorld() const {
-        m_worldRenderer->render();
+        if (m_worldRenderer)
+            m_worldRenderer->render();
     }
 }

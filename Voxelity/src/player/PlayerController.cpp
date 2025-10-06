@@ -59,10 +59,13 @@ namespace voxelity {
             moveDir = glm::normalize(moveDir);
         }
 
-        // Déterminer la vitesse selon l'état
+        // Déterminer la vitesse selon l'état (Minecraft style)
         float speed = m_settings.walkSpeed;
         if (ash::Input::IsKeyPressed(ash::Key::LeftControl)) {
-            speed = m_settings.sprintSpeed;
+            // Sprint : seulement si on avance (W)
+            if (ash::Input::IsKeyPressed(ash::Key::W)) {
+                speed = m_settings.sprintSpeed;
+            }
         } else if (ash::Input::IsKeyPressed(ash::Key::LeftShift)) {
             speed = m_settings.crouchSpeed;
         }

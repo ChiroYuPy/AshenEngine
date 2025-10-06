@@ -14,11 +14,11 @@ set(APP_SOURCES
         src/voxelWorld/voxel/VoxelArray.cpp
         src/voxelWorld/voxel/VoxelType.cpp
 
-        src/voxelWorld/world/TextureColorPalette.cpp
+        src/voxelWorld/render/TextureColorPalette.cpp
         src/voxelWorld/world/VoxelRaycaster.cpp
         src/voxelWorld/world/World.cpp
         src/voxelWorld/world/WorldInteractor.cpp
-        src/voxelWorld/world/WorldRenderer.cpp
+        src/voxelWorld/render/WorldRenderer.cpp
         src/voxelWorld/world/ChunkManager.cpp
 
         src/layers/VoxelWorldLayer.cpp

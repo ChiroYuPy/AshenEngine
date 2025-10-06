@@ -37,7 +37,7 @@ namespace voxelity {
             hasCollision = false;
         }
 
-        std::vector<CollisionInfo> getCollisionsOnAxis(int axis) const {
+        std::vector<CollisionInfo> getCollisionsOnAxis(const int axis) const {
             std::vector<CollisionInfo> result;
             for (const auto& col : collisions) {
                 if (col.axis == axis) {
@@ -49,12 +49,14 @@ namespace voxelity {
     };
 
     struct PhysicsConfig {
-        float gravity = -32.0f;
-        float terminalVelocity = -78.4f;
-        float groundFriction = 0.6f;
-        float airDrag = 0.02f;
+        // Physique Minecraft exacte (Java Edition)
+        float gravity = -32.0f;              // Gravity: -0.08 blocks/tick = -32 m/s²
+        float terminalVelocity = -78.4f;     // Terminal velocity: -3.92 blocks/tick
+        float groundFriction = 0.546f;       // Block friction: 0.6 (ground) * 0.91 = 0.546
+        float airDrag = 0.98f;               // Air resistance: 0.98 (vertical)
+        float horizontalAirDrag = 0.91f;     // Air resistance: 0.91 (horizontal)
         float collisionEpsilon = 0.001f;
-        bool useMaterialProperties = true; // Utiliser les propriétés des matériaux
+        bool useMaterialProperties = true;
     };
 
     class PhysicsSystem {

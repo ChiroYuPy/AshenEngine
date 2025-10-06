@@ -1,4 +1,4 @@
-#include "Voxelity/voxelWorld/world/WorldRenderer.h"
+#include "Voxelity/voxelWorld/render/WorldRenderer.h"
 #include "Ashen/renderer/RenderCommand.h"
 
 namespace voxelity {

@@ -16,6 +16,9 @@ namespace voxelity {
 
         void update(float deltaTime, const World &world) override;
 
+        // Mise à jour visuelle (appelée chaque frame)
+        void updateVisuals(float deltaTime);
+
         // Gestion du contrôleur
         PlayerController &getController() { return *m_controller; }
         const PlayerController &getController() const { return *m_controller; }
@@ -30,12 +33,18 @@ namespace voxelity {
         void setJumpForce(const float force) { m_jumpForce = force; }
         float getJumpForce() const { return m_jumpForce; }
 
+        // Mode vol
+        void toggleFly() { m_isFlying = !m_isFlying; }
+        bool isFlying() const { return m_isFlying; }
+
     private:
         ash::Ref<ash::PerspectiveCamera> m_camera;
         ash::Scope<PlayerController> m_controller;
         ash::Scope<PhysicsSystem> m_physics;
 
-        float m_jumpForce = 9.0f;
+        float m_jumpForce = 10.0f;       // Jump velocity Minecraft (permet de sauter ~1.25 blocs)
+        bool m_isFlying = false;
+        float m_flySpeed = 10.92f;       // Fly speed Minecraft (10.92 blocks/s)
 
         void updateCameraPosition() const;
 

@@ -6,6 +6,7 @@
 #include "Ashen/core/Logger.h"
 #include "Ashen/events/KeyEvent.h"
 #include "Ashen/events/MouseEvent.h"
+#include "Voxelity/entities/Player.h"
 #include "Voxelity/player/PlayerController.h"
 
 namespace voxelity {
@@ -48,6 +49,13 @@ namespace voxelity {
             } else {
                 VoxelityApp::Get().Stop();
             }
+        }
+
+        // F : toggle mode vol
+        if (event.GetKeyCode() == ash::Key::F && m_playerController.isActive()) {
+            m_layer.getPlayer().toggleFly();
+            const bool isFlying = m_layer.getPlayer().isFlying();
+            ash::Logger::info() << (isFlying ? "Flying mode enabled" : "Flying mode disabled");
         }
 
         // Debug : ajuster l'espacement des chunks (si exposé)

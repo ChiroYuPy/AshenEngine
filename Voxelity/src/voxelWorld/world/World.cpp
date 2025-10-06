@@ -7,10 +7,10 @@ namespace voxelity {
     }
 
     VoxelType World::getVoxel(const int worldX, const int worldY, const int worldZ) const {
-        ChunkCoord chunkCoord = toChunkCoord(worldX, worldY, worldZ);
-        ash::IVec3 localPos = toLocalCoord(worldX, worldY, worldZ);
+        const ChunkCoord chunkCoord = toChunkCoord(worldX, worldY, worldZ);
+        const ash::IVec3 localPos = toLocalCoord(worldX, worldY, worldZ);
 
-        Chunk* chunk = m_chunkManager.get()->getChunk(chunkCoord);
+        const Chunk* chunk = m_chunkManager.get()->getChunk(chunkCoord);
         if (chunk)
             return chunk->get(localPos.x, localPos.y, localPos.z);
 

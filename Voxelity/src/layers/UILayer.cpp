@@ -9,7 +9,7 @@
 #include "Ashen/resources/ResourceManager.h"
 
 namespace voxelity {
-    UILayer::UILayer() : showCrosshair(false) {
+    UILayer::UILayer() : showCrosshair(true) {
         m_UICamera = std::make_shared<ash::UICamera>();
 
         m_CrosshairTexture = ash::AssetLibrary::Textures().Load("textures/crosshairs/crosshair.png");

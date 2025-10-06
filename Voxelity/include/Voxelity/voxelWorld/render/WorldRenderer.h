@@ -3,7 +3,7 @@
 
 #include "Ashen/renderer/Camera.h"
 #include "Ashen/renderer/gfx/Shader.h"
-#include "Voxelity/voxelWorld/world/TextureColorPalette.h"
+#include "TextureColorPalette.h"
 #include "Voxelity/voxelWorld/world/World.h"
 
 namespace voxelity {

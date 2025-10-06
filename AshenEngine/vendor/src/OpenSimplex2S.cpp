@@ -113,7 +113,7 @@ double OpenSimplex2S::noise2_Base(double xs, double ys) {
  */
 double OpenSimplex2S::noise3_Classic(double x, double y, double z) {
     // Re-orient the cubic lattices via rotation, to produce the expected look on cardinal planar
-    // slices. If texturing objects that don't tend to have cardinal plane faces, you could even
+    // slices. If texturing skybox that don't tend to have cardinal plane faces, you could even
     // remove this. Orthonormal rotation. Not a skew transform.
     double r = (2.0 / 3.0) * (x + y + z);
     double xr = r - x;

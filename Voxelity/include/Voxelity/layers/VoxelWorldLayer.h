@@ -6,7 +6,8 @@
 #include "Voxelity/VoxelityApp.h"
 #include "Voxelity/voxelWorld/world/World.h"
 #include "Voxelity/voxelWorld/world/WorldInteractor.h"
-#include "Voxelity/voxelWorld/world/WorldRenderer.h"
+#include "../voxelWorld/render/WorldRenderer.h"
+#include "Ashen/graphics/skybox/SkyboxCubeMap.h"
 #include "Voxelity/input/InputHandler.h"
 #include "Voxelity/entities/EntityManager.h"
 
@@ -14,8 +15,13 @@ namespace voxelity {
     class Player;
 
     struct WorldConfig {
-        int renderDistance = 4;
+        int renderDistance = 8;
         int renderHeight = 2;
+
+        // Fixed timestep Minecraft-style (20 ticks/second)
+        float tickRate = 20.0f;              // 20 TPS comme Minecraft
+        float fixedDeltaTime = 1.0f / 20.0f; // 0.05s par tick
+        int maxTicksPerFrame = 10;           // Limite pour éviter spiral of death
     };
 
     class VoxelWorldLayer final : public ash::Layer {
@@ -41,6 +47,9 @@ namespace voxelity {
     private:
         WorldConfig m_config;
 
+        // Fixed timestep accumulator
+        float m_tickAccumulator = 0.0f;
+
         // Systèmes principaux
         ash::Scope<World> m_world;
         ash::Scope<WorldRenderer> m_worldRenderer;
@@ -54,10 +63,7 @@ namespace voxelity {
         ash::Ref<ash::ShaderProgram> m_shader;
 
         // Skybox
-        ash::Ref<ash::ShaderProgram> m_skyboxShader;
-        ash::Ref<ash::VertexArray> m_skyboxVAO;
-        ash::Ref<ash::VertexBuffer> m_skyboxVBO;
-        ash::Ref<ash::TextureCubeMap> m_skyboxTexture;
+        ash::Ref<ash::SkyboxCubeMap> m_skybox;
 
         // Initialisation
         void setupCamera();

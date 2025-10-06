@@ -11,35 +11,30 @@ namespace voxelity {
     void PhysicsSystem::step(Entity& entity, const float deltaTime, const World& world) const {
         if (!entity.isActive) return;
 
+        // 1. Gravité et air drag
         integrate(entity, deltaTime, world);
 
+        // 2. Mouvement et collisions
         const glm::vec3 motion = entity.velocity * deltaTime;
         const glm::vec3 actualMotion = moveAndCollide(entity, motion, world);
-
         entity.position += actualMotion;
 
+        // 3. Friction au sol (appliquée APRÈS le mouvement dans Minecraft)
         applyFriction(entity, deltaTime, world);
     }
 
     void PhysicsSystem::integrate(Entity& entity, const float deltaTime, const World& world) const {
         if (!entity.useGravity) return;
 
-        float gravityFactor = 1.0f;
-        float dragFactor = m_config.airDrag;
+        // Dans Minecraft, la gravité s'applique AVANT le drag
+        entity.velocity.y += m_config.gravity * deltaTime;
 
-        const glm::ivec3 blockPos = glm::floor(entity.position);
-        const VoxelType voxel = world.getVoxel(blockPos.x, blockPos.y, blockPos.z);
+        // Air drag vertical (0.98 dans Minecraft)
+        entity.velocity.y *= m_config.airDrag;
 
-        if (isVoxelLiquid(voxel)) {
-            gravityFactor = 0.3f;
-            dragFactor = m_config.airDrag * 5.0f;
-        }
-
-        entity.velocity.y += m_config.gravity * gravityFactor * deltaTime;
-        entity.velocity.y = std::max(entity.velocity.y, m_config.terminalVelocity);
-
-        if (!entity.onGround) {
-            entity.velocity *= (1.0f - dragFactor * deltaTime);
+        // Limiter à la terminal velocity
+        if (entity.velocity.y < m_config.terminalVelocity) {
+            entity.velocity.y = m_config.terminalVelocity;
         }
     }
 
@@ -181,19 +176,23 @@ namespace voxelity {
 
     void PhysicsSystem::applyFriction(Entity& entity, const float deltaTime, const World& world) const {
         if (entity.onGround) {
+            // Friction au sol (Minecraft style)
             float friction = m_config.groundFriction;
 
-            // Utiliser la friction du bloc sous l'entité
             if (m_config.useMaterialProperties) {
                 friction = getGroundFriction(entity, world);
             }
 
-            const float frictionFactor = std::pow(friction, deltaTime * 10.0f);
-            entity.velocity.x *= frictionFactor;
-            entity.velocity.z *= frictionFactor;
+            entity.velocity.x *= friction;
+            entity.velocity.z *= friction;
 
-            if (std::abs(entity.velocity.x) < 0.001f) entity.velocity.x = 0.0f;
-            if (std::abs(entity.velocity.z) < 0.001f) entity.velocity.z = 0.0f;
+            // Arrêter les très petites vitesses
+            if (std::abs(entity.velocity.x) < 0.003f) entity.velocity.x = 0.0f;
+            if (std::abs(entity.velocity.z) < 0.003f) entity.velocity.z = 0.0f;
+        } else {
+            // Friction en l'air (horizontal)
+            entity.velocity.x *= m_config.horizontalAirDrag;
+            entity.velocity.z *= m_config.horizontalAirDrag;
         }
     }
 

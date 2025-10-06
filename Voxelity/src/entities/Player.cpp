@@ -1,6 +1,7 @@
 #include "Voxelity/entities/Player.h"
 
 #include "Voxelity/voxelWorld/world/World.h"
+#include "Ashen/core/Input.h"
 
 namespace voxelity {
     Player::Player(std::shared_ptr<ash::PerspectiveCamera> camera)
@@ -13,41 +14,78 @@ namespace voxelity {
         // Initialisation du contrôleur et de la physique
         m_controller = std::make_unique<PlayerController>(m_camera);
 
-        // Configuration physique réaliste
+        // Configuration physique Minecraft (exacte Java Edition)
         PhysicsConfig physicsConfig;
-        physicsConfig.gravity = -32.0f;
-        physicsConfig.groundFriction = 0.6f;
-        physicsConfig.airDrag = 0.02f;
+        physicsConfig.gravity = -32.0f;              // -0.08 blocks/tick
+        physicsConfig.terminalVelocity = -78.4f;     // -3.92 blocks/tick
+        physicsConfig.groundFriction = 0.546f;       // 0.91 * 0.6
+        physicsConfig.airDrag = 0.98f;               // Vertical air drag
+        physicsConfig.horizontalAirDrag = 0.91f;     // Horizontal air drag
         m_physics = std::make_unique<PhysicsSystem>(physicsConfig);
     }
 
     void Player::update(const float deltaTime, const World &world) {
         if (!isActive) return;
 
-        // 1. Mettre à jour le contrôleur (inputs)
-        m_controller->update(deltaTime);
-
-        // 2. Gérer le mouvement basé sur les inputs
+        // Fixed timestep : logique et physique seulement
+        // 1. Gérer le mouvement basé sur les inputs
         handleMovement(deltaTime);
 
-        // 3. Appliquer la physique (un seul appel qui gère tout)
-        m_physics->step(*this, deltaTime, world);
+        // 2. Appliquer la physique (seulement si pas en mode vol)
+        if (m_isFlying) {
+            // En mode vol, pas de gravité ni de collisions
+            position += velocity * deltaTime;
+            onGround = false;
+        } else {
+            // Mode normal : physique complète
+            m_physics->step(*this, deltaTime, world);
+        }
+    }
 
-        // 4. Mettre à jour la position de la caméra
+    void Player::updateVisuals(const float deltaTime) {
+        if (!isActive) return;
+
+        // Mise à jour chaque frame pour la fluidité
+        // 1. Controller (rotation caméra, inputs)
+        m_controller->update(deltaTime);
+
+        // 2. Position de la caméra
         updateCameraPosition();
     }
 
     void Player::handleMovement(const float deltaTime) {
         const glm::vec3 input = m_controller->getMovementInput();
 
-        // Appliquer le mouvement horizontal uniquement
-        // La physique gère la gravité automatiquement
-        velocity.x = input.x;
-        velocity.z = input.z;
+        if (m_isFlying) {
+            // Mode vol Minecraft : mouvement horizontal plan + montée/descente
+            float flySpeed = m_flySpeed;
 
-        // Gérer le saut
-        if (m_controller->wantsToJump() && onGround) {
-            jump();
+            // Sprint en vol (comme Minecraft)
+            if (ash::Input::IsKeyPressed(ash::Key::LeftControl)) {
+                flySpeed *= 2.0f;
+            }
+
+            // Mouvement horizontal (WASD)
+            velocity.x = input.x * flySpeed;
+            velocity.z = input.z * flySpeed;
+
+            // Montée/descente : Space pour monter, Shift pour descendre
+            velocity.y = 0.0f;
+            if (ash::Input::IsKeyPressed(ash::Key::Space)) {
+                velocity.y = flySpeed;
+            }
+            if (ash::Input::IsKeyPressed(ash::Key::LeftShift)) {
+                velocity.y = -flySpeed;
+            }
+        } else {
+            // Mode normal : mouvement horizontal + gravité
+            velocity.x = input.x;
+            velocity.z = input.z;
+
+            // Gérer le saut
+            if (m_controller->wantsToJump() && onGround) {
+                jump();
+            }
         }
     }
 

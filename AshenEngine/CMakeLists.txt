@@ -25,6 +25,8 @@ set(CORE_SOURCES
         include/Ashen/math/BoundingBox.h
         src/renderer/Renderer3D.cpp
         include/Ashen/renderer/Renderer3D.h
+        include/Ashen/graphics/skybox/ISkybox.h
+        include/Ashen/graphics/skybox/SkyboxCubeMap.h
 
 )
 

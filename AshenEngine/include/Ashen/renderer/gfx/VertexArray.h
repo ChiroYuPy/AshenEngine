@@ -158,17 +158,17 @@ namespace ash {
         void AddVertexBuffer(const std::shared_ptr<VertexBuffer> &vbo, const VertexBufferLayout &layout) {
             Bind();
             vbo->Bind();
-            for (const auto &elem: layout.GetElements()) {
-                EnableAttrib(elem.index);
-                if (elem.integral) {
-                    glVertexAttribIPointer(elem.index, elem.size, elem.type, static_cast<GLsizei>(layout.GetStride()),
-                                           reinterpret_cast<void *>(elem.offset));
+            for (const auto &[index, size, type, integral, offset, divisor]: layout.GetElements()) {
+                EnableAttrib(index);
+                if (integral) {
+                    glVertexAttribIPointer(index, size, type, static_cast<GLsizei>(layout.GetStride()),
+                                           reinterpret_cast<void *>(offset));
                 } else {
-                    glVertexAttribPointer(elem.index, elem.size, elem.type, GL_FALSE,
+                    glVertexAttribPointer(index, size, type, GL_FALSE,
                                           static_cast<GLsizei>(layout.GetStride()),
-                                          reinterpret_cast<void *>(elem.offset));
+                                          reinterpret_cast<void *>(offset));
                 }
-                if (elem.divisor > 0) glVertexAttribDivisor(elem.index, elem.divisor);
+                if (divisor > 0) glVertexAttribDivisor(index, divisor);
             }
             m_VertexBuffers.push_back(vbo);
         }

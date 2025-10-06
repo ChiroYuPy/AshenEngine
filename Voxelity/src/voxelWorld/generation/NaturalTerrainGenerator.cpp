@@ -2,13 +2,14 @@
 #include "Voxelity/voxelWorld/generation/NaturalTerrainGenerator.h"
 
 namespace voxelity {
-    constexpr double CONTINENT_SCALE = 0.001;
-    constexpr double ELEVATION_SCALE = 0.01;
-    constexpr double DETAIL_SCALE = 0.01;
-    constexpr double CAVE_SCALE = 0.02;
-    constexpr double ORE_SCALE = 0.08;
-    constexpr double TEMPERATURE_SCALE = 0.003;
-    constexpr double HUMIDITY_SCALE = 0.002;
+    // Optimisé : échelles ajustées pour moins de calculs
+    constexpr double CONTINENT_SCALE = 0.0008;
+    constexpr double ELEVATION_SCALE = 0.015;
+    constexpr double DETAIL_SCALE = 0.05;
+    constexpr double CAVE_SCALE = 0.03;
+    constexpr double ORE_SCALE = 0.1;
+    constexpr double TEMPERATURE_SCALE = 0.004;
+    constexpr double HUMIDITY_SCALE = 0.003;
 
     constexpr int HEIGHT = 24;
     constexpr int SEA_LEVEL = HEIGHT;
@@ -165,60 +166,98 @@ namespace voxelity {
     void NaturalTerrainGenerator::generateChunk(Chunk &voxelChunk) {
         const glm::ivec3 chunkPos = voxelChunk.getPosition();
 
-        // Première passe : génération du terrain de base
+        // Optimisation : pré-calculer les hauteurs pour chaque colonne (X,Z)
+        int heightMap[VoxelArray::SIZE][VoxelArray::SIZE];
+        BiomeType biomeMap[VoxelArray::SIZE][VoxelArray::SIZE];
+
+        for (int x = 0; x < VoxelArray::SIZE; ++x) {
+            const int worldX = chunkPos.x * VoxelArray::SIZE + x;
+            for (int z = 0; z < VoxelArray::SIZE; ++z) {
+                const int worldZ = chunkPos.z * VoxelArray::SIZE + z;
+
+                // Calculer l'élévation une seule fois par colonne
+                double continentNoise = noise.noise2(worldX * CONTINENT_SCALE, worldZ * CONTINENT_SCALE);
+                double elevationNoise = noise.noise2(worldX * ELEVATION_SCALE, worldZ * ELEVATION_SCALE);
+                double detailNoise = noise.noise2(worldX * DETAIL_SCALE, worldZ * DETAIL_SCALE);
+
+                double combinedElevation = continentNoise * 30.0 + elevationNoise * 20.0 + detailNoise * 8.0;
+                int groundHeight = static_cast<int>(SEA_LEVEL + combinedElevation);
+
+                heightMap[x][z] = groundHeight;
+                biomeMap[x][z] = getBiome(glm::ivec3(worldX, groundHeight, worldZ), groundHeight);
+            }
+        }
+
+        // Première passe : génération du terrain de base (optimisée)
         for (int y = 0; y < VoxelArray::SIZE; ++y) {
             const int worldY = chunkPos.y * VoxelArray::SIZE + y;
             for (int x = 0; x < VoxelArray::SIZE; ++x) {
                 const int worldX = chunkPos.x * VoxelArray::SIZE + x;
                 for (int z = 0; z < VoxelArray::SIZE; ++z) {
                     const int worldZ = chunkPos.z * VoxelArray::SIZE + z;
-                    glm::ivec3 worldPos(worldX, worldY, worldZ);
-                    const VoxelType voxelID = generateVoxel(worldPos);
+                    const int groundHeight = heightMap[x][z];
+                    const BiomeType biome = biomeMap[x][z];
+                    const BiomeData& biomeData = biomeConfigs[static_cast<int>(biome)];
+
+                    VoxelType voxelID = VoxelID::AIR;
+
+                    // Génération optimisée par hauteur
+                    if (worldY < groundHeight - 10) {
+                        // Cavernes
+                        if (worldY > 10) {
+                            glm::ivec3 worldPos(worldX, worldY, worldZ);
+                            double caveValue = getCaveNoise(worldPos);
+                            if (caveValue < 0.1) {
+                                voxelID = VoxelID::AIR;
+                            } else {
+                                voxelID = biomeData.deepBlock;
+                            }
+                        } else {
+                            voxelID = biomeData.deepBlock;
+                        }
+                    } else if (worldY < groundHeight - 2) {
+                        voxelID = biomeData.subSurfaceBlock;
+                    } else if (worldY < groundHeight) {
+                        voxelID = biomeData.surfaceBlock;
+                    } else if (worldY < SEA_LEVEL) {
+                        voxelID = VoxelID::WATER;
+                    }
+
                     voxelChunk.set({x, y, z}, voxelID);
                 }
             }
         }
 
-        // Deuxième passe : génération des structures (arbres, etc.)
+        // Deuxième passe : génération des structures (arbres) - optimisée
         for (int x = 0; x < VoxelArray::SIZE; ++x) {
             for (int z = 0; z < VoxelArray::SIZE; ++z) {
-                // Trouver la surface
-                int surfaceY = -1;
-                for (int y = VoxelArray::SIZE - 1; y >= 0; --y) {
-                    const VoxelType blockType = voxelChunk.get({x, y, z});
-                    if (blockType != VoxelID::AIR && blockType != VoxelID::WATER) {
-                        surfaceY = y;
-                        break;
-                    }
-                }
+                const int groundHeight = heightMap[x][z];
+                const int worldY = chunkPos.y * VoxelArray::SIZE;
 
-                if (surfaceY >= 0 && surfaceY < VoxelArray::SIZE - 6) {
+                // Vérifier si la surface est dans ce chunk
+                const int surfaceLocalY = groundHeight - worldY;
+                if (surfaceLocalY >= 0 && surfaceLocalY < VoxelArray::SIZE - 6) {
+                    const BiomeType biome = biomeMap[x][z];
+                    const BiomeData& biomeData = biomeConfigs[static_cast<int>(biome)];
+
                     const int worldX = chunkPos.x * VoxelArray::SIZE + x;
                     const int worldZ = chunkPos.z * VoxelArray::SIZE + z;
-                    const int worldY = chunkPos.y * VoxelArray::SIZE + surfaceY;
-                    glm::ivec3 worldPos(worldX, worldY, worldZ);
-
-                    // Déterminer le biome pour cette position
-                    BiomeType biome = getBiome(worldPos, worldY);
-                    const BiomeData &biomeData = biomeConfigs[static_cast<int>(biome)];
+                    glm::ivec3 worldPos(worldX, groundHeight, worldZ);
 
                     // Vérifier si on doit générer un arbre
                     if (shouldGenerateTree(worldPos, biomeData)) {
-                        // S'assurer qu'il y a de l'espace au-dessus
+                        // Vérifier l'espace disponible
                         bool canPlaceTree = true;
-                        for (int checkY = 1; checkY <= 6; checkY++) {
-                            if (surfaceY + checkY >= VoxelArray::SIZE) {
+                        for (int checkY = 1; checkY <= 6 && canPlaceTree; checkY++) {
+                            if (surfaceLocalY + checkY >= VoxelArray::SIZE) {
                                 canPlaceTree = false;
-                                break;
-                            }
-                            if (voxelChunk.get({x, surfaceY + checkY, z}) != VoxelID::AIR) {
+                            } else if (voxelChunk.get({x, surfaceLocalY + checkY, z}) != VoxelID::AIR) {
                                 canPlaceTree = false;
-                                break;
                             }
                         }
 
                         if (canPlaceTree) {
-                            generateTree(voxelChunk, {x, surfaceY + 1, z}, chunkPos);
+                            generateTree(voxelChunk, {x, surfaceLocalY + 1, z}, chunkPos);
                         }
                     }
                 }
