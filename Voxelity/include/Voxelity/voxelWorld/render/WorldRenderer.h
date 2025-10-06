@@ -15,8 +15,7 @@ namespace voxelity {
 
         void render();
 
-        // Configuration
-        void setChunkSpacing(float spacing) { m_chunkSpacing = spacing; }
+        void setChunkSpacing(const float spacing) { m_chunkSpacing = spacing; }
         [[nodiscard]] float getChunkSpacing() const { return m_chunkSpacing; }
 
     private:

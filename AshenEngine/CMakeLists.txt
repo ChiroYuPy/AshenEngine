@@ -21,6 +21,7 @@ set(CORE_SOURCES
         src/Graphics/Rendering/Renderer3D.cpp
         include/Ashen/Config/IConfig.h
         include/Ashen/Config/JsonConfig.h
+        include/Ashen/Core/UID.h
 
 )
 
