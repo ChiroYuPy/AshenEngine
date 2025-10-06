@@ -22,6 +22,10 @@ set(CORE_SOURCES
         include/Ashen/Config/IConfig.h
         include/Ashen/Config/JsonConfig.h
         include/Ashen/Core/UID.h
+        include/Ashen/Resources/Loader/ShaderLoader.h
+        src/Resources/Loader/ShaderLoader.cpp
+        include/Ashen/Resources/Loader/TextureLoader.h
+        src/Resources/Loader/TextureLoader.cpp
 
 )
 

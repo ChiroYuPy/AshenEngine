@@ -1,7 +1,6 @@
 #ifndef ASHEN_SHADER_H
 #define ASHEN_SHADER_H
 
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -14,6 +13,7 @@
 #include <glad/glad.h>
 
 #include "Ashen/Math/Math.h"
+#include "Ashen/Core/Logger.h"
 #include "Ashen/GraphicsAPI/GLEnums.h"
 #include "Ashen/GraphicsAPI/GLObject.h"
 
@@ -214,12 +214,10 @@ namespace ash {
 
                 if (m_Config.throwOnWarning)
                     throw std::runtime_error("ShaderProgram validation failed:\n" + infoLog);
-                else
-                    std::cerr << "ShaderProgram validation warning:\n" << infoLog << std::endl;
+                Logger::error() << "ShaderProgram validation warning:\n" << infoLog;
             }
         }
 
-        // Uniform setters
         void SetBool(const std::string &name, bool value) const {
             glUniform1i(GetUniformLocation(name), static_cast<int>(value));
         }
@@ -270,7 +268,7 @@ namespace ash {
             if (blockIndex != GL_INVALID_INDEX) {
                 glUniformBlockBinding(m_ID, blockIndex, bindingPoint);
             } else if (m_Config.warnOnMissingUniform) {
-                std::cerr << "Warning: Uniform block '" << name << "' not found!\n";
+                Logger::error() << "Warning: Uniform block '" << name << "' not found!";
             }
         }
 
@@ -280,7 +278,7 @@ namespace ash {
             if (blockIndex != GL_INVALID_INDEX) {
                 glShaderStorageBlockBinding(m_ID, blockIndex, bindingPoint);
             } else if (m_Config.warnOnMissingUniform) {
-                std::cerr << "Warning: Storage block '" << name << "' not found!\n";
+                Logger::error() << "Warning: Storage block '" << name << "' not found!";
             }
         }
 
@@ -353,7 +351,7 @@ namespace ash {
             const GLint loc = glGetUniformLocation(m_ID, name.c_str());
 
             if (loc == -1 && m_Config.warnOnMissingUniform && !m_WarnedUniforms.contains(name)) {
-                std::cerr << "Warning: uniform '" << name << "' doesn't exist!\n";
+                Logger::error() << "Warning: uniform '" << name << "' doesn't exist!";
                 m_WarnedUniforms.insert(name);
             }
 

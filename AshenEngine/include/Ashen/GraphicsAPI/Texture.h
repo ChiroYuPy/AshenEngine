@@ -216,38 +216,6 @@ namespace ash {
         void SetWrap(const TextureWrap s, const TextureWrap t) {
             Texture::SetWrap(s, t, s);
         }
-
-        static Texture2D LoadFromFile(const std::string &path,
-                                      const TextureConfig &config = TextureConfig::Default()) {
-            Texture2D tex;
-
-            int width, height, channels;
-            stbi_set_flip_vertically_on_load(true);
-            unsigned char *data = stbi_load(path.c_str(), &width, &height, &channels, 0);
-
-            if (!data)
-                throw std::runtime_error("Failed to load texture: " + path);
-
-            auto format = TextureFormat::RGBA8;
-            auto dataFormat = TextureFormat::RGBA;
-
-            if (channels == 1) {
-                format = TextureFormat::R8;
-                dataFormat = TextureFormat::Red;
-            } else if (channels == 3) {
-                format = TextureFormat::RGB8;
-                dataFormat = TextureFormat::RGB;
-            } else if (channels == 4) {
-                format = TextureFormat::RGBA8;
-                dataFormat = TextureFormat::RGBA;
-            }
-
-            tex.SetData(format, width, height, dataFormat, PixelDataType::UnsignedByte, data);
-            tex.ApplyConfig(config);
-
-            stbi_image_free(data);
-            return tex;
-        }
     };
 
     class Texture3D final : public Texture {
