@@ -10,7 +10,6 @@ set(CORE_SOURCES
         src/Core/Platform.cpp
         src/Core/Window.cpp
 
-        src/GraphicsAPI/GLUtils.cpp
         src/GraphicsAPI/RenderCommand.cpp
         src/Graphics/Rendering/Renderer.cpp
         src/Graphics/Rendering/Renderer2D.cpp
@@ -19,13 +18,10 @@ set(CORE_SOURCES
         src/Utils/ImageLoader.cpp
         src/Resources/ResourceManager.cpp
         src/Graphics/Rendering/Renderer3D.cpp
-        include/Ashen/Config/IConfig.h
-        include/Ashen/Config/JsonConfig.h
-        include/Ashen/Core/UID.h
-        include/Ashen/Resources/Loader/ShaderLoader.h
         src/Resources/Loader/ShaderLoader.cpp
-        include/Ashen/Resources/Loader/TextureLoader.h
         src/Resources/Loader/TextureLoader.cpp
+        include/Ashen/GraphicsAPI/GraphicsContext.h
+        src/GraphicsAPI/GraphicsContext.cpp
 
 )
 

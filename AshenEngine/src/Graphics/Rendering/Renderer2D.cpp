@@ -245,6 +245,22 @@ namespace ash {
         delete[] s_Data.Quads.VertexBufferBase;
         delete[] s_Data.Lines.VertexBufferBase;
         delete[] s_Data.Circles.VertexBufferBase;
+
+        s_Data.Quads.VertexArray2D.reset();
+        s_Data.Quads.VertexBuffer2D.reset();
+        s_Data.Quads.IndexBuffer2D.reset();
+        s_Data.Quads.WhiteTexture.reset();
+        s_Data.Quads.TextureSlots.fill(nullptr);
+        s_Data.Quads.Shader.reset();
+
+        s_Data.Lines.VertexArray2D.reset();
+        s_Data.Lines.VertexBuffer2D.reset();
+        s_Data.Lines.Shader.reset();
+
+        s_Data.Circles.VertexArray2D.reset();
+        s_Data.Circles.VertexBuffer2D.reset();
+        s_Data.Circles.IndexBuffer2D.reset();
+        s_Data.Circles.Shader.reset();
     }
 
     void Renderer2D::BeginScene(const Camera &camera) {

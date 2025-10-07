@@ -48,6 +48,8 @@ namespace voxelity {
             if (m_playerController.isActive()) {
                 ash::Input::SetCursorMode(ash::CursorMode::Normal);
                 m_playerController.setActive(false);
+                // IMPORTANT : Reset le delta pour éviter les sauts
+                ash::Input::ResetMouseDelta();
             } else {
                 VoxelityApp::Get().Stop();
             }
@@ -59,10 +61,6 @@ namespace voxelity {
             const bool isFlying = m_layer.getPlayer().isFlying();
             ash::Logger::info() << (isFlying ? "Flying mode enabled" : "Flying mode disabled");
         }
-
-        // Debug : ajuster l'espacement des chunks (si exposé)
-        // if (event.GetKeyCode() == pixl::Key::Y) { ... }
-        // if (event.GetKeyCode() == pixl::Key::U) { ... }
     }
 
     void InputHandler::handleMouseButton(const ash::MouseButtonPressedEvent &event) const {
@@ -80,6 +78,8 @@ namespace voxelity {
             } else {
                 // Activer le mode caméra
                 ash::Input::SetCursorMode(ash::CursorMode::Disabled);
+                // IMPORTANT : Reset le delta pour éviter les sauts
+                ash::Input::ResetMouseDelta();
                 m_playerController.setActive(true);
             }
         }

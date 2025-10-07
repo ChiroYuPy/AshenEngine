@@ -2,6 +2,7 @@
 #define ASHEN_ICONFIG_H
 
 #include <string>
+#include <vector>
 
 struct IConfig {
     virtual ~IConfig() = default;

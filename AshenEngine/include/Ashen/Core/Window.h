@@ -4,13 +4,14 @@
 #include <functional>
 #include <string>
 
+#include "Types.h"
 #include "Ashen/Events/Event.h"
+#include "Ashen/GraphicsAPI/GraphicsContext.h"
 #include "Ashen/Math/Math.h"
 
 struct GLFWwindow;
 
 namespace ash {
-
     struct WindowProperties {
         std::string Title;
         uint32_t Width = 1280;
@@ -20,42 +21,57 @@ namespace ash {
     };
 
     class Window final {
-        using EventCallbackFn = std::function<void(Event&)>;
+        using EventCallbackFn = std::function<void(Event &)>;
 
     public:
-        explicit Window(const WindowProperties& props = WindowProperties());
+        explicit Window(const WindowProperties &props = WindowProperties());
+
         ~Window();
 
-        void Create();
-        void Destroy();
-        void SwapBuffers() const;
+        void Update() const;
+
         void PollEvents() const;
-        void SetEventCallback(const EventCallbackFn& callback);
+
+        void SetEventCallback(const EventCallbackFn &callback);
 
         [[nodiscard]] Vec2 GetFramebufferSize() const;
+
         [[nodiscard]] bool ShouldClose() const;
+
         [[nodiscard]] std::string GetTitle() const;
+
         [[nodiscard]] UVec2 GetSizeU() const;
+
         [[nodiscard]] Vec2 GetSizeF() const;
+
         [[nodiscard]] uint32_t GetWidth() const;
+
         [[nodiscard]] uint32_t GetHeight() const;
+
         [[nodiscard]] float GetAspectRatio() const;
-        [[nodiscard]] void* GetHandle() const;
+
+        [[nodiscard]] void *GetHandle() const;
 
     private:
         void SetupCallbacks() const;
+
+        void Create();
+
+        void Destroy();
+
+        GLFWwindow *m_Handle = nullptr;
+        Scope<GraphicsContext> m_Context;
 
         struct WindowData {
             std::string Title;
             UVec2 Size;
             bool VSync;
+
             EventCallbackFn EventCallback;
         };
 
         WindowData m_Data;
-        GLFWwindow* m_Handle = nullptr;
     };
-
 } // namespace ash
 
 #endif // ASHEN_GLFWWINDOW_H

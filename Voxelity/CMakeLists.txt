@@ -36,16 +36,13 @@ set(APP_SOURCES
 
 add_executable(Voxelity ${APP_SOURCES})
 
-target_include_directories(Voxelity
-        PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
+target_include_directories(Voxelity PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_libraries(Voxelity PRIVATE Ashen)
 
-add_custom_target(copy_resources
+add_custom_target(voxelity_copy_resources
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/resources
         ${CMAKE_CURRENT_BINARY_DIR}/resources
 )
-add_dependencies(Voxelity copy_resources)
+add_dependencies(Voxelity voxelity_copy_resources)

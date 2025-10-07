@@ -7,7 +7,6 @@
 #include "Ashen/Core/Input.h"
 #include "Ashen/Core/Logger.h"
 #include "Ashen/Events/ApplicationEvent.h"
-#include "Ashen/GraphicsAPI/GLUtils.h"
 #include "Ashen/Graphics/Rendering/Renderer.h"
 #include "Ashen/Resources/ResourceManager.h"
 
@@ -22,11 +21,22 @@ namespace ash {
         }
         s_Instance = this;
 
-        InitializeGLFW();
-        InitializeResourceSystem();
-        InitializeWindow();
-        InitializeRenderer();
-        InitializeInput();
+        ResourcePaths::Instance().SetWorkingDirectory(m_Settings.ResourceDirectory);
+        AssetLibrary::Initialize();
+
+        WindowProperties windowProperties;
+        windowProperties.Title = m_Settings.Name + " v" + m_Settings.Version;
+
+        m_Window = MakeScope<Window>(windowProperties);
+
+        m_Window->SetEventCallback([this](Event &e) {
+            Input::OnEvent(e);
+            OnEvent(e);
+        });
+
+        Renderer::Init();
+
+        Input::Init(*m_Window);
     }
 
     Application::~Application() {
@@ -64,40 +74,6 @@ namespace ash {
         return static_cast<float>(glfwGetTime());
     }
 
-    void Application::InitializeGLFW() const {
-        if (!glfwInit()) {
-            Logger::error("Failed to initialize GLFW");
-            throw std::runtime_error("GLFW initialization failed");
-        }
-    }
-
-    void Application::InitializeResourceSystem() const {
-        ResourcePaths::Instance().SetWorkingDirectory(m_Settings.ResourceDirectory);
-        AssetLibrary::Initialize();
-    }
-
-    void Application::InitializeWindow() {
-        WindowProperties windowProperties;
-        windowProperties.Title = m_Settings.Name + " v" + m_Settings.Version;
-
-        m_Window = MakeScope<Window>(windowProperties);
-        m_Window->Create();
-
-        m_Window->SetEventCallback([this](Event &e) {
-            Input::OnEvent(e);
-            OnEvent(e);
-        });
-    }
-
-    void Application::InitializeRenderer() const {
-        InitOpenGLDebugMessageCallback();
-        Renderer::Init();
-    }
-
-    void Application::InitializeInput() const {
-        Input::Init(*m_Window);
-    }
-
     void Application::SendDefaultEvents() {
         WindowResizeEvent event(m_Window->GetWidth(), m_Window->GetHeight());
         OnEvent(event);
@@ -105,24 +81,15 @@ namespace ash {
 
     void Application::Shutdown() const {
         AssetLibrary::ClearAll();
+
         Renderer::Shutdown();
-
-        if (m_Window) {
-            m_Window->Destroy();
-        }
-
-        glfwTerminate();
     }
 
     void Application::Tick(const float deltaTime) const {
-        ProcessEvents();
+        m_Window->PollEvents();
         Update(deltaTime);
         Render();
-        m_Window->SwapBuffers();
-    }
-
-    void Application::ProcessEvents() const {
-        m_Window->PollEvents();
+        m_Window->Update();
     }
 
     void Application::Update(const float deltaTime) const {

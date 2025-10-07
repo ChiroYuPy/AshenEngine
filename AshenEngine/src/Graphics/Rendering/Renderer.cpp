@@ -4,6 +4,7 @@
 
 #include "Ashen/Core/Logger.h"
 #include "Ashen/Graphics/Rendering/Renderer2D.h"
+#include "Ashen/Graphics/Rendering/Renderer3D.h"
 #include "Ashen/GraphicsAPI/RenderCommand.h"
 #include "Ashen/GraphicsAPI/VertexArray.h"
 
@@ -18,12 +19,14 @@ namespace ash {
         RenderCommand::SetFrontFace(RenderCommand::FrontFace::CCW);
 
         Renderer2D::Init();
+        Renderer3D::Init();
 
         Logger::info("Renderer initialized");
     }
 
     void Renderer::Shutdown() {
         Renderer2D::Shutdown();
+        Renderer3D::Shutdown();
         Logger::info("Renderer shutdown");
     }
 

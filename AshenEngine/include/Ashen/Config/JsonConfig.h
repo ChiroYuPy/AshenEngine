@@ -3,7 +3,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <vector>
 #include <stdexcept>
 
 #include <json.hpp>

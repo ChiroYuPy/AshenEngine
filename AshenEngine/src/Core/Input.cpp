@@ -13,6 +13,8 @@ namespace ash {
         s_MouseButtonsPrevious.reset();
         s_FirstMouseUpdate = true;
 
+        glfwSetInputMode(s_Window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
         double x, y;
         glfwGetCursorPos(s_Window, &x, &y);
         s_MousePosition = {static_cast<float>(x), static_cast<float>(y)};
