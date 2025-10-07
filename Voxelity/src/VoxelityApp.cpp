@@ -12,7 +12,7 @@ namespace voxelity {
 
 ash::Application *ash::CreateApplication(const ApplicationCommandLineArgs args) {
     ApplicationSettings settings;
-    settings.Name = "Sandbox";
+    settings.Name = "Voxelity";
     settings.Version = "0.0.3";
     settings.CommandLineArgs = args;
 

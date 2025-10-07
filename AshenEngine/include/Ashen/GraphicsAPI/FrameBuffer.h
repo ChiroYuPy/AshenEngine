@@ -44,7 +44,7 @@ namespace ash {
         std::optional<FramebufferAttachmentSpec> depthAttachment;
         bool swapChainTarget = false;
 
-        static FramebufferConfig Default(uint32_t w = 1280, uint32_t h = 720) {
+        static FramebufferConfig Default(const uint32_t w = 1280, const uint32_t h = 720) {
             FramebufferConfig config;
             config.width = w;
             config.height = h;
@@ -53,7 +53,7 @@ namespace ash {
             return config;
         }
 
-        static FramebufferConfig HDR(uint32_t w = 1280, uint32_t h = 720) {
+        static FramebufferConfig HDR(const uint32_t w = 1280, const uint32_t h = 720) {
             FramebufferConfig config;
             config.width = w;
             config.height = h;
@@ -62,7 +62,7 @@ namespace ash {
             return config;
         }
 
-        static FramebufferConfig ColorOnly(uint32_t w = 1280, uint32_t h = 720) {
+        static FramebufferConfig ColorOnly(const uint32_t w = 1280, const uint32_t h = 720) {
             FramebufferConfig config;
             config.width = w;
             config.height = h;
@@ -70,7 +70,7 @@ namespace ash {
             return config;
         }
 
-        static FramebufferConfig Multisampled(uint32_t samples, uint32_t w = 1280, uint32_t h = 720) {
+        static FramebufferConfig Multisampled(const uint32_t samples, const uint32_t w = 1280, const uint32_t h = 720) {
             FramebufferConfig config = Default(w, h);
             config.samples = samples;
             return config;
@@ -148,7 +148,7 @@ namespace ash {
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_ID);
         }
 
-        void Resize(uint32_t width, uint32_t height) {
+        void Resize(const uint32_t width, const uint32_t height) {
             if (width == 0 || height == 0)
                 throw std::invalid_argument("Framebuffer dimensions must be > 0");
 
@@ -165,7 +165,7 @@ namespace ash {
             CreateAttachments();
         }
 
-        void AttachColorTexture(const Texture2D &texture, uint32_t index = 0) {
+        void AttachColorTexture(const Texture2D &texture, const uint32_t index = 0) {
             Bind();
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index,
                                    GL_TEXTURE_2D, texture.ID(), 0);
@@ -177,7 +177,7 @@ namespace ash {
                                    GL_TEXTURE_2D, texture.ID(), 0);
         }
 
-        [[nodiscard]] const Texture2D *GetColorTexture(size_t index = 0) const {
+        [[nodiscard]] const Texture2D *GetColorTexture(const size_t index = 0) const {
             if (index >= m_ColorTextures.size())
                 return nullptr;
             return m_ColorTextures[index].get();
@@ -217,7 +217,7 @@ namespace ash {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
 
-        void Clear(const Vec4 &color = Vec4(0.0f), float depth = 1.0f) const {
+        void Clear(const Vec4 &color = Vec4(0.0f), const float depth = 1.0f) const {
             Bind();
             glClearColor(color.r, color.g, color.b, color.a);
             glClearDepth(depth);

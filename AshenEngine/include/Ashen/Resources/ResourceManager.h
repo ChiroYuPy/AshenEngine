@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <filesystem>
 
+#include "Ashen/Graphics/Objects/Material.h"
+#include "Ashen/Graphics/Objects/Mesh.h"
 #include "Ashen/GraphicsAPI/Shader.h"
 #include "Ashen/GraphicsAPI/Texture.h"
 #include "Ashen/Utils/FileSystem.h"
@@ -183,12 +185,94 @@ namespace ash {
     };
 
     /**
+     * @brief Manages mesh resources with caching
+     */
+    class MeshManager final : public ResourceManager<Mesh> {
+    public:
+        static MeshManager& Instance() {
+            static MeshManager instance;
+            return instance;
+        }
+
+        /**
+         * @brief Load mesh by name (finds file with supported extension)
+         */
+        std::shared_ptr<Mesh> Load(const std::string& id) override;
+
+        /**
+         * @brief Load mesh from explicit path
+         */
+        std::shared_ptr<Mesh> LoadFromPath(
+            const std::string& id,
+            const fs::path& path,
+            bool flipUVs = true
+        );
+
+        /**
+         * @brief Get list of available meshes in resource directory
+         */
+        static std::vector<std::string> GetAvailableMeshes();
+
+    private:
+        MeshManager() = default;
+    };
+
+    /**
+     * @brief Manages material resources
+     */
+    class MaterialManager final : public ResourceManager<Material> {
+    public:
+        static MaterialManager& Instance() {
+            static MaterialManager instance;
+            return instance;
+        }
+
+        /**
+         * @brief Create a material with a specific shader
+         */
+        std::shared_ptr<Material> Create(
+            const std::string& id,
+            const std::string& shaderName
+        );
+
+        /**
+         * @brief Create a PBR material
+         * Note: This stores the material separately from the base Material cache
+         */
+        std::shared_ptr<PBRMaterial> CreatePBR(
+            const std::string& id,
+            const std::string& shaderName = "pbr"
+        );
+
+        /**
+         * @brief Get a PBR material (returns nullptr if not a PBR material)
+         */
+        std::shared_ptr<PBRMaterial> GetPBR(const std::string& id);
+
+        /**
+         * @brief Load method (materials are typically created, not loaded)
+         */
+        std::shared_ptr<Material> Load(const std::string& id) override {
+            // For materials, we typically create them rather than load
+            // This could be extended to load material definitions from files
+            return nullptr;
+        }
+
+    private:
+        MaterialManager() = default;
+        // Separate cache for PBR materials to avoid casting issues
+        std::unordered_map<std::string, std::shared_ptr<PBRMaterial>> m_PBRMaterials;
+    };
+
+    /**
      * @brief Central access point for all asset managers
      */
     class AssetLibrary {
     public:
         static ShaderManager& Shaders() { return ShaderManager::Instance(); }
         static TextureManager& Textures() { return TextureManager::Instance(); }
+        static MeshManager& Meshes() { return MeshManager::Instance(); }
+        static MaterialManager& Materials() { return MaterialManager::Instance(); }
 
         static void Initialize();
         static void ClearAll();

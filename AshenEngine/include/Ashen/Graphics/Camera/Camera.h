@@ -29,6 +29,12 @@ namespace ash {
         void SetPosition(const Vec3 &position) { m_Position = position; }
         void Move(const Vec3 &offset) { m_Position += offset; }
 
+        void LookAt(const Vec3& target, const Vec3& worldUp = {0.0f, 1.0f, 0.0f}) {
+            m_Front = glm::normalize(target - m_Position);
+            m_Right = glm::normalize(glm::cross(m_Front, worldUp));
+            m_Up = glm::normalize(glm::cross(m_Right, m_Front));
+        }
+
     protected:
         Camera() = default;
 
@@ -157,8 +163,6 @@ namespace ash {
             m_Bottom = centerY - halfHeight;
             m_Top = centerY + halfHeight;
 
-            Logger::info("OrthographicCamera: {0}, {1}, {2}, {3}", m_Left, m_Right, m_Bottom, m_Top);
-
             UpdateProjectionMatrix();
         }
 
@@ -197,8 +201,6 @@ namespace ash {
             m_Top = static_cast<float>(height);
 
             m_ProjectionMatrix = glm::ortho(m_Left, m_Right, m_Bottom, m_Top, m_Near, m_Far);
-
-            Logger::info("UICamera resized: left={}, right={}, bottom={}, top={}", m_Left, m_Right, m_Bottom, m_Top);
         }
 
         float m_Left, m_Right, m_Bottom, m_Top;

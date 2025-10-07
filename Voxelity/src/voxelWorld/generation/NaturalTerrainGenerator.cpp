@@ -29,7 +29,7 @@ namespace voxelity {
         {VoxelID::DIRT, VoxelID::DIRT, VoxelID::STONE, false, false, true, 0.005} // BiomeType::TUNDRA
     };
 
-    BiomeType NaturalTerrainGenerator::getBiome(const glm::ivec3 &worldPos, double elevation) {
+    BiomeType NaturalTerrainGenerator::getBiome(const glm::ivec3 &worldPos, const double elevation) {
         double temperature = noise.noise2(worldPos.x * TEMPERATURE_SCALE, worldPos.z * TEMPERATURE_SCALE);
         double humidity = noise.noise2(worldPos.x * HUMIDITY_SCALE + 1000, worldPos.z * HUMIDITY_SCALE + 1000);
 
@@ -60,7 +60,7 @@ namespace voxelity {
         return std::abs(cave1) + std::abs(cave2);
     }
 
-    VoxelType NaturalTerrainGenerator::getOreType(const glm::ivec3 &worldPos, double depth) {
+    VoxelType NaturalTerrainGenerator::getOreType(const glm::ivec3 &worldPos, const double depth) {
         double oreNoise = noise.noise3_XYBeforeZ(worldPos.x * ORE_SCALE, worldPos.y * ORE_SCALE,
                                                  worldPos.z * ORE_SCALE);
         oreNoise = (oreNoise + 1.0) * 0.5; // Normaliser entre 0 et 1

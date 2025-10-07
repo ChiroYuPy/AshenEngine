@@ -13,7 +13,7 @@
 #include "Ashen/GraphicsAPI/GLObject.h"
 
 namespace ash {
-    struct VertexAttribute {
+    struct VertexAttributeDescription {
         uint32_t location;
         uint32_t componentCount;
         VertexAttribType type;
@@ -21,70 +21,70 @@ namespace ash {
         size_t offset;
         uint32_t divisor = 0;
 
-        static VertexAttribute Float(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription Float(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
             return {location, 1, VertexAttribType::Float, false, offset, divisor};
         }
 
-        static VertexAttribute Vec2(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription Vec2(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
             return {location, 2, VertexAttribType::Float, false, offset, divisor};
         }
 
-        static VertexAttribute Vec3(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription Vec3(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
             return {location, 3, VertexAttribType::Float, false, offset, divisor};
         }
 
-        static VertexAttribute Vec4(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription Vec4(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
             return {location, 4, VertexAttribType::Float, false, offset, divisor};
         }
 
-        static VertexAttribute Int(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription Int(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
             return {location, 1, VertexAttribType::Int, false, offset, divisor};
         }
 
-        static VertexAttribute IVec2(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription IVec2(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
             return {location, 2, VertexAttribType::Int, false, offset, divisor};
         }
 
-        static VertexAttribute IVec3(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription IVec3(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
             return {location, 3, VertexAttribType::Int, false, offset, divisor};
         }
 
-        static VertexAttribute IVec4(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription IVec4(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
             return {location, 4, VertexAttribType::Int, false, offset, divisor};
         }
 
-        static VertexAttribute UInt(const uint32_t loc, const size_t off = 0, const uint32_t div = 0) {
+        static VertexAttributeDescription UInt(const uint32_t loc, const size_t off = 0, const uint32_t div = 0) {
             return {loc, 1, VertexAttribType::UnsignedInt, false, off, div};
         }
 
-        static VertexAttribute UVec2(const uint32_t loc, const size_t off = 0, const uint32_t div = 0) {
+        static VertexAttributeDescription UVec2(const uint32_t loc, const size_t off = 0, const uint32_t div = 0) {
             return {loc, 2, VertexAttribType::UnsignedInt, false, off, div};
         }
 
-        static VertexAttribute UVec3(const uint32_t loc, const size_t off = 0, const uint32_t div = 0) {
+        static VertexAttributeDescription UVec3(const uint32_t loc, const size_t off = 0, const uint32_t div = 0) {
             return {loc, 3, VertexAttribType::UnsignedInt, false, off, div};
         }
 
-        static VertexAttribute UVec4(const uint32_t loc, const size_t off = 0, const uint32_t div = 0) {
+        static VertexAttributeDescription UVec4(const uint32_t loc, const size_t off = 0, const uint32_t div = 0) {
             return {loc, 4, VertexAttribType::UnsignedInt, false, off, div};
         }
 
-        static VertexAttribute Byte(const uint32_t loc, const size_t off = 0, const bool norm = true,
+        static VertexAttributeDescription Byte(const uint32_t loc, const size_t off = 0, const bool norm = true,
                                     const uint32_t div = 0) {
             return {loc, 1, VertexAttribType::Byte, norm, off, div};
         }
 
-        static VertexAttribute UByte(const uint32_t loc, const size_t off = 0, const bool norm = true,
+        static VertexAttributeDescription UByte(const uint32_t loc, const size_t off = 0, const bool norm = true,
                                      const uint32_t div = 0) {
             return {loc, 1, VertexAttribType::UnsignedByte, norm, off, div};
         }
 
-        static VertexAttribute Short(const uint32_t loc, const size_t off = 0, const bool norm = true,
+        static VertexAttributeDescription Short(const uint32_t loc, const size_t off = 0, const bool norm = true,
                                      const uint32_t div = 0) {
             return {loc, 1, VertexAttribType::Short, norm, off, div};
         }
 
-        static VertexAttribute UShort(const uint32_t loc, const size_t off = 0, const bool norm = true,
+        static VertexAttributeDescription UShort(const uint32_t loc, const size_t off = 0, const bool norm = true,
                                       const uint32_t div = 0) {
             return {loc, 1, VertexAttribType::UnsignedShort, norm, off, div};
         }
@@ -94,20 +94,20 @@ namespace ash {
     public:
         VertexBufferLayout() = default;
 
-        explicit VertexBufferLayout(const std::initializer_list<VertexAttribute> attributes, const size_t stride = 0)
+        explicit VertexBufferLayout(const std::initializer_list<VertexAttributeDescription> attributes, const size_t stride = 0)
             : m_Attributes(attributes), m_Stride(stride) {
             if (m_Stride == 0)
                 CalculateStride();
         }
 
-        void AddAttribute(const VertexAttribute &attrib) {
+        void AddAttribute(const VertexAttributeDescription &attrib) {
             m_Attributes.push_back(attrib);
             CalculateStride();
         }
 
         void SetStride(const size_t stride) { m_Stride = stride; }
 
-        [[nodiscard]] const std::vector<VertexAttribute> &GetAttributes() const {
+        [[nodiscard]] const std::vector<VertexAttributeDescription> &GetAttributes() const {
             return m_Attributes;
         }
 
@@ -116,7 +116,7 @@ namespace ash {
         //TODO: abstracted types predefined layouts
         static VertexBufferLayout Position2D() {
             return VertexBufferLayout({
-                VertexAttribute::Vec2(0, 0)
+                VertexAttributeDescription::Vec2(0, 0)
             }, sizeof(Vec2));
         }
 
@@ -154,7 +154,7 @@ namespace ash {
             }
         }
 
-        std::vector<VertexAttribute> m_Attributes;
+        std::vector<VertexAttributeDescription> m_Attributes;
         size_t m_Stride = 0;
     };
 

@@ -13,7 +13,7 @@ namespace voxelity {
     struct ChunkCoord {
         int x, y, z;
 
-        ChunkCoord(int x = 0, int y = 0, int z = 0) : x(x), y(y), z(z) {
+        ChunkCoord(const int x = 0, const int y = 0, const int z = 0) : x(x), y(y), z(z) {
         }
 
         ChunkCoord(const glm::ivec3 &v) : x(v.x), y(v.y), z(v.z) {

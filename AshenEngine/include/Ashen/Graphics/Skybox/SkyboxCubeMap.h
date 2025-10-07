@@ -70,7 +70,7 @@ namespace ash {
             m_vbo->SetData<float>(vertices);
 
             const VertexBufferLayout layout({
-                VertexAttribute::Vec3(0, 0),
+                VertexAttributeDescription::Vec3(0, 0),
             });
 
             m_vao->AddVertexBuffer(m_vbo, layout);

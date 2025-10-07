@@ -41,7 +41,6 @@ namespace ash {
 
     void Renderer::OnWindowResize(const uint32_t width, const uint32_t height) {
         RenderCommand::SetViewport(width, height);
-        Logger::info("viewport size: {}, {}", width, height);
     }
 
     void Renderer::DrawIndexed(const VertexArray &vao, const uint32_t indexCount) {

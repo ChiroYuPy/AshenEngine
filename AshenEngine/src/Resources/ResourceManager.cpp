@@ -1,8 +1,8 @@
 #include "Ashen/Resources/ResourceManager.h"
 
-#include <iostream>
 
 #include "Ashen/Core/Logger.h"
+#include "Ashen/Resources/Loader/MeshLoader.h"
 #include "Ashen/Resources/Loader/ShaderLoader.h"
 #include "Ashen/Resources/Loader/TextureLoader.h"
 
@@ -96,7 +96,91 @@ namespace ash {
         return TextureLoader::ScanForTextures(ResourcePaths::Instance().Root());
     }
 
-    // ========== AssetLibrary ==========
+    // ========== MeshManager ==========
+
+    std::shared_ptr<Mesh> MeshManager::Load(const std::string& id) {
+        if (const auto existing = m_Resources.find(id); existing != m_Resources.end())
+            return existing->second;
+
+        // Try to find mesh file
+        const fs::path basePath = ResourcePaths::Instance().Root();
+
+        for (const auto& ext : MeshLoader::GetSupportedFormats()) {
+            fs::path meshPath = basePath / (id + ext);
+            if (FileSystem::Exists(meshPath)) {
+                return LoadFromPath(id, meshPath);
+            }
+        }
+
+        throw std::runtime_error("Mesh not found: " + id);
+    }
+
+    std::shared_ptr<Mesh> MeshManager::LoadFromPath(
+        const std::string& id,
+        const fs::path& path,
+        const bool flipUVs
+    ) {
+        auto mesh = std::make_shared<Mesh>(
+            MeshLoader::LoadSingle(path, flipUVs)
+        );
+
+        m_Resources[id] = mesh;
+
+        return mesh;
+    }
+
+    std::vector<std::string> MeshManager::GetAvailableMeshes() {
+        return MeshLoader::ScanForMeshes(ResourcePaths::Instance().Root());
+    }
+
+    // ========== MaterialManager ==========
+
+    std::shared_ptr<Material> MaterialManager::Create(
+        const std::string& id,
+        const std::string& shaderName
+    ) {
+        if (const auto existing = m_Resources.find(id); existing != m_Resources.end())
+            return existing->second;
+
+        auto shader = ShaderManager::Instance().Get(shaderName);
+        auto material = std::make_shared<Material>(shader);
+
+        m_Resources[id] = material;
+        Logger::info() << "Created material: " + id;
+
+        return material;
+    }
+
+    std::shared_ptr<PBRMaterial> MaterialManager::CreatePBR(
+        const std::string& id,
+        const std::string& shaderName
+    ) {
+        // Check PBR cache first
+        if (const auto existing = m_PBRMaterials.find(id); existing != m_PBRMaterials.end()) {
+            return existing->second;
+        }
+
+        auto shader = ShaderManager::Instance().Get(shaderName);
+        auto material = std::make_shared<PBRMaterial>(shader);
+
+        // Store in both caches
+        m_PBRMaterials[id] = material;
+        m_Resources[id] = material;  // Also store as base Material
+
+        Logger::info() << "Created PBR material: " + id;
+
+        return material;
+    }
+
+    std::shared_ptr<PBRMaterial> MaterialManager::GetPBR(const std::string& id) {
+        auto it = m_PBRMaterials.find(id);
+        if (it != m_PBRMaterials.end()) {
+            return it->second;
+        }
+        return nullptr;
+    }
+
+    // ========== AssetLibrary Updates ==========
 
     void AssetLibrary::Initialize() {
         static std::once_flag flag;
@@ -108,15 +192,20 @@ namespace ash {
 
     void AssetLibrary::LogAvailableResources() {
         const auto shaders = ShaderManager::GetAvailableShaders();
-        Logger::info() << "Found " << shaders.size() << " shader(s): ";
+        Logger::info() << "Found " << shaders.size() << " shader(s)";
 
         const auto textures = TextureManager::GetAvailableTextures();
-        Logger::info() << "Found " << textures.size() << " texture(s): ";
+        Logger::info() << "Found " << textures.size() << " texture(s)";
+
+        const auto meshes = MeshManager::GetAvailableMeshes();
+        Logger::info() << "Found " << meshes.size() << " mesh(es)";
     }
 
     void AssetLibrary::ClearAll() {
         Shaders().Clear();
         Textures().Clear();
+        Meshes().Clear();
+        Materials().Clear();
         Logger::info("All resources cleared");
     }
 }

@@ -178,7 +178,7 @@ namespace voxelity {
         }
     }
 
-    void ChunkManager::markChunkForMeshRebuild(const ChunkCoord &coord, int priority) {
+    void ChunkManager::markChunkForMeshRebuild(const ChunkCoord &coord, const int priority) {
         if (!areNeighborsLoaded(coord)) {
             return;
         }

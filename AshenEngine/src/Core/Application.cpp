@@ -21,6 +21,8 @@ namespace ash {
         }
         s_Instance = this;
 
+        Logger::info() << "Application started: " << m_Settings.Name << " v" << m_Settings.Version;
+
         ResourcePaths::Instance().SetWorkingDirectory(m_Settings.ResourceDirectory);
         AssetLibrary::Initialize();
 
@@ -106,17 +108,17 @@ namespace ash {
     void Application::OnEvent(Event &event) {
         EventDispatcher dispatcher(event);
 
-        dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent &) {
-            Stop();
-            return true;
-        });
-
         dispatcher.Dispatch<WindowResizeEvent>([](const WindowResizeEvent &e) {
             Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
             return false;
         });
 
         m_LayerStack.OnEvent(event);
+
+        dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent &) {
+            Stop();
+            return true;
+        });
     }
 
     void Application::UpdateLayers(const float ts) const {

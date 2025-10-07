@@ -218,15 +218,15 @@ namespace ash {
             }
         }
 
-        void SetBool(const std::string &name, bool value) const {
+        void SetBool(const std::string &name, const bool value) const {
             glUniform1i(GetUniformLocation(name), static_cast<int>(value));
         }
 
-        void SetInt(const std::string &name, int value) const {
+        void SetInt(const std::string &name, const int value) const {
             glUniform1i(GetUniformLocation(name), value);
         }
 
-        void SetFloat(const std::string &name, float value) const {
+        void SetFloat(const std::string &name, const float value) const {
             glUniform1f(GetUniformLocation(name), value);
         }
 
@@ -234,7 +234,7 @@ namespace ash {
             glUniform2fv(GetUniformLocation(name), 1, glm::value_ptr(v));
         }
 
-        void SetVec2(const std::string &name, float x, float y) const {
+        void SetVec2(const std::string &name, const float x, const float y) const {
             glUniform2f(GetUniformLocation(name), x, y);
         }
 
@@ -242,7 +242,7 @@ namespace ash {
             glUniform3fv(GetUniformLocation(name), 1, glm::value_ptr(v));
         }
 
-        void SetVec3(const std::string &name, float x, float y, float z) const {
+        void SetVec3(const std::string &name, const float x, const float y, const float z) const {
             glUniform3f(GetUniformLocation(name), x, y, z);
         }
 
@@ -250,7 +250,7 @@ namespace ash {
             glUniform4fv(GetUniformLocation(name), 1, glm::value_ptr(v));
         }
 
-        void SetVec4(const std::string &name, float x, float y, float z, float w) const {
+        void SetVec4(const std::string &name, const float x, const float y, const float z, const float w) const {
             glUniform4f(GetUniformLocation(name), x, y, z, w);
         }
 
@@ -263,7 +263,7 @@ namespace ash {
         }
 
         // Uniform block binding
-        void BindUniformBlock(const std::string &name, uint32_t bindingPoint) const {
+        void BindUniformBlock(const std::string &name, const uint32_t bindingPoint) const {
             const GLuint blockIndex = glGetUniformBlockIndex(m_ID, name.c_str());
             if (blockIndex != GL_INVALID_INDEX) {
                 glUniformBlockBinding(m_ID, blockIndex, bindingPoint);
@@ -273,7 +273,7 @@ namespace ash {
         }
 
         // Shader storage block binding
-        void BindStorageBlock(const std::string &name, uint32_t bindingPoint) const {
+        void BindStorageBlock(const std::string &name, const uint32_t bindingPoint) const {
             const GLuint blockIndex = glGetProgramResourceIndex(m_ID, GL_SHADER_STORAGE_BLOCK, name.c_str());
             if (blockIndex != GL_INVALID_INDEX) {
                 glShaderStorageBlockBinding(m_ID, blockIndex, bindingPoint);

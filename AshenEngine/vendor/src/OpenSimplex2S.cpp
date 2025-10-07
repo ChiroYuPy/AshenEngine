@@ -38,7 +38,7 @@ OpenSimplex2S::OpenSimplex2S(long seed) {
 /**
  * 2D SuperSimplex noise, standard lattice orientation.
  */
-double OpenSimplex2S::noise2(double x, double y) {
+double OpenSimplex2S::noise2(const double x, const double y) {
     // Get points for A2* lattice
     double s = 0.366025403784439 * (x + y);
     double xs = x + s;
@@ -52,7 +52,7 @@ double OpenSimplex2S::noise2(double x, double y) {
  * Might be better for a 2D sandbox style game, where Y is vertical.
  * Probably slightly less optimal for heightmaps or continent maps.
  */
-double OpenSimplex2S::noise2_XBeforeY(double x, double y) {
+double OpenSimplex2S::noise2_XBeforeY(const double x, const double y) {
     // Skew transform and rotation baked into one.
     double xx = x * 0.7071067811865476;
     double yy = y * 1.224744871380249;
@@ -64,7 +64,7 @@ double OpenSimplex2S::noise2_XBeforeY(double x, double y) {
  * 2D SuperSimplex noise base.
  * Lookup table implementation inspired by DigitalShadow.
  */
-double OpenSimplex2S::noise2_Base(double xs, double ys) {
+double OpenSimplex2S::noise2_Base(const double xs, const double ys) {
     double value = 0;
 
     // Get base points and offsets
@@ -111,7 +111,7 @@ double OpenSimplex2S::noise2_Base(double xs, double ys) {
  * in light of Forbidden Formulae.
  * Use noise3_XYBeforeZ or noise3_XZBeforeY instead, wherever appropriate.
  */
-double OpenSimplex2S::noise3_Classic(double x, double y, double z) {
+double OpenSimplex2S::noise3_Classic(const double x, const double y, const double z) {
     // Re-orient the cubic lattices via rotation, to produce the expected look on cardinal planar
     // slices. If texturing skybox that don't tend to have cardinal plane faces, you could even
     // remove this. Orthonormal rotation. Not a skew transform.
@@ -132,7 +132,7 @@ double OpenSimplex2S::noise3_Classic(double x, double y, double z) {
  * If Z is vertical in world coordinates, call noise3_XYBeforeZ(x, y, Z).
  * For a time varied animation, call noise3_XYBeforeZ(x, y, T).
  */
-double OpenSimplex2S::noise3_XYBeforeZ(double x, double y, double z) {
+double OpenSimplex2S::noise3_XYBeforeZ(const double x, const double y, const double z) {
     // Re-orient the cubic lattices without skewing, to make X and Y triangular like 2D.
     // Orthonormal rotation. Not a skew transform.
     double xy = x + y;
@@ -154,7 +154,7 @@ double OpenSimplex2S::noise3_XYBeforeZ(double x, double y, double z) {
  * If Z is vertical in world coordinates, call noise3_XZBeforeY(x, Z, y) or Bind noise3_XYBeforeZ.
  * For a time varied animation, call noise3_XZBeforeY(x, T, y) or Bind noise3_XYBeforeZ.
  */
-double OpenSimplex2S::noise3_XZBeforeY(double x, double y, double z) {
+double OpenSimplex2S::noise3_XZBeforeY(const double x, const double y, const double z) {
     // Re-orient the cubic lattices without skewing, to make X and Z triangular like 2D.
     // Orthonormal rotation. Not a skew transform.
     double xz = x + z;
@@ -174,7 +174,7 @@ double OpenSimplex2S::noise3_XZBeforeY(double x, double y, double z) {
  * It was actually faster to narrow down the points in the loop itself,
  * than to build up the index with enough info to isolate 8 points.
  */
-double OpenSimplex2S::noise3_BCC(double xr, double yr, double zr) {
+double OpenSimplex2S::noise3_BCC(const double xr, const double yr, const double zr) {
     // Get base and offsets inside cube of first lattice.
     int xrb = fastFloor(xr);
     int yrb = fastFloor(yr);
@@ -218,7 +218,7 @@ double OpenSimplex2S::noise3_BCC(double xr, double yr, double zr) {
 /**
  * 4D SuperSimplex noise, classic lattice orientation.
  */
-double OpenSimplex2S::noise4_Classic(double x, double y, double z, double w) {
+double OpenSimplex2S::noise4_Classic(const double x, const double y, const double z, const double w) {
     // Get points for A4 lattice
     double s = 0.309016994374947 * (x + y + z + w);
     double xs = x + s;
@@ -234,7 +234,7 @@ double OpenSimplex2S::noise4_Classic(double x, double y, double z, double w) {
  * Recommended for 3D terrain, where X and Y (or Z and W) are horizontal.
  * Recommended for noise(x, y, sin(time), cos(time)) trick.
  */
-double OpenSimplex2S::noise4_XYBeforeZW(double x, double y, double z, double w) {
+double OpenSimplex2S::noise4_XYBeforeZW(const double x, const double y, const double z, const double w) {
     double s2 = (x + y) * -0.28522513987434876941 + (z + w) * 0.83897065470611435718;
     double t2 = (z + w) * 0.21939749883706435719 + (x + y) * -0.48214856493302476942;
     double xs = x + s2;
@@ -249,7 +249,7 @@ double OpenSimplex2S::noise4_XYBeforeZW(double x, double y, double z, double w) 
  * 4D SuperSimplex noise, with XZ and YW forming orthogonal triangular-based planes.
  * Recommended for 3D terrain, where X and Z (or Y and W) are horizontal.
  */
-double OpenSimplex2S::noise4_XZBeforeYW(double x, double y, double z, double w) {
+double OpenSimplex2S::noise4_XZBeforeYW(const double x, const double y, const double z, const double w) {
     double s2 = (x + z) * -0.28522513987434876941 + (y + w) * 0.83897065470611435718;
     double t2 = (y + w) * 0.21939749883706435719 + (x + z) * -0.48214856493302476942;
     double xs = x + s2;
@@ -265,7 +265,7 @@ double OpenSimplex2S::noise4_XZBeforeYW(double x, double y, double z, double w) 
  * and W for an extra degree of freedom.
  * Recommended for time-varied animations which textures a 3D object (W=time)
  */
-double OpenSimplex2S::noise4_XYZBeforeW(double x, double y, double z, double w) {
+double OpenSimplex2S::noise4_XYZBeforeW(const double x, const double y, const double z, const double w) {
     double xyz = x + y + z;
     double ww = w * 1.118033988749894;
     double s2 = xyz * -0.16666666666666666 + ww;
@@ -283,7 +283,7 @@ double OpenSimplex2S::noise4_XYZBeforeW(double x, double y, double z, double w) 
  * This isn't as elegant or SIMD/GPU/etc. portable as other approaches,
  * but it does compete performance-wise with optimized OpenSimplex1.
  */
-double OpenSimplex2S::noise4_Base(double xs, double ys, double zs, double ws) {
+double OpenSimplex2S::noise4_Base(const double xs, const double ys, const double zs, const double ws) {
     double value = 0;
 
     // Get base points and offsets
@@ -330,12 +330,12 @@ double OpenSimplex2S::noise4_Base(double xs, double ys, double zs, double ws) {
     return value;
 }
 
-int OpenSimplex2S::fastFloor(double x) {
+int OpenSimplex2S::fastFloor(const double x) {
     int xi = static_cast<int>(x);
     return x < xi ? xi - 1 : xi;
 }
 
-OpenSimplex2S::LatticePoint2D::LatticePoint2D(int a_xsv, int a_ysv) {
+OpenSimplex2S::LatticePoint2D::LatticePoint2D(const int a_xsv, const int a_ysv) {
     xsv = a_xsv;
     ysv = a_ysv;
     double ssv = (a_xsv + a_ysv) * -0.211324865405187;
@@ -345,7 +345,7 @@ OpenSimplex2S::LatticePoint2D::LatticePoint2D(int a_xsv, int a_ysv) {
 
 OpenSimplex2S::LatticePoint2D::LatticePoint2D() = default;
 
-OpenSimplex2S::LatticePoint3D::LatticePoint3D(int a_xrv, int a_yrv, int a_zrv, int lattice) {
+OpenSimplex2S::LatticePoint3D::LatticePoint3D(const int a_xrv, const int a_yrv, const int a_zrv, const int lattice) {
     dxr = -a_xrv + lattice * 0.5;
     dyr = -a_yrv + lattice * 0.5;
     dzr = -a_zrv + lattice * 0.5;
@@ -356,7 +356,7 @@ OpenSimplex2S::LatticePoint3D::LatticePoint3D(int a_xrv, int a_yrv, int a_zrv, i
 
 OpenSimplex2S::LatticePoint3D::LatticePoint3D() = default;
 
-OpenSimplex2S::LatticePoint4D::LatticePoint4D(int a_xsv, int a_ysv, int a_zsv, int a_wsv) {
+OpenSimplex2S::LatticePoint4D::LatticePoint4D(const int a_xsv, const int a_ysv, const int a_zsv, const int a_wsv) {
     xsv = a_xsv;
     ysv = a_ysv;
     zsv = a_zsv;

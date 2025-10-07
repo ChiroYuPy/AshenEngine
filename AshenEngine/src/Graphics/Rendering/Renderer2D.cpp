@@ -23,10 +23,10 @@ namespace ash {
             quads.VertexBuffer2D->SetEmpty(QuadData::MaxVertices, sizeof(QuadVertex));
 
             const VertexBufferLayout layout({
-                VertexAttribute::Vec3(0, offsetof(QuadVertex, Position)),
-                VertexAttribute::Vec4(1, offsetof(QuadVertex, Color)),
-                VertexAttribute::Vec2(2, offsetof(QuadVertex, TexCoord)),
-                VertexAttribute::Float(3, offsetof(QuadVertex, TexIndex)),
+                VertexAttributeDescription::Vec3(0, offsetof(QuadVertex, Position)),
+                VertexAttributeDescription::Vec4(1, offsetof(QuadVertex, Color)),
+                VertexAttributeDescription::Vec2(2, offsetof(QuadVertex, TexCoord)),
+                VertexAttributeDescription::Float(3, offsetof(QuadVertex, TexIndex)),
             });
 
             quads.VertexArray2D->AddVertexBuffer(quads.VertexBuffer2D, layout);
@@ -118,8 +118,8 @@ namespace ash {
             lines.VertexBuffer2D->SetEmpty(LineData::MaxVertices, sizeof(LineVertex));
 
             const VertexBufferLayout layout({
-                VertexAttribute::Vec3(0, offsetof(LineVertex, Position)),
-                VertexAttribute::Vec4(1, offsetof(LineVertex, Color)),
+                VertexAttributeDescription::Vec3(0, offsetof(LineVertex, Position)),
+                VertexAttributeDescription::Vec4(1, offsetof(LineVertex, Color)),
             });
 
             lines.VertexArray2D->AddVertexBuffer(lines.VertexBuffer2D, layout);
@@ -162,11 +162,11 @@ namespace ash {
             circles.VertexBuffer2D->SetEmpty(CircleData::MaxVertices, sizeof(CircleVertex));
 
             const VertexBufferLayout layout({
-                VertexAttribute::Vec3(0, offsetof(CircleVertex, WorldPosition)),
-                VertexAttribute::Vec3(1, offsetof(CircleVertex, LocalPosition)),
-                VertexAttribute::Vec4(1, offsetof(CircleVertex, Color)),
-                VertexAttribute::Float(1, offsetof(CircleVertex, Thickness)),
-                VertexAttribute::Float(1, offsetof(CircleVertex, Fade)),
+                VertexAttributeDescription::Vec3(0, offsetof(CircleVertex, WorldPosition)),
+                VertexAttributeDescription::Vec3(1, offsetof(CircleVertex, LocalPosition)),
+                VertexAttributeDescription::Vec4(1, offsetof(CircleVertex, Color)),
+                VertexAttributeDescription::Float(1, offsetof(CircleVertex, Thickness)),
+                VertexAttributeDescription::Float(1, offsetof(CircleVertex, Fade)),
             });
 
             circles.VertexArray2D->AddVertexBuffer(circles.VertexBuffer2D, layout);

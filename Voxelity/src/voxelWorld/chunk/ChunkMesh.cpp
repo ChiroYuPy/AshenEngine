@@ -15,7 +15,7 @@ namespace voxelity {
         m_vao->Bind();
 
         const ash::VertexBufferLayout layout({
-            ash::VertexAttribute::UInt(0, 0, 1) // location 0, offset 0, divisor 1
+            ash::VertexAttributeDescription::UInt(0, 0, 1) // location 0, offset 0, divisor 1
         });
 
         m_vao->AddVertexBuffer(m_instanceBuffer, layout);

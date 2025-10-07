@@ -32,18 +32,16 @@ namespace ash {
     }
 
     void Window::Create() {
-        {
-            const int success = glfwInit();
-            if (!success) Logger::error("Failed to initialize GLFW!");
+        if (s_GLFWWindowCount == 0) {
+            if (!glfwInit())
+                Logger::error("Failed to initialize GLFW!");
             glfwSetErrorCallback(GLFWErrorCallback);
         }
 
-        {
-            glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
-            m_Handle = glfwCreateWindow(m_Data.Size.x, m_Data.Size.y, m_Data.Title.c_str(), nullptr, nullptr);
-            ++s_GLFWWindowCount;
-        }
+        m_Handle = glfwCreateWindow(m_Data.Size.x, m_Data.Size.y, m_Data.Title.c_str(), nullptr, nullptr);
+        ++s_GLFWWindowCount;
 
         m_Context = MakeScope<GraphicsContext>(m_Handle);
         m_Context->Init();
