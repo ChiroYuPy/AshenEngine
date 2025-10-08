@@ -15,6 +15,8 @@ namespace ash {
         SandboxLayer() {
             m_Mesh = AssetLibrary::Meshes().Load("sofa/sofa");
 
+            m_ShapeMesh = AssetLibrary::Meshes().GetCube();
+
             m_Camera = MakeRef<PerspectiveCamera>();
             m_Camera->SetPosition({10, 10, 10});
             m_Camera->LookAt({0, 0, 0});
@@ -55,7 +57,6 @@ namespace ash {
             const Mat4 view = m_Camera->GetViewMatrix();
             const Mat4 proj = m_Camera->GetProjectionMatrix();
 
-            shader->SetMat4("u_Model", model);
             shader->SetMat4("u_View", view);
             shader->SetMat4("u_Proj", proj);
 
@@ -70,7 +71,12 @@ namespace ash {
             }
 
             m_Material->Bind();
+
+            shader->SetMat4("u_Model", translate(model, {0, 0, 0}));
             m_Mesh->Draw();
+
+            shader->SetMat4("u_Model", translate(model, {-3, 0, 0}));
+            m_ShapeMesh->Draw();
         }
 
         void OnEvent(Event &event) override {
@@ -113,7 +119,10 @@ namespace ash {
     private:
         Ref<CameraController> m_CameraController;
         Ref<PerspectiveCamera> m_Camera;
+
         Ref<Mesh> m_Mesh;
+        Ref<Mesh> m_ShapeMesh;
+
         Ref<PBRMaterial> m_Material;
 
         std::array<Vec3, MAX_LIGHTS> m_LightPositions;

@@ -51,7 +51,7 @@ namespace ash {
     }
 
     std::optional<float> Material::GetFloat(const std::string& name) const {
-        auto it = m_Properties.find(name);
+        const auto it = m_Properties.find(name);
         if (it != m_Properties.end() && std::holds_alternative<float>(it->second)) {
             return std::get<float>(it->second);
         }
@@ -59,7 +59,7 @@ namespace ash {
     }
 
     std::optional<int> Material::GetInt(const std::string& name) const {
-        auto it = m_Properties.find(name);
+        const auto it = m_Properties.find(name);
         if (it != m_Properties.end() && std::holds_alternative<int>(it->second)) {
             return std::get<int>(it->second);
         }
@@ -67,7 +67,7 @@ namespace ash {
     }
 
     std::optional<Vec3> Material::GetVec3(const std::string& name) const {
-        auto it = m_Properties.find(name);
+        const auto it = m_Properties.find(name);
         if (it != m_Properties.end() && std::holds_alternative<Vec3>(it->second)) {
             return std::get<Vec3>(it->second);
         }
@@ -75,7 +75,7 @@ namespace ash {
     }
 
     std::optional<Vec4> Material::GetVec4(const std::string& name) const {
-        auto it = m_Properties.find(name);
+        const auto it = m_Properties.find(name);
         if (it != m_Properties.end() && std::holds_alternative<Vec4>(it->second)) {
             return std::get<Vec4>(it->second);
         }

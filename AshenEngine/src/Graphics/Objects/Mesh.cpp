@@ -260,7 +260,7 @@ namespace ash {
 
         // Indices for all 6 faces
         for (uint32_t i = 0; i < 6; ++i) {
-            uint32_t base = i * 4;
+            const uint32_t base = i * 4;
             builder.AddTriangle(base, base + 1, base + 2);
             builder.AddTriangle(base, base + 2, base + 3);
         }
@@ -328,11 +328,11 @@ namespace ash {
 
         for (uint32_t y = 0; y <= subdivisions; ++y) {
             for (uint32_t x = 0; x <= subdivisions; ++x) {
-                float u = static_cast<float>(x) / static_cast<float>(subdivisions);
-                float v = static_cast<float>(y) / static_cast<float>(subdivisions);
+                const float u = static_cast<float>(x) / static_cast<float>(subdivisions);
+                const float v = static_cast<float>(y) / static_cast<float>(subdivisions);
 
-                float px = -halfW + u * width;
-                float pz = -halfH + v * height;
+                const float px = -halfW + u * width;
+                const float pz = -halfH + v * height;
 
                 builder.AddVertex(
                     Vec3(px, 0.0f, pz),
@@ -344,8 +344,8 @@ namespace ash {
 
         for (uint32_t y = 0; y < subdivisions; ++y) {
             for (uint32_t x = 0; x < subdivisions; ++x) {
-                uint32_t a = y * (subdivisions + 1) + x;
-                uint32_t b = a + subdivisions + 1;
+                const uint32_t a = y * (subdivisions + 1) + x;
+                const uint32_t b = a + subdivisions + 1;
 
                 builder.AddTriangle(a, b, a + 1);
                 builder.AddTriangle(b, b + 1, a + 1);
