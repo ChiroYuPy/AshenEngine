@@ -8,19 +8,28 @@
 namespace ash {
     class CameraController {
     public:
-        explicit CameraController(const Ref<PerspectiveCamera> &camera, const float moveSpeed = 5.0f, const float sensitivity = 0.1f)
-            : m_camera(camera), m_moveSpeed(moveSpeed), m_mouseSensitivity(sensitivity) {
-            m_yaw = -90.0f;
-            m_pitch = 0.0f;
+        explicit CameraController(const Ref<PerspectiveCamera> &camera,
+                                 const float moveSpeed = 5.0f,
+                                 const float sensitivity = 0.1f)
+            : m_camera(camera), m_moveSpeed(moveSpeed),
+              m_mouseSensitivity(sensitivity), m_isActive(false) {
+
+            // Calculer yaw et pitch depuis la direction actuelle de la caméra
+            const Vec3 front = m_camera->GetFront();
+            m_yaw = glm::degrees(atan2(front.z, front.x));
+            m_pitch = glm::degrees(asin(front.y));
+
             m_lastMouseX = 0.0f;
             m_lastMouseY = 0.0f;
             m_firstMouse = true;
         }
 
         void OnUpdate(const float deltaTime) const {
+            if (!m_isActive) return;
             // Récupération des vecteurs de direction
             const Vec3 cameraFront = m_camera->GetFront();
-            const Vec3 cameraRight = glm::normalize(glm::cross(cameraFront, Vec3(0, 1, 0)));
+            const Vec3 cameraRight = m_camera->GetRight();
+            const Vec3 cameraUp = m_camera->GetUp();
 
             Vec3 position = m_camera->GetPosition();
             const float velocity = m_moveSpeed * deltaTime;
@@ -34,6 +43,10 @@ namespace ash {
                 position -= cameraRight * velocity;
             if (Input::IsKeyPressed(Key::D))
                 position += cameraRight * velocity;
+            if (Input::IsKeyPressed(Key::Space))
+                position += cameraUp * velocity;
+            if (Input::IsKeyPressed(Key::LeftShift))
+                position -= cameraUp * velocity;
 
             // Déplacements verticaux Q/E
             if (Input::IsKeyPressed(Key::Q))
@@ -45,14 +58,17 @@ namespace ash {
         }
 
         void OnMouseMove(const float xpos, const float ypos) {
+            if (!m_isActive) return;
+
             if (m_firstMouse) {
                 m_lastMouseX = xpos;
                 m_lastMouseY = ypos;
                 m_firstMouse = false;
+                return; // Sortir ici pour éviter le saut initial
             }
 
             float xoffset = xpos - m_lastMouseX;
-            float yoffset = m_lastMouseY - ypos; // Inversé: y va de bas en haut
+            float yoffset = m_lastMouseY - ypos;
             m_lastMouseX = xpos;
             m_lastMouseY = ypos;
 
@@ -62,7 +78,6 @@ namespace ash {
             m_yaw += xoffset;
             m_pitch += yoffset;
 
-            // Contraintes pour éviter les flips
             if (m_pitch > 89.0f)
                 m_pitch = 89.0f;
             if (m_pitch < -89.0f)
@@ -72,12 +87,22 @@ namespace ash {
         }
 
         void OnMouseScroll(const float yoffset) {
+            if (!m_isActive) return;
             m_moveSpeed += yoffset * 0.5f;
             if (m_moveSpeed < 1.0f)
                 m_moveSpeed = 1.0f;
             if (m_moveSpeed > 50.0f)
                 m_moveSpeed = 50.0f;
         }
+
+        void SetActive(const bool active) {
+            m_isActive = active;
+            if (active) {
+                m_firstMouse = true;
+            }
+        }
+
+        bool IsActive() const { return m_isActive; }
 
     private:
         void UpdateCameraDirection() const {
@@ -98,6 +123,7 @@ namespace ash {
         float m_lastMouseX;
         float m_lastMouseY;
         bool m_firstMouse;
+        bool m_isActive;
     };
 }
 

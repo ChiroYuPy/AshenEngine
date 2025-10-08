@@ -23,18 +23,18 @@ namespace ash {
 
         Logger::info() << "Application started: " << m_Settings.Name << " v" << m_Settings.Version;
 
-        ResourcePaths::Instance().SetWorkingDirectory(m_Settings.ResourceDirectory);
-        AssetLibrary::Initialize();
-
         WindowProperties windowProperties;
         windowProperties.Title = m_Settings.Name + " v" + m_Settings.Version;
-
         m_Window = MakeScope<Window>(windowProperties);
 
         m_Window->SetEventCallback([this](Event &e) {
             Input::OnEvent(e);
             OnEvent(e);
         });
+
+        ResourcePaths::Instance().SetWorkingDirectory(m_Settings.ResourceDirectory);
+        AssetLibrary::Initialize();
+        AssetLibrary::PreloadCommon();
 
         Renderer::Init();
 
@@ -81,9 +81,9 @@ namespace ash {
         OnEvent(event);
     }
 
-    void Application::Shutdown() const {
+    void Application::Shutdown() {
+        m_LayerStack.Clear();
         AssetLibrary::ClearAll();
-
         Renderer::Shutdown();
     }
 

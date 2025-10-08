@@ -4,7 +4,9 @@
 #include <memory>
 #include <unordered_map>
 #include <filesystem>
+#include <mutex>
 
+#include "Ashen/BuiltIn/BuiltInShader.h"
 #include "Ashen/Graphics/Objects/Material.h"
 #include "Ashen/Graphics/Objects/Mesh.h"
 #include "Ashen/GraphicsAPI/Shader.h"
@@ -25,7 +27,6 @@ namespace ash {
         }
 
         void SetWorkingDirectory(const fs::path& dir);
-
         [[nodiscard]] fs::path GetPath(const std::string& filename) const;
         [[nodiscard]] std::vector<fs::path> Scan(const std::vector<std::string>& extensions = {}) const;
         [[nodiscard]] const fs::path& Root() const { return m_Root; }
@@ -33,58 +34,49 @@ namespace ash {
     private:
         ResourcePaths() = default;
         fs::path m_Root;
+        mutable std::mutex m_Mutex;
     };
 
     /**
-     * @brief Base template for resource managers (cache layer only)
+     * @brief Base template for resource managers (cache layer)
      */
     template<typename T>
     class ResourceManager {
     public:
         virtual ~ResourceManager() = default;
 
-        /**
-         * @brief Get resource from cache or load it
-         */
         std::shared_ptr<T> Get(const std::string& id) {
+            std::lock_guard<std::mutex> lock(m_Mutex);
+
             auto it = m_Resources.find(id);
             if (it != m_Resources.end())
                 return it->second;
+
             return Load(id);
         }
 
-        /**
-         * @brief Add resource to cache manually
-         */
         void Add(const std::string& id, std::shared_ptr<T> resource) {
+            std::lock_guard<std::mutex> lock(m_Mutex);
             m_Resources[id] = std::move(resource);
         }
 
-        /**
-         * @brief Check if resource is in cache
-         */
         [[nodiscard]] bool Has(const std::string& id) const {
+            std::lock_guard<std::mutex> lock(m_Mutex);
             return m_Resources.contains(id);
         }
 
-        /**
-         * @brief Remove resource from cache
-         */
         void Unload(const std::string& id) {
+            std::lock_guard<std::mutex> lock(m_Mutex);
             m_Resources.erase(id);
         }
 
-        /**
-         * @brief Clear all cached resources
-         */
         void Clear() {
+            std::lock_guard<std::mutex> lock(m_Mutex);
             m_Resources.clear();
         }
 
-        /**
-         * @brief Get list of cached resource IDs
-         */
         [[nodiscard]] std::vector<std::string> GetLoadedResources() const {
+            std::lock_guard<std::mutex> lock(m_Mutex);
             std::vector<std::string> ids;
             ids.reserve(m_Resources.size());
             for (const auto& [id, _] : m_Resources)
@@ -92,25 +84,20 @@ namespace ash {
             return ids;
         }
 
-        /**
-         * @brief Get number of cached resources
-         */
         [[nodiscard]] size_t Count() const {
+            std::lock_guard<std::mutex> lock(m_Mutex);
             return m_Resources.size();
         }
 
     protected:
-        /**
-         * @brief Load resource (to be implemented by derived classes)
-         */
         virtual std::shared_ptr<T> Load(const std::string& id) = 0;
 
         std::unordered_map<std::string, std::shared_ptr<T>> m_Resources;
+        mutable std::mutex m_Mutex;
     };
 
     /**
-     * @brief Manages shader program resources
-     * Delegates loading to ShaderLoader
+     * @brief Shader manager supporting both built-in and custom shaders
      */
     class ShaderManager final : public ResourceManager<ShaderProgram> {
     public:
@@ -120,7 +107,12 @@ namespace ash {
         }
 
         /**
-         * @brief Load shader by name (looks for name.vert and name.frag)
+         * @brief Get a built-in shader
+         */
+        std::shared_ptr<ShaderProgram> GetBuiltIn(BuiltInShaders::Type type);
+
+        /**
+         * @brief Load custom shader by name (looks for name.vert and name.frag)
          */
         std::shared_ptr<ShaderProgram> Load(const std::string& id) override;
 
@@ -133,9 +125,6 @@ namespace ash {
             const fs::path& fragPath
         );
 
-        /**
-         * @brief Get list of available shaders in resource directory
-         */
         static std::vector<std::string> GetAvailableShaders();
 
     private:
@@ -143,8 +132,7 @@ namespace ash {
     };
 
     /**
-     * @brief Manages texture resources
-     * Delegates loading to TextureLoader
+     * @brief Texture manager
      */
     class TextureManager final : public ResourceManager<Texture2D> {
     public:
@@ -153,31 +141,19 @@ namespace ash {
             return instance;
         }
 
-        /**
-         * @brief Load texture by name (finds file with supported extension)
-         */
         std::shared_ptr<Texture2D> Load(const std::string& id) override;
 
-        /**
-         * @brief Load texture with specific configuration
-         */
         std::shared_ptr<Texture2D> LoadWithConfig(
             const std::string& id,
             const TextureConfig& config
         );
 
-        /**
-         * @brief Load texture from explicit path
-         */
         std::shared_ptr<Texture2D> LoadFromPath(
             const std::string& id,
             const fs::path& path,
             const TextureConfig& config = TextureConfig::Default()
         );
 
-        /**
-         * @brief Get list of available textures in resource directory
-         */
         static std::vector<std::string> GetAvailableTextures();
 
     private:
@@ -185,7 +161,7 @@ namespace ash {
     };
 
     /**
-     * @brief Manages mesh resources with caching
+     * @brief Mesh manager
      */
     class MeshManager final : public ResourceManager<Mesh> {
     public:
@@ -194,14 +170,8 @@ namespace ash {
             return instance;
         }
 
-        /**
-         * @brief Load mesh by name (finds file with supported extension)
-         */
         std::shared_ptr<Mesh> Load(const std::string& id) override;
 
-        /**
-         * @brief Load mesh from explicit path
-         */
         std::shared_ptr<Mesh> LoadFromPath(
             const std::string& id,
             const fs::path& path,
@@ -209,8 +179,13 @@ namespace ash {
         );
 
         /**
-         * @brief Get list of available meshes in resource directory
+         * @brief Get built-in primitive meshes
          */
+        std::shared_ptr<Mesh> GetCube();
+        std::shared_ptr<Mesh> GetSphere();
+        std::shared_ptr<Mesh> GetPlane();
+        std::shared_ptr<Mesh> GetQuad();
+
         static std::vector<std::string> GetAvailableMeshes();
 
     private:
@@ -218,7 +193,7 @@ namespace ash {
     };
 
     /**
-     * @brief Manages material resources
+     * @brief Material manager with built-in material support
      */
     class MaterialManager final : public ResourceManager<Material> {
     public:
@@ -228,39 +203,57 @@ namespace ash {
         }
 
         /**
-         * @brief Create a material with a specific shader
+         * @brief Create materials using built-in shaders
          */
-        std::shared_ptr<Material> Create(
+        std::shared_ptr<UnlitMaterial> CreateUnlit(
+            const std::string& id,
+            const Vec4& color = Vec4(1.0f)
+        );
+
+        std::shared_ptr<UnlitMaterial> CreateUnlitTextured(
+            const std::string& id,
+            const std::string& textureName
+        );
+
+        std::shared_ptr<BlinnPhongMaterial> CreateBlinnPhong(
+            const std::string& id,
+            const Vec3& diffuse = Vec3(0.8f),
+            const Vec3& specular = Vec3(0.5f),
+            float shininess = 32.0f
+        );
+
+        std::shared_ptr<PBRMaterial> CreatePBR(
+            const std::string& id,
+            const Vec3& albedo = Vec3(1.0f),
+            float metallic = 0.0f,
+            float roughness = 0.5f
+        );
+
+        /**
+         * @brief Create material with custom shader
+         */
+        std::shared_ptr<Material> CreateCustom(
             const std::string& id,
             const std::string& shaderName
         );
 
         /**
-         * @brief Create a PBR material
-         * Note: This stores the material separately from the base Material cache
+         * @brief Get typed materials
          */
-        std::shared_ptr<PBRMaterial> CreatePBR(
-            const std::string& id,
-            const std::string& shaderName = "pbr"
-        );
-
-        /**
-         * @brief Get a PBR material (returns nullptr if not a PBR material)
-         */
+        std::shared_ptr<UnlitMaterial> GetUnlit(const std::string& id);
+        std::shared_ptr<BlinnPhongMaterial> GetBlinnPhong(const std::string& id);
         std::shared_ptr<PBRMaterial> GetPBR(const std::string& id);
 
-        /**
-         * @brief Load method (materials are typically created, not loaded)
-         */
         std::shared_ptr<Material> Load(const std::string& id) override {
-            // For materials, we typically create them rather than load
-            // This could be extended to load material definitions from files
-            return nullptr;
+            return nullptr; // Materials are created, not loaded
         }
 
     private:
         MaterialManager() = default;
-        // Separate cache for PBR materials to avoid casting issues
+
+        // Type-specific caches to avoid casting
+        std::unordered_map<std::string, std::shared_ptr<UnlitMaterial>> m_UnlitMaterials;
+        std::unordered_map<std::string, std::shared_ptr<BlinnPhongMaterial>> m_BlinnPhongMaterials;
         std::unordered_map<std::string, std::shared_ptr<PBRMaterial>> m_PBRMaterials;
     };
 
@@ -274,13 +267,31 @@ namespace ash {
         static MeshManager& Meshes() { return MeshManager::Instance(); }
         static MaterialManager& Materials() { return MaterialManager::Instance(); }
 
+        /**
+         * @brief Initialize the asset library and scan resources
+         */
         static void Initialize();
+
+        /**
+         * @brief Preload commonly used assets
+         */
+        static void PreloadCommon();
+
+        /**
+         * @brief Clear all cached resources
+         */
         static void ClearAll();
+
+        /**
+         * @brief Get memory usage statistics
+         */
+        static size_t GetTotalResourceCount();
 
     private:
         AssetLibrary() = default;
         static void LogAvailableResources();
     };
-}
+
+} // namespace ash
 
 #endif // ASHEN_RESOURCEMANAGER_H

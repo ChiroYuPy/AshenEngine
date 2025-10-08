@@ -40,6 +40,8 @@ set(CORE_SOURCES
 set(TINYOBJ_SOURCES
         vendor/tinyobjloader/tiny_obj_loader.cc
         include/Ashen/Graphics/Camera/CameraController.h
+        include/Ashen/BuiltIn/BuiltInShader.h
+        src/BuiltIn/BuiltInShader.cpp
 )
 
 # ===========================

@@ -16,27 +16,18 @@ namespace ash {
     using MaterialValue = std::variant<float, int, bool, Vec2, Vec3, Vec4, Mat3, Mat4, std::shared_ptr<Texture2D>>;
 
     /**
-     * @brief Material class managing shader and properties
+     * @brief Base material class
      */
     class Material {
     public:
         explicit Material(std::shared_ptr<ShaderProgram> shader);
         Material() = default;
-        virtual ~Material() = default;  // Virtual destructor for polymorphism
+        virtual ~Material() = default;
 
-        /**
-         * @brief Set the shader program
-         */
         void SetShader(std::shared_ptr<ShaderProgram> shader);
-
-        /**
-         * @brief Get the shader program
-         */
         [[nodiscard]] const std::shared_ptr<ShaderProgram>& GetShader() const { return m_Shader; }
 
-        /**
-         * @brief Set property values
-         */
+        // Property setters
         void SetFloat(const std::string& name, float value);
         void SetInt(const std::string& name, int value);
         void SetBool(const std::string& name, bool value);
@@ -47,35 +38,18 @@ namespace ash {
         void SetMat4(const std::string& name, const Mat4& value);
         void SetTexture(const std::string& name, std::shared_ptr<Texture2D> texture);
 
-        /**
-         * @brief Get property values
-         */
+        // Property getters
         [[nodiscard]] std::optional<float> GetFloat(const std::string& name) const;
         [[nodiscard]] std::optional<int> GetInt(const std::string& name) const;
         [[nodiscard]] std::optional<Vec3> GetVec3(const std::string& name) const;
         [[nodiscard]] std::optional<Vec4> GetVec4(const std::string& name) const;
-
-        /**
-         * @brief Check if property exists
-         */
         [[nodiscard]] bool HasProperty(const std::string& name) const;
 
-        /**
-         * @brief Apply all material properties to shader
-         */
         virtual void Apply() const;
-
-        /**
-         * @brief Bind the material (binds shader and applies properties)
-         */
         virtual void Bind() const;
-
-        /**
-         * @brief Unbind the material
-         */
         virtual void Unbind() const;
 
-    protected:  // Changed from private to allow derived class access
+    protected:
         std::shared_ptr<ShaderProgram> m_Shader;
         std::unordered_map<std::string, MaterialValue> m_Properties;
         mutable std::unordered_map<std::string, uint32_t> m_TextureUnits;
@@ -85,35 +59,99 @@ namespace ash {
     };
 
     /**
-     * @brief PBR Material with standard properties
+     * @brief Unlit material (no lighting)
+     */
+    class UnlitMaterial : public Material {
+    public:
+        UnlitMaterial();
+        explicit UnlitMaterial(std::shared_ptr<ShaderProgram> customShader);
+
+        void SetColor(const Vec4& color);
+        void SetTexture(std::shared_ptr<Texture2D> texture);
+
+        [[nodiscard]] Vec4 GetColor() const;
+    };
+
+    /**
+     * @brief Blinn-Phong material
+     */
+    class BlinnPhongMaterial : public Material {
+    public:
+        BlinnPhongMaterial();
+        explicit BlinnPhongMaterial(std::shared_ptr<ShaderProgram> customShader);
+
+        void SetDiffuse(const Vec3& color);
+        void SetSpecular(const Vec3& color);
+        void SetShininess(float value);
+        void SetDiffuseMap(std::shared_ptr<Texture2D> texture);
+
+        [[nodiscard]] Vec3 GetDiffuse() const;
+        [[nodiscard]] Vec3 GetSpecular() const;
+        [[nodiscard]] float GetShininess() const;
+    };
+
+    /**
+     * @brief PBR Material
      */
     class PBRMaterial : public Material {
     public:
-        explicit PBRMaterial(std::shared_ptr<ShaderProgram> shader);
+        PBRMaterial();
+        explicit PBRMaterial(std::shared_ptr<ShaderProgram> customShader);
 
-        // Albedo/Base Color
+        // Base properties
         void SetAlbedo(const Vec3& color);
-        void SetAlbedoMap(std::shared_ptr<Texture2D> texture);
-
-        // Metallic and Roughness
         void SetMetallic(float value);
         void SetRoughness(float value);
-        void SetMetallicRoughnessMap(std::shared_ptr<Texture2D> texture);
-
-        // Normal mapping
-        void SetNormalMap(std::shared_ptr<Texture2D> texture);
-
-        // Ambient Occlusion
-        void SetAOMap(std::shared_ptr<Texture2D> texture);
-
-        // Emissive
         void SetEmissive(const Vec3& color);
+
+        // Texture maps
+        void SetAlbedoMap(std::shared_ptr<Texture2D> texture);
+        void SetMetallicRoughnessMap(std::shared_ptr<Texture2D> texture);
+        void SetNormalMap(std::shared_ptr<Texture2D> texture);
+        void SetAOMap(std::shared_ptr<Texture2D> texture);
         void SetEmissiveMap(std::shared_ptr<Texture2D> texture);
 
+        // Getters
         [[nodiscard]] Vec3 GetAlbedo() const;
         [[nodiscard]] float GetMetallic() const;
         [[nodiscard]] float GetRoughness() const;
+        [[nodiscard]] Vec3 GetEmissive() const;
     };
-}
+
+    /**
+     * @brief Skybox material
+     */
+    class SkyboxMaterial : public Material {
+    public:
+        SkyboxMaterial();
+        explicit SkyboxMaterial(std::shared_ptr<ShaderProgram> customShader);
+
+        void SetCubemap(const std::shared_ptr<TextureCubeMap> &cubemap) const;
+    };
+
+    /**
+     * @brief Factory for creating materials with built-in shaders
+     */
+    class MaterialFactory {
+    public:
+        static std::shared_ptr<UnlitMaterial> CreateUnlit(const Vec4& color = Vec4(1.0f));
+        static std::shared_ptr<UnlitMaterial> CreateUnlitTextured(std::shared_ptr<Texture2D> texture);
+
+        static std::shared_ptr<BlinnPhongMaterial> CreateBlinnPhong(
+            const Vec3& diffuse = Vec3(0.8f),
+            const Vec3& specular = Vec3(0.5f),
+            float shininess = 32.0f
+        );
+
+        static std::shared_ptr<PBRMaterial> CreatePBR(
+            const Vec3& albedo = Vec3(1.0f),
+            float metallic = 0.0f,
+            float roughness = 0.5f
+        );
+
+        static std::shared_ptr<SkyboxMaterial> CreateSkybox(std::shared_ptr<TextureCubeMap> cubemap);
+    };
+
+} // namespace ash
 
 #endif // ASHEN_MATERIAL_H

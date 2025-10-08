@@ -62,7 +62,7 @@ namespace ash {
     private:
         void SendDefaultEvents();
 
-        void Shutdown() const;
+        void Shutdown();
 
         void Tick(float deltaTime) const;
 
