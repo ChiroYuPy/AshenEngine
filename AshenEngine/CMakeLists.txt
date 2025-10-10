@@ -13,12 +13,15 @@ set(CORE_SOURCES
         src/Core/Platform.cpp
         src/Core/Window.cpp
 
-        src/GraphicsAPI/RenderCommand.cpp
+        src/GraphicsAPI/RenderState.cpp
         src/GraphicsAPI/GraphicsContext.cpp
 
         src/Graphics/Rendering/Renderer.cpp
         src/Graphics/Rendering/Renderer2D.cpp
         src/Graphics/Rendering/Renderer3D.cpp
+        src/Graphics/Rendering/DebugRenderer.cpp
+        src/Graphics/Objects/Material.cpp
+        src/Graphics/Objects/Mesh.cpp
 
         src/Utils/FileSystem.cpp
         src/Utils/ImageLoader.cpp
@@ -26,12 +29,9 @@ set(CORE_SOURCES
         src/Resources/ResourceManager.cpp
         src/Resources/Loader/ShaderLoader.cpp
         src/Resources/Loader/TextureLoader.cpp
-        src/Graphics/Objects/Mesh.cpp
-        include/Ashen/Graphics/Objects/Mesh.h
-        src/Graphics/Objects/Material.cpp
-        include/Ashen/Graphics/Objects/Material.h
-        include/Ashen/Resources/Loader/MeshLoader.h
         src/Resources/Loader/MeshLoader.cpp
+
+        src/BuiltIn/BuiltInShader.cpp
 )
 
 # ===========================
@@ -39,12 +39,6 @@ set(CORE_SOURCES
 # ===========================
 set(TINYOBJ_SOURCES
         vendor/tinyobjloader/tiny_obj_loader.cc
-        include/Ashen/Graphics/Camera/CameraController.h
-        include/Ashen/BuiltIn/BuiltInShader.h
-        src/BuiltIn/BuiltInShader.cpp
-        include/Ashen/Graphics/Scene/Scene.h
-        include/Ashen/Graphics/Rendering/DebugRenderer.h
-        src/Graphics/Rendering/DebugRenderer.cpp
 )
 
 # ===========================
