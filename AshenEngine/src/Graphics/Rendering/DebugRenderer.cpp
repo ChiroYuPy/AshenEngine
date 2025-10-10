@@ -72,14 +72,14 @@ namespace ash {
         s_Data->vao = std::make_shared<VertexArray>();
         s_Data->vao->AddVertexBuffer(s_Data->vbo, layout);
 
-        Logger::info("DebugRenderer initialized");
+        Logger::Info("DebugRenderer initialized");
     }
 
     void DebugRenderer::Shutdown() {
         if (s_Data) {
             s_Data.reset();
         }
-        Logger::info("DebugRenderer shutdown");
+        Logger::Info("DebugRenderer shutdown");
     }
 
     void DebugRenderer::Begin(const Camera& camera) {
@@ -305,7 +305,7 @@ namespace ash {
 
     void DebugRenderer::AddLine(const Vec3& start, const Vec3& end, const Vec3& color1, const Vec3& color2) {
         if (s_Data->lines.size() >= DebugData::MaxLines) {
-            Logger::warn("DebugRenderer: Maximum line count reached!");
+            Logger::Warn("DebugRenderer: Maximum line count reached!");
             return;
         }
 

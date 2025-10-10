@@ -74,17 +74,17 @@ namespace ash {
         /**
          * @brief Create mesh from vertex data and indices
          */
-        void SetData(const VertexData& vertexData, const std::vector<uint32_t>& indices);
+        void SetData(const VertexData &vertexData, const std::vector<uint32_t> &indices);
 
         /**
          * @brief Add a submesh for multi-material rendering
          */
-        void AddSubMesh(const SubMesh& submesh);
+        void AddSubMesh(const SubMesh &submesh);
 
         /**
          * @brief Get vertex array object
          */
-        [[nodiscard]] const VertexArray& GetVAO() const { return m_VAO; }
+        [[nodiscard]] const VertexArray &GetVAO() const { return m_VAO; }
 
         /**
          * @brief Get vertex attributes flags
@@ -109,7 +109,7 @@ namespace ash {
         /**
          * @brief Get submeshes
          */
-        [[nodiscard]] const std::vector<SubMesh>& GetSubMeshes() const { return m_SubMeshes; }
+        [[nodiscard]] const std::vector<SubMesh> &GetSubMeshes() const { return m_SubMeshes; }
 
         /**
          * @brief Draw the entire mesh
@@ -144,24 +144,24 @@ namespace ash {
         /**
          * @brief Set which attributes to include
          */
-        MeshBuilder& WithAttributes(VertexAttribute attrs);
+        MeshBuilder &WithAttributes(VertexAttribute attrs);
 
         /**
          * @brief Add a vertex with all specified attributes
          */
-        MeshBuilder& AddVertex(
-            const Vec3& position,
-            const std::optional<Vec3>& normal = std::nullopt,
-            const std::optional<Vec2>& texCoord = std::nullopt,
-            const std::optional<Vec4>& color = std::nullopt,
-            const std::optional<Vec3>& tangent = std::nullopt,
-            const std::optional<Vec3>& bitangent = std::nullopt
+        MeshBuilder &AddVertex(
+            const Vec3 &position,
+            const std::optional<Vec3> &normal = std::nullopt,
+            const std::optional<Vec2> &texCoord = std::nullopt,
+            const std::optional<Vec4> &color = std::nullopt,
+            const std::optional<Vec3> &tangent = std::nullopt,
+            const std::optional<Vec3> &bitangent = std::nullopt
         );
 
         /**
          * @brief Add triangle indices
          */
-        MeshBuilder& AddTriangle(uint32_t i0, uint32_t i1, uint32_t i2);
+        MeshBuilder &AddTriangle(uint32_t i0, uint32_t i1, uint32_t i2);
 
         /**
          * @brief Build the final vertex data
@@ -171,7 +171,7 @@ namespace ash {
         /**
          * @brief Get indices
          */
-        [[nodiscard]] const std::vector<uint32_t>& GetIndices() const { return m_Indices; }
+        [[nodiscard]] const std::vector<uint32_t> &GetIndices() const { return m_Indices; }
 
         /**
          * @brief Reset builder
@@ -196,8 +196,11 @@ namespace ash {
      */
     namespace MeshPrimitives {
         Mesh CreateCube(float size = 1.0f);
+
         Mesh CreateSphere(float radius = 1.0f, uint32_t segments = 32, uint32_t rings = 16);
+
         Mesh CreatePlane(float width = 1.0f, float height = 1.0f, uint32_t subdivisions = 1);
+
         Mesh CreateQuad();
     }
 }

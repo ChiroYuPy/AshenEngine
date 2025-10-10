@@ -12,9 +12,11 @@
 #include <thread>
 #include <condition_variable>
 #include <atomic>
+#include <stdexcept>
 
 namespace ash {
-    enum class LogLevel { TRACE, INFO, WARN, ERROR };
+
+    enum class LogLevel { Trace, Debug, Info, Warn, Error, Fatal };
 
     class LogStream;
 
@@ -25,13 +27,16 @@ namespace ash {
 
     class Logger {
     public:
-        static Logger &instance() {
+        static Logger &Get() {
             static Logger logger(std::cout);
             return logger;
         }
 
+        // Logging formaté
         template<typename... Args>
-        void log(const LogLevel level, std::format_string<Args...> fmt, Args &&... args) {
+        void Log(const LogLevel level, std::format_string<Args...> fmt, Args &&... args) {
+            if (level < minLevel) return;
+
             const auto now = std::chrono::system_clock::now();
             std::time_t t = std::chrono::system_clock::to_time_t(now);
             std::tm tm{};
@@ -43,71 +48,77 @@ namespace ash {
 
             std::string levelStr;
             switch (level) {
-                case LogLevel::INFO: levelStr = "INFO";
-                    break;
-                case LogLevel::WARN: levelStr = "WARN";
-                    break;
-                case LogLevel::ERROR: levelStr = "ERROR";
-                    break;
-                default: levelStr = "TRACE";
-                    break;
-            } {
-                const std::string msg = std::format("[{:02}:{:02}:{:02} {}] {}",
-                                                    tm.tm_hour, tm.tm_min, tm.tm_sec,
-                                                    levelStr,
-                                                    std::format(fmt, std::forward<Args>(args)...));
+                case LogLevel::Trace: levelStr = "TRACE"; break;
+                case LogLevel::Debug: levelStr = "DEBUG"; break;
+                case LogLevel::Info:  levelStr = "INFO"; break;
+                case LogLevel::Warn:  levelStr = "WARN"; break;
+                case LogLevel::Error: levelStr = "ERROR"; break;
+                case LogLevel::Fatal: levelStr = "FATAL"; break;
+            }
+
+            const std::string msg = std::format("[{:02}:{:02}:{:02} {}] {}",
+                                                tm.tm_hour, tm.tm_min, tm.tm_sec,
+                                                levelStr,
+                                                std::format(fmt, std::forward<Args>(args)...));
+
+            {
                 std::scoped_lock lock(queueMutex);
                 messageQueue.push({msg, level});
             }
             cv.notify_one();
         }
 
-        template<typename... Args>
-        static void info(std::format_string<Args...> fmt, Args &&... args) {
-            instance().log(LogLevel::INFO, fmt, std::forward<Args>(args)...);
-        }
+        // Versions statiques
+        template<typename... Args> static void Trace(std::format_string<Args...> fmt, Args&&... args) { Get().Log(LogLevel::Trace, fmt, std::forward<Args>(args)...); }
+        template<typename... Args> static void Debug(std::format_string<Args...> fmt, Args&&... args) { Get().Log(LogLevel::Debug, fmt, std::forward<Args>(args)...); }
+        template<typename... Args> static void Info(std::format_string<Args...> fmt, Args&&... args) { Get().Log(LogLevel::Info, fmt, std::forward<Args>(args)...); }
+        template<typename... Args> static void Warn(std::format_string<Args...> fmt, Args&&... args) { Get().Log(LogLevel::Warn, fmt, std::forward<Args>(args)...); }
+        template<typename... Args> static void Error(std::format_string<Args...> fmt, Args&&... args) { Get().Log(LogLevel::Error, fmt, std::forward<Args>(args)...); }
+        template<typename... Args> static void Fatal(std::format_string<Args...> fmt, Args&&... args) { Get().Log(LogLevel::Fatal, fmt, std::forward<Args>(args)...); }
 
-        template<typename... Args>
-        static void warn(std::format_string<Args...> fmt, Args &&... args) {
-            instance().log(LogLevel::WARN, fmt, std::forward<Args>(args)...);
-        }
+        // Versions LogStream
+        static LogStream Trace();
+        static LogStream Debug();
+        static LogStream Info();
+        static LogStream Warn();
+        static LogStream Error();
+        static LogStream Fatal();
 
-        template<typename... Args>
-        static void error(std::format_string<Args...> fmt, Args &&... args) {
-            instance().log(LogLevel::ERROR, fmt, std::forward<Args>(args)...);
-        }
-
-        static LogStream info();
-
-        static LogStream warn();
-
-        static LogStream error();
-
-        void setOutput(std::ostream &newOut) {
+        void SetOutput(std::ostream &newOut) {
             std::scoped_lock lock(outputMutex);
             out = &newOut;
         }
 
-        void stop() {
+        void SetFileOutput(const std::string& filename) {
+            std::scoped_lock lock(outputMutex);
+            file.open(filename, std::ios::app);
+            if (!file.is_open()) throw std::runtime_error("Impossible d'ouvrir le fichier de log");
+        }
+
+        void SetMinLevel(const LogLevel level) {
+            minLevel = level;
+        }
+
+        void Stop() {
             running = false;
             cv.notify_one();
             if (worker.joinable()) worker.join();
         }
 
         ~Logger() {
-            stop();
+            Stop();
         }
 
     private:
-        explicit Logger(std::ostream &output) : out(&output), running(true) {
-            worker = std::thread([this] { this->processLoop(); });
+        explicit Logger(std::ostream &output) : out(&output), running(true), minLevel(LogLevel::Trace) {
+            worker = std::thread([this] { this->ProcessLoop(); });
         }
 
-        static bool isConsole(const std::ostream *os) {
+        static bool IsConsole(const std::ostream *os) {
             return os == &std::cout || os == &std::cerr;
         }
 
-        void processLoop() {
+        void ProcessLoop() {
             while (running) {
                 std::unique_lock lock(queueMutex);
                 cv.wait(lock, [this] { return !messageQueue.empty() || !running; });
@@ -119,53 +130,54 @@ namespace ash {
 
                     std::string colorStart, colorEnd = "\033[0m";
                     switch (level) {
-                        case LogLevel::INFO: colorStart = "\033[32m";
-                            break;
-                        case LogLevel::WARN: colorStart = "\033[33m";
-                            break;
-                        case LogLevel::ERROR: colorStart = "\033[31m";
-                            break;
-                        default: colorStart = "\033[37m";
-                            break;
-                    } {
-                        std::scoped_lock outLock(outputMutex);
-                        if (isConsole(out))
-                            *out << colorStart << text << colorEnd << '\n';
-                        else
-                            *out << text << '\n';
-                        out->flush();
+                        case LogLevel::Trace: colorStart = "\033[37m"; break;  // gris clair
+                        case LogLevel::Debug: colorStart = "\033[36m"; break;  // cyan
+                        case LogLevel::Info:  colorStart = "\033[32m"; break;  // vert
+                        case LogLevel::Warn:  colorStart = "\033[33m"; break;  // jaune
+                        case LogLevel::Error: colorStart = "\033[31m"; break;  // rouge
+                        case LogLevel::Fatal: colorStart = "\033[1;41m"; break; // fond rouge
                     }
+
+                    std::scoped_lock outLock(outputMutex);
+                    if (IsConsole(out)) *out << colorStart << text << colorEnd << '\n';
+                    else *out << text << '\n';
+                    if (file.is_open()) file << text << '\n';
+                    out->flush();
+                    if (file.is_open()) file.flush();
 
                     lock.lock();
                 }
             }
 
+            // flush remaining
             while (!messageQueue.empty()) {
                 auto [text, level] = std::move(messageQueue.front());
                 messageQueue.pop();
-                if (isConsole(out))
-                    *out << text << '\n';
-                else
-                    *out << text << '\n';
+                std::scoped_lock outLock(outputMutex);
+                *out << text << '\n';
+                if (file.is_open()) file << text << '\n';
+                out->flush();
+                if (file.is_open()) file.flush();
             }
         }
 
         std::ostream *out;
+        std::ofstream file;
         std::mutex outputMutex;
         std::queue<LogMessage> messageQueue;
         std::mutex queueMutex;
         std::condition_variable cv;
         std::thread worker;
         std::atomic<bool> running;
+        LogLevel minLevel;
     };
 
+    // LogStream pour syntaxe << pratique
     class LogStream {
     public:
-        explicit LogStream(const LogLevel level) : m_level(level) {
-        }
-
+        explicit LogStream(const LogLevel level) : m_level(level) {}
         ~LogStream() {
-            Logger::instance().log(m_level, "{}", m_stream.str());
+            Logger::Get().Log(m_level, "{}", m_stream.str());
         }
 
         template<typename T>
@@ -179,9 +191,13 @@ namespace ash {
         std::ostringstream m_stream;
     };
 
-    inline LogStream Logger::info() { return LogStream(LogLevel::INFO); }
-    inline LogStream Logger::warn() { return LogStream(LogLevel::WARN); }
-    inline LogStream Logger::error() { return LogStream(LogLevel::ERROR); }
+    inline LogStream Logger::Trace() { return LogStream(LogLevel::Trace); }
+    inline LogStream Logger::Debug() { return LogStream(LogLevel::Debug); }
+    inline LogStream Logger::Info()  { return LogStream(LogLevel::Info); }
+    inline LogStream Logger::Warn()  { return LogStream(LogLevel::Warn); }
+    inline LogStream Logger::Error() { return LogStream(LogLevel::Error); }
+    inline LogStream Logger::Fatal() { return LogStream(LogLevel::Fatal); }
+
 }
 
 #endif // ASHEN_LOGGER_H

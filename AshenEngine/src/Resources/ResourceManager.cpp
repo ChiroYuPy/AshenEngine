@@ -13,7 +13,7 @@ namespace ash {
     void ResourcePaths::SetWorkingDirectory(const fs::path& dir) {
         std::lock_guard<std::mutex> lock(m_Mutex);
         m_Root = FileSystem::GetAbsolutePath(dir);
-        Logger::info() << "Working directory set to: " << m_Root.string();
+        Logger::Info() << "Working directory set to: " << m_Root.string();
     }
 
     fs::path ResourcePaths::GetPath(const std::string& filename) const {
@@ -37,9 +37,9 @@ namespace ash {
             if (it != m_Resources.end()) {
                 return it->second;
             }
-        } // 🔒 lock auto-libéré ici
+        }
 
-        // Crée le shader sans verrou
+        // Create the shader without lock
         auto shader = BuiltInShaderManager::Instance().Get(type);
 
         {
@@ -59,23 +59,31 @@ namespace ash {
     }
 
     std::shared_ptr<ShaderProgram> ShaderManager::LoadFromPaths(
-    const std::string& id,
-    const fs::path& vertPath,
-    const fs::path& fragPath
-) {
-        // Ne PAS acquérir le lock ici - déjà acquis par Get()
-        auto it = m_Resources.find(id);
-        if (it != m_Resources.end()) {
-            return it->second;
+        const std::string& id,
+        const fs::path& vertPath,
+        const fs::path& fragPath
+    ) {
+        // Check if already loaded
+        {
+            std::lock_guard<std::mutex> lock(m_Mutex);
+            auto it = m_Resources.find(id);
+            if (it != m_Resources.end()) {
+                return it->second;
+            }
         }
 
-        // Charger le shader
+        // Load shader without holding lock
         auto shader = std::make_shared<ShaderProgram>(
             ShaderLoader::Load(vertPath, fragPath)
         );
 
-        m_Resources[id] = shader;
-        Logger::info() << "Loaded shader: " << id;
+        // Store result
+        {
+            std::lock_guard<std::mutex> lock(m_Mutex);
+            m_Resources[id] = shader;
+        }
+
+        Logger::Info() << "Loaded shader: " << id;
         return shader;
     }
 
@@ -129,7 +137,7 @@ namespace ash {
             m_Resources[id] = texture;
         }
 
-        Logger::info() << "Loaded texture: " << id;
+        Logger::Info() << "Loaded texture: " << id;
 
         return texture;
     }
@@ -179,7 +187,7 @@ namespace ash {
             m_Resources[id] = mesh;
         }
 
-        Logger::info() << "Loaded mesh: " << id;
+        Logger::Info() << "Loaded mesh: " << id;
 
         return mesh;
     }
@@ -251,120 +259,142 @@ namespace ash {
 
     // ========== MaterialManager ==========
 
-    std::shared_ptr<UnlitMaterial> MaterialManager::CreateUnlit(
+    std::shared_ptr<CanvasItemMaterial> MaterialManager::CreateCanvasItem(
         const std::string& id,
-        const Vec4& color
+        const Vec4& albedo
     ) {
         // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_UnlitMaterials.find(id);
-            if (it != m_UnlitMaterials.end()) {
+            auto it = m_CanvasItemMaterials.find(id);
+            if (it != m_CanvasItemMaterials.end()) {
                 return it->second;
             }
         }
 
         // Create without holding lock
-        auto material = MaterialFactory::CreateUnlit(color);
+        auto material = MaterialFactory::CreateCanvasItem(albedo);
 
         // Store result
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            m_UnlitMaterials[id] = material;
+            m_CanvasItemMaterials[id] = material;
             m_Resources[id] = material;
         }
 
-        Logger::info() << "Created unlit material: " << id;
-
+        Logger::Info() << "Created CanvasItem material: " << id;
         return material;
     }
 
-    std::shared_ptr<UnlitMaterial> MaterialManager::CreateUnlitTextured(
+    std::shared_ptr<CanvasItemMaterial> MaterialManager::CreateCanvasItemTextured(
         const std::string& id,
         const std::string& textureName
     ) {
         // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_UnlitMaterials.find(id);
-            if (it != m_UnlitMaterials.end()) {
+            auto it = m_CanvasItemMaterials.find(id);
+            if (it != m_CanvasItemMaterials.end()) {
                 return it->second;
             }
         }
 
         // Load texture (doesn't need our lock)
         auto texture = TextureManager::Instance().Get(textureName);
-        auto material = MaterialFactory::CreateUnlitTextured(texture);
+        auto material = MaterialFactory::CreateCanvasItemTextured(texture);
 
         // Store result
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            m_UnlitMaterials[id] = material;
+            m_CanvasItemMaterials[id] = material;
             m_Resources[id] = material;
         }
 
-        Logger::info() << "Created unlit textured material: " << id;
-
+        Logger::Info() << "Created CanvasItem textured material: " << id;
         return material;
     }
 
-    std::shared_ptr<BlinnPhongMaterial> MaterialManager::CreateBlinnPhong(
+    std::shared_ptr<SpatialMaterial> MaterialManager::CreateSpatial(
         const std::string& id,
-        const Vec3& diffuse,
-        const Vec3& specular,
-        const float shininess
+        const Vec4& albedo,
+        float metallic,
+        float roughness,
+        float specular
     ) {
         // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_BlinnPhongMaterials.find(id);
-            if (it != m_BlinnPhongMaterials.end()) {
+            auto it = m_SpatialMaterials.find(id);
+            if (it != m_SpatialMaterials.end()) {
                 return it->second;
             }
         }
 
         // Create without holding lock
-        auto material = MaterialFactory::CreateBlinnPhong(diffuse, specular, shininess);
+        auto material = MaterialFactory::CreateSpatial(albedo, metallic, roughness, specular);
 
         // Store result
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            m_BlinnPhongMaterials[id] = material;
+            m_SpatialMaterials[id] = material;
             m_Resources[id] = material;
         }
 
-        Logger::info() << "Created Blinn-Phong material: " << id;
-
+        Logger::Info() << "Created Spatial material: " << id;
         return material;
     }
 
-    std::shared_ptr<PBRMaterial> MaterialManager::CreatePBR(
+    std::shared_ptr<SpatialMaterial> MaterialManager::CreateSpatialUnlit(
         const std::string& id,
-        const Vec3& albedo,
-        const float metallic,
-        const float roughness
+        const Vec4& albedo
     ) {
         // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_PBRMaterials.find(id);
-            if (it != m_PBRMaterials.end()) {
+            auto it = m_SpatialMaterials.find(id);
+            if (it != m_SpatialMaterials.end()) {
                 return it->second;
             }
         }
 
         // Create without holding lock
-        auto material = MaterialFactory::CreatePBR(albedo, metallic, roughness);
+        auto material = MaterialFactory::CreateSpatialUnlit(albedo);
 
         // Store result
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            m_PBRMaterials[id] = material;
+            m_SpatialMaterials[id] = material;
             m_Resources[id] = material;
         }
 
-        Logger::info() << "Created PBR material: " << id;
+        Logger::Info() << "Created Spatial Unlit material: " << id;
+        return material;
+    }
 
+    std::shared_ptr<SkyMaterial> MaterialManager::CreateSky(
+        const std::string& id,
+        const Vec4& color
+    ) {
+        // Check if already exists
+        {
+            std::lock_guard<std::mutex> lock(m_Mutex);
+            auto it = m_SkyMaterials.find(id);
+            if (it != m_SkyMaterials.end()) {
+                return it->second;
+            }
+        }
+
+        // Create without holding lock
+        auto material = MaterialFactory::CreateSky(color);
+
+        // Store result
+        {
+            std::lock_guard<std::mutex> lock(m_Mutex);
+            m_SkyMaterials[id] = material;
+            m_Resources[id] = material;
+        }
+
+        Logger::Info() << "Created Sky material: " << id;
         return material;
     }
 
@@ -391,27 +421,26 @@ namespace ash {
             m_Resources[id] = material;
         }
 
-        Logger::info() << "Created custom material: " << id;
-
+        Logger::Info() << "Created custom material: " << id;
         return material;
     }
 
-    std::shared_ptr<UnlitMaterial> MaterialManager::GetUnlit(const std::string& id) {
+    std::shared_ptr<CanvasItemMaterial> MaterialManager::GetCanvasItem(const std::string& id) {
         std::lock_guard<std::mutex> lock(m_Mutex);
-        auto it = m_UnlitMaterials.find(id);
-        return (it != m_UnlitMaterials.end()) ? it->second : nullptr;
+        auto it = m_CanvasItemMaterials.find(id);
+        return (it != m_CanvasItemMaterials.end()) ? it->second : nullptr;
     }
 
-    std::shared_ptr<BlinnPhongMaterial> MaterialManager::GetBlinnPhong(const std::string& id) {
+    std::shared_ptr<SpatialMaterial> MaterialManager::GetSpatial(const std::string& id) {
         std::lock_guard<std::mutex> lock(m_Mutex);
-        auto it = m_BlinnPhongMaterials.find(id);
-        return (it != m_BlinnPhongMaterials.end()) ? it->second : nullptr;
+        auto it = m_SpatialMaterials.find(id);
+        return (it != m_SpatialMaterials.end()) ? it->second : nullptr;
     }
 
-    std::shared_ptr<PBRMaterial> MaterialManager::GetPBR(const std::string& id) {
+    std::shared_ptr<SkyMaterial> MaterialManager::GetSky(const std::string& id) {
         std::lock_guard<std::mutex> lock(m_Mutex);
-        auto it = m_PBRMaterials.find(id);
-        return (it != m_PBRMaterials.end()) ? it->second : nullptr;
+        auto it = m_SkyMaterials.find(id);
+        return (it != m_SkyMaterials.end()) ? it->second : nullptr;
     }
 
     // ========== AssetLibrary ==========
@@ -419,7 +448,7 @@ namespace ash {
     void AssetLibrary::Initialize() {
         static std::once_flag flag;
         std::call_once(flag, []() {
-            Logger::info() << "Initializing AssetLibrary...";
+            Logger::Info() << "Initializing AssetLibrary...";
 
             // Preload built-in shaders
             BuiltInShaderManager::Instance().PreloadAll();
@@ -429,7 +458,7 @@ namespace ash {
     }
 
     void AssetLibrary::PreloadCommon() {
-        Logger::info() << "Preloading common assets...";
+        Logger::Info() << "Preloading common assets...";
 
         // Preload primitive meshes
         Meshes().GetCube();
@@ -437,18 +466,18 @@ namespace ash {
         Meshes().GetPlane();
         Meshes().GetQuad();
 
-        Logger::info() << "Common assets preloaded";
+        Logger::Info() << "Common assets preloaded";
     }
 
     void AssetLibrary::LogAvailableResources() {
         const auto shaders = ShaderManager::GetAvailableShaders();
-        Logger::info() << "Found " << shaders.size() << " custom shader(s)";
+        Logger::Info() << "Found " << shaders.size() << " custom shader(s)";
 
         const auto textures = TextureManager::GetAvailableTextures();
-        Logger::info() << "Found " << textures.size() << " texture(s)";
+        Logger::Info() << "Found " << textures.size() << " texture(s)";
 
         const auto meshes = MeshManager::GetAvailableMeshes();
-        Logger::info() << "Found " << meshes.size() << " mesh(es)";
+        Logger::Info() << "Found " << meshes.size() << " mesh(es)";
     }
 
     void AssetLibrary::ClearAll() {
@@ -458,7 +487,7 @@ namespace ash {
         Materials().Clear();
         BuiltInShaderManager::Instance().Clear();
 
-        Logger::info() << "All resources cleared";
+        Logger::Info() << "All resources cleared";
     }
 
     size_t AssetLibrary::GetTotalResourceCount() {

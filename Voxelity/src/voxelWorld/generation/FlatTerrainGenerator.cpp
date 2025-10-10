@@ -13,7 +13,7 @@ namespace voxelity {
 
     void FlatTerrainGenerator::generateChunk(Chunk &voxelChunk) {
         const glm::ivec3 chunkPos = voxelChunk.getPosition();
-        ash::Logger::info() << std::format("chunkPos: {}, {}, {}", chunkPos.x, chunkPos.y, chunkPos.z);
+        ash::Logger::Info() << std::format("chunkPos: {}, {}, {}", chunkPos.x, chunkPos.y, chunkPos.z);
 
         for (int y = 0; y < VoxelArray::SIZE; ++y) {
             const int worldY = chunkPos.y * VoxelArray::SIZE + y;

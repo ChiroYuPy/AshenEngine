@@ -59,7 +59,7 @@ namespace voxelity {
         if (event.GetKeyCode() == ash::Key::F && m_playerController.isActive()) {
             m_layer.getPlayer().toggleFly();
             const bool isFlying = m_layer.getPlayer().isFlying();
-            ash::Logger::info() << (isFlying ? "Flying mode enabled" : "Flying mode disabled");
+            ash::Logger::Info() << (isFlying ? "Flying mode enabled" : "Flying mode disabled");
         }
     }
 
@@ -71,9 +71,9 @@ namespace voxelity {
             if (m_playerController.isActive()) {
                 // Casser un bloc
                 if (m_worldInteractor.BreakBlock(cameraPos, cameraDir)) {
-                    ash::Logger::info() << "Block broken!";
+                    ash::Logger::Info() << "Block broken!";
                 } else {
-                    ash::Logger::info() << "No block to break";
+                    ash::Logger::Info() << "No block to break";
                 }
             } else {
                 // Activer le mode caméra
@@ -87,9 +87,9 @@ namespace voxelity {
         if (event.GetMouseButton() == ash::Mouse::ButtonRight && m_playerController.isActive()) {
             // Placer un bloc
             if (m_worldInteractor.PlaceBlock(cameraPos, cameraDir)) {
-                ash::Logger::info() << "Block placed!";
+                ash::Logger::Info() << "Block placed!";
             } else {
-                ash::Logger::info() << "Cannot place block here";
+                ash::Logger::Info() << "Cannot place block here";
             }
         }
     }
@@ -98,6 +98,6 @@ namespace voxelity {
         static VoxelType voxelID = 0;
         voxelID += static_cast<VoxelType>(event.GetYOffset());
         m_worldInteractor.setSelectedVoxelID(voxelID);
-        ash::Logger::info() << "block selected: " + getDisplayName(voxelID);
+        ash::Logger::Info() << "block selected: " + getDisplayName(voxelID);
     }
 }

@@ -5,7 +5,7 @@
 #include "Ashen/Graphics/Objects/Mesh.h"
 #include "Ashen/Graphics/Objects/Material.h"
 #include "Ashen/Graphics/Rendering/DebugRenderer.h"
-#include "Ashen/GraphicsAPI/RenderCommand.h"
+#include "Ashen/GraphicsAPI/RenderState.h"
 
 namespace ash {
 
@@ -45,7 +45,7 @@ namespace ash {
     void Renderer3D::Init() {
         s_Data = std::make_unique<SceneData>();
         DebugRenderer::Init();
-        Logger::info("Renderer3D initialized");
+        Logger::Info("Renderer3D initialized");
     }
 
     void Renderer3D::Shutdown() {
@@ -53,7 +53,7 @@ namespace ash {
         if (s_Data)
             s_Data.reset();
 
-        Logger::info("Renderer3D shutdown");
+        Logger::Info("Renderer3D shutdown");
     }
 
     void Renderer3D::BeginScene(const Camera& camera) {
@@ -66,11 +66,11 @@ namespace ash {
         s_Data->cameraPosition = camera.GetPosition();
 
         // Setup render state
-        RenderCommand::EnableDepthTest(true);
-        RenderCommand::SetDepthFunc(DepthFunc::Less);
-        RenderCommand::EnableCulling(true);
-        RenderCommand::SetCullFace(CullFaceMode::Back);
-        RenderCommand::SetFrontFace(FrontFace::CounterClockwise);
+        RenderState::EnableDepthTest(true);
+        RenderState::SetDepthFunc(DepthFunc::Less);
+        RenderState::EnableCulling(true);
+        RenderState::SetCullFace(CullFaceMode::Back);
+        RenderState::SetFrontFace(FrontFace::CounterClockwise);
     }
 
     void Renderer3D::EndScene() {
@@ -138,7 +138,7 @@ namespace ash {
         if (s_Data->pointLights.size() < MAX_POINT_LIGHTS)
             s_Data->pointLights.push_back(light);
         else
-            Logger::warn("Maximum number of point lights reached (16)");
+            Logger::Warn("Maximum number of point lights reached (16)");
     }
 
     void Renderer3D::ClearLights() {
@@ -167,7 +167,7 @@ namespace ash {
     }
 
     void Renderer3D::SetWireframeMode(const bool enabled) {
-        RenderCommand::SetPolygonMode(CullFaceMode::FrontAndBack, enabled ? PolygonMode::Line : PolygonMode::Fill);
+        RenderState::SetPolygonMode(CullFaceMode::FrontAndBack, enabled ? PolygonMode::Line : PolygonMode::Fill);
     }
 
     void Renderer3D::FlushRenderQueue() {
@@ -178,28 +178,37 @@ namespace ash {
     }
 
     void Renderer3D::SetupLighting(const std::shared_ptr<ShaderProgram>& shader) {
-        // Directional light
-        if (s_Data->hasDirectionalLight) {
-            shader->SetVec3("u_DirectionalLight.direction", s_Data->directionalLight.direction);
-            shader->SetVec3("u_DirectionalLight.color", s_Data->directionalLight.color);
-            shader->SetFloat("u_DirectionalLight.intensity", s_Data->directionalLight.intensity);
-            shader->SetBool("u_HasDirectionalLight", true);
-        } else {
-            shader->SetBool("u_HasDirectionalLight", false);
-        }
-
-        // Point lights (max 16)
-        const int pointLightCount = static_cast<int>(s_Data->pointLights.size());
-        shader->SetInt("u_PointLightCount", pointLightCount);
-
-        for (int i = 0; i < pointLightCount && i < 16; ++i) {
-            const auto&[position, color, intensity] = s_Data->pointLights[i];
-            shader->SetVec3("u_LightPositions[" + std::to_string(i) + "]", position);
-            shader->SetVec3("u_LightColors[" + std::to_string(i) + "]",
-                          color * intensity);
-        }
+        // Camera position
+        shader->SetVec3("u_CameraPos", s_Data->cameraPosition);
 
         // Ambient light
         shader->SetVec3("u_AmbientLight", s_Data->environment.ambientColor);
+
+        // Directional light
+        if (s_Data->hasDirectionalLight) {
+            shader->SetVec3("u_LightDirection", s_Data->directionalLight.direction);
+            shader->SetVec3("u_LightColor", s_Data->directionalLight.color);
+            shader->SetFloat("u_LightEnergy", s_Data->directionalLight.intensity);
+        } else {
+            // Default sun-like light
+            shader->SetVec3("u_LightDirection", Vec3(-0.5f, -1.0f, -0.3f));
+            shader->SetVec3("u_LightColor", Vec3(1.0f));
+            shader->SetFloat("u_LightEnergy", 1.0f);
+        }
+
+        // Point lights (max 4 for simplicity)
+        const int pointLightCount = std::min(static_cast<int>(s_Data->pointLights.size()), 4);
+        shader->SetInt("u_PointLightCount", pointLightCount);
+
+        for (int i = 0; i < pointLightCount; ++i) {
+            const auto&[position, color, intensity] = s_Data->pointLights[i];
+            shader->SetVec3("u_PointLightPositions[" + std::to_string(i) + "]", position);
+            shader->SetVec3("u_PointLightColors[" + std::to_string(i) + "]", color);
+            shader->SetFloat("u_PointLightEnergies[" + std::to_string(i) + "]", intensity);
+
+            // Calculate range from intensity (simple heuristic)
+            const float range = std::sqrt(intensity) * 10.0f;
+            shader->SetFloat("u_PointLightRanges[" + std::to_string(i) + "]", range);
+        }
     }
 }

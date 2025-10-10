@@ -1,5 +1,4 @@
 #include "Ashen/Graphics/Objects/Material.h"
-
 #include "Ashen/BuiltIn/BuiltInShader.h"
 
 namespace ash {
@@ -51,7 +50,7 @@ namespace ash {
     }
 
     std::optional<float> Material::GetFloat(const std::string& name) const {
-        const auto it = m_Properties.find(name);
+        auto it = m_Properties.find(name);
         if (it != m_Properties.end() && std::holds_alternative<float>(it->second)) {
             return std::get<float>(it->second);
         }
@@ -59,7 +58,7 @@ namespace ash {
     }
 
     std::optional<int> Material::GetInt(const std::string& name) const {
-        const auto it = m_Properties.find(name);
+        auto it = m_Properties.find(name);
         if (it != m_Properties.end() && std::holds_alternative<int>(it->second)) {
             return std::get<int>(it->second);
         }
@@ -67,7 +66,7 @@ namespace ash {
     }
 
     std::optional<Vec3> Material::GetVec3(const std::string& name) const {
-        const auto it = m_Properties.find(name);
+        auto it = m_Properties.find(name);
         if (it != m_Properties.end() && std::holds_alternative<Vec3>(it->second)) {
             return std::get<Vec3>(it->second);
         }
@@ -75,7 +74,7 @@ namespace ash {
     }
 
     std::optional<Vec4> Material::GetVec4(const std::string& name) const {
-        const auto it = m_Properties.find(name);
+        auto it = m_Properties.find(name);
         if (it != m_Properties.end() && std::holds_alternative<Vec4>(it->second)) {
             return std::get<Vec4>(it->second);
         }
@@ -150,226 +149,171 @@ namespace ash {
         }
     }
 
-    // ========== UnlitMaterial ==========
+    // ========== CanvasItemMaterial ==========
 
-    UnlitMaterial::UnlitMaterial()
-        : Material(BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::UnlitTexture)) {
-        SetColor(Vec4(1.0f));
+    CanvasItemMaterial::CanvasItemMaterial()
+        : Material(BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::CanvasItemTextured)) {
+        SetAlbedo(Vec4(1.0f));
     }
 
-    UnlitMaterial::UnlitMaterial(std::shared_ptr<ShaderProgram> customShader)
+    CanvasItemMaterial::CanvasItemMaterial(std::shared_ptr<ShaderProgram> customShader)
         : Material(std::move(customShader)) {
-        SetColor(Vec4(1.0f));
+        SetAlbedo(Vec4(1.0f));
     }
 
-    void UnlitMaterial::SetColor(const Vec4& color) {
-        SetVec4("u_Color", color);
+    void CanvasItemMaterial::SetAlbedo(const Vec4& color) {
+        SetVec4("u_Albedo", color);
     }
 
-    void UnlitMaterial::SetTexture(std::shared_ptr<Texture2D> texture) {
+    void CanvasItemMaterial::SetTexture(std::shared_ptr<Texture2D> texture) {
         Material::SetTexture("u_Texture", std::move(texture));
     }
 
-    Vec4 UnlitMaterial::GetColor() const {
-        return GetVec4("u_Color").value_or(Vec4(1.0f));
+    Vec4 CanvasItemMaterial::GetAlbedo() const {
+        return GetVec4("u_Albedo").value_or(Vec4(1.0f));
     }
 
-    // ========== BlinnPhongMaterial ==========
+    // ========== SpatialMaterial ==========
 
-    BlinnPhongMaterial::BlinnPhongMaterial()
-        : Material(BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::BlinnPhong)) {
-        SetDiffuse(Vec3(0.8f));
-        SetSpecular(Vec3(0.5f));
-        SetShininess(32.0f);
-        SetBool("u_Material.hasTexture", false);
-    }
-
-    BlinnPhongMaterial::BlinnPhongMaterial(std::shared_ptr<ShaderProgram> customShader)
-        : Material(std::move(customShader)) {
-        SetDiffuse(Vec3(0.8f));
-        SetSpecular(Vec3(0.5f));
-        SetShininess(32.0f);
-        SetBool("u_Material.hasTexture", false);
-    }
-
-    void BlinnPhongMaterial::SetDiffuse(const Vec3& color) {
-        SetVec3("u_Material.diffuse", color);
-    }
-
-    void BlinnPhongMaterial::SetSpecular(const Vec3& color) {
-        SetVec3("u_Material.specular", color);
-    }
-
-    void BlinnPhongMaterial::SetShininess(const float value) {
-        SetFloat("u_Material.shininess", value);
-    }
-
-    void BlinnPhongMaterial::SetDiffuseMap(std::shared_ptr<Texture2D> texture) {
-        Material::SetTexture("u_Material.diffuseMap", std::move(texture));
-        SetBool("u_Material.hasTexture", true);
-    }
-
-    Vec3 BlinnPhongMaterial::GetDiffuse() const {
-        return GetVec3("u_Material.diffuse").value_or(Vec3(0.8f));
-    }
-
-    Vec3 BlinnPhongMaterial::GetSpecular() const {
-        return GetVec3("u_Material.specular").value_or(Vec3(0.5f));
-    }
-
-    float BlinnPhongMaterial::GetShininess() const {
-        return GetFloat("u_Material.shininess").value_or(32.0f);
-    }
-
-    // ========== PBRMaterial ==========
-
-    PBRMaterial::PBRMaterial()
-        : Material(BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::PBR)) {
-        SetAlbedo(Vec3(1.0f));
+    SpatialMaterial::SpatialMaterial()
+        : Material(BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::Spatial)) {
+        SetAlbedo(Vec4(1.0f));
         SetMetallic(0.0f);
         SetRoughness(0.5f);
-        SetEmissive(Vec3(0.0f));
-
-        // Initialize texture flags
-        SetBool("material.hasAlbedoMap", false);
-        SetBool("material.hasMetallicRoughnessMap", false);
-        SetBool("material.hasNormalMap", false);
-        SetBool("material.hasAOMap", false);
-        SetBool("material.hasEmissiveMap", false);
+        SetSpecular(0.5f);
+        SetBool("u_UseAlbedoTexture", false);
     }
 
-    PBRMaterial::PBRMaterial(std::shared_ptr<ShaderProgram> customShader)
+    SpatialMaterial::SpatialMaterial(std::shared_ptr<ShaderProgram> customShader)
         : Material(std::move(customShader)) {
-        SetAlbedo(Vec3(1.0f));
+        SetAlbedo(Vec4(1.0f));
         SetMetallic(0.0f);
         SetRoughness(0.5f);
-        SetEmissive(Vec3(0.0f));
-
-        SetBool("material.hasAlbedoMap", false);
-        SetBool("material.hasMetallicRoughnessMap", false);
-        SetBool("material.hasNormalMap", false);
-        SetBool("material.hasAOMap", false);
-        SetBool("material.hasEmissiveMap", false);
+        SetSpecular(0.5f);
+        SetBool("u_UseAlbedoTexture", false);
     }
 
-    void PBRMaterial::SetAlbedo(const Vec3& color) {
-        SetVec3("material.albedo", color);
+    void SpatialMaterial::SetAlbedo(const Vec4& color) {
+        SetVec4("u_Albedo", color);
     }
 
-    void PBRMaterial::SetMetallic(const float value) {
-        SetFloat("material.metallic", value);
+    void SpatialMaterial::SetAlbedoTexture(std::shared_ptr<Texture2D> texture) {
+        Material::SetTexture("u_AlbedoTexture", std::move(texture));
+        SetBool("u_UseAlbedoTexture", true);
     }
 
-    void PBRMaterial::SetRoughness(const float value) {
-        SetFloat("material.roughness", value);
+    void SpatialMaterial::SetMetallic(float value) {
+        SetFloat("u_Metallic", value);
     }
 
-    void PBRMaterial::SetEmissive(const Vec3& color) {
-        SetVec3("material.emissive", color);
+    void SpatialMaterial::SetRoughness(float value) {
+        SetFloat("u_Roughness", value);
     }
 
-    void PBRMaterial::SetAlbedoMap(std::shared_ptr<Texture2D> texture) {
-        Material::SetTexture("material.albedoMap", std::move(texture));
-        SetBool("material.hasAlbedoMap", true);
+    void SpatialMaterial::SetSpecular(float value) {
+        SetFloat("u_Specular", value);
     }
 
-    void PBRMaterial::SetMetallicRoughnessMap(std::shared_ptr<Texture2D> texture) {
-        Material::SetTexture("material.metallicRoughnessMap", std::move(texture));
-        SetBool("material.hasMetallicRoughnessMap", true);
+    void SpatialMaterial::SetUnshaded(bool unshaded) {
+        if (unshaded) {
+            SetShader(BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::SpatialUnlit));
+        } else {
+            SetShader(BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::Spatial));
+        }
     }
 
-    void PBRMaterial::SetNormalMap(std::shared_ptr<Texture2D> texture) {
-        Material::SetTexture("material.normalMap", std::move(texture));
-        SetBool("material.hasNormalMap", true);
+    Vec4 SpatialMaterial::GetAlbedo() const {
+        return GetVec4("u_Albedo").value_or(Vec4(1.0f));
     }
 
-    void PBRMaterial::SetAOMap(std::shared_ptr<Texture2D> texture) {
-        Material::SetTexture("material.aoMap", std::move(texture));
-        SetBool("material.hasAOMap", true);
+    float SpatialMaterial::GetMetallic() const {
+        return GetFloat("u_Metallic").value_or(0.0f);
     }
 
-    void PBRMaterial::SetEmissiveMap(std::shared_ptr<Texture2D> texture) {
-        Material::SetTexture("material.emissiveMap", std::move(texture));
-        SetBool("material.hasEmissiveMap", true);
+    float SpatialMaterial::GetRoughness() const {
+        return GetFloat("u_Roughness").value_or(0.5f);
     }
 
-    Vec3 PBRMaterial::GetAlbedo() const {
-        return GetVec3("material.albedo").value_or(Vec3(1.0f));
+    float SpatialMaterial::GetSpecular() const {
+        return GetFloat("u_Specular").value_or(0.5f);
     }
 
-    float PBRMaterial::GetMetallic() const {
-        return GetFloat("material.metallic").value_or(0.0f);
+    // ========== SkyMaterial ==========
+
+    SkyMaterial::SkyMaterial()
+        : Material(BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::Sky)) {
+        SetSkyColor(Vec4(0.5f, 0.7f, 1.0f, 1.0f));
+        SetBool("u_UseSkybox", false);
     }
 
-    float PBRMaterial::GetRoughness() const {
-        return GetFloat("material.roughness").value_or(0.5f);
-    }
-
-    Vec3 PBRMaterial::GetEmissive() const {
-        return GetVec3("material.emissive").value_or(Vec3(0.0f));
-    }
-
-    // ========== SkyboxMaterial ==========
-
-    SkyboxMaterial::SkyboxMaterial()
-        : Material(BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::Skybox)) {
-    }
-
-    SkyboxMaterial::SkyboxMaterial(std::shared_ptr<ShaderProgram> customShader)
+    SkyMaterial::SkyMaterial(std::shared_ptr<ShaderProgram> customShader)
         : Material(std::move(customShader)) {
+        SetSkyColor(Vec4(0.5f, 0.7f, 1.0f, 1.0f));
+        SetBool("u_UseSkybox", false);
     }
 
-    void SkyboxMaterial::SetCubemap(const std::shared_ptr<TextureCubeMap> &cubemap) const {
-        // Note: This needs special handling since cubemap is not Texture2D
-        // We'll need to extend MaterialValue to support cubemaps or handle it differently
+    void SkyMaterial::SetSkyColor(const Vec4& color) {
+        SetVec4("u_SkyColor", color);
+    }
+
+    void SkyMaterial::SetCubemap(const std::shared_ptr<TextureCubeMap>& cubemap) {
         if (cubemap && m_Shader) {
             m_Shader->Bind();
             cubemap->BindToUnit(0);
             m_Shader->SetInt("u_Skybox", 0);
+            SetBool("u_UseSkybox", true);
         }
+    }
+
+    Vec4 SkyMaterial::GetSkyColor() const {
+        return GetVec4("u_SkyColor").value_or(Vec4(0.5f, 0.7f, 1.0f, 1.0f));
     }
 
     // ========== MaterialFactory ==========
 
-    std::shared_ptr<UnlitMaterial> MaterialFactory::CreateUnlit(const Vec4& color) {
-        auto material = std::make_shared<UnlitMaterial>();
-        material->SetColor(color);
+    std::shared_ptr<CanvasItemMaterial> MaterialFactory::CreateCanvasItem(const Vec4& albedo) {
+        auto material = std::make_shared<CanvasItemMaterial>();
+        material->SetAlbedo(albedo);
         return material;
     }
 
-    std::shared_ptr<UnlitMaterial> MaterialFactory::CreateUnlitTextured(std::shared_ptr<Texture2D> texture) {
-        auto material = std::make_shared<UnlitMaterial>();
+    std::shared_ptr<CanvasItemMaterial> MaterialFactory::CreateCanvasItemTextured(std::shared_ptr<Texture2D> texture) {
+        auto material = std::make_shared<CanvasItemMaterial>();
         material->SetTexture(std::move(texture));
         return material;
     }
 
-    std::shared_ptr<BlinnPhongMaterial> MaterialFactory::CreateBlinnPhong(
-        const Vec3& diffuse,
-        const Vec3& specular,
-        const float shininess
+    std::shared_ptr<SpatialMaterial> MaterialFactory::CreateSpatial(
+        const Vec4& albedo,
+        float metallic,
+        float roughness,
+        float specular
     ) {
-        auto material = std::make_shared<BlinnPhongMaterial>();
-        material->SetDiffuse(diffuse);
-        material->SetSpecular(specular);
-        material->SetShininess(shininess);
-        return material;
-    }
-
-    std::shared_ptr<PBRMaterial> MaterialFactory::CreatePBR(
-        const Vec3& albedo,
-        const float metallic,
-        const float roughness
-    ) {
-        auto material = std::make_shared<PBRMaterial>();
+        auto material = std::make_shared<SpatialMaterial>();
         material->SetAlbedo(albedo);
         material->SetMetallic(metallic);
         material->SetRoughness(roughness);
+        material->SetSpecular(specular);
         return material;
     }
 
-    std::shared_ptr<SkyboxMaterial> MaterialFactory::CreateSkybox(std::shared_ptr<TextureCubeMap> cubemap) {
-        auto material = std::make_shared<SkyboxMaterial>();
-        material->SetCubemap(cubemap);
+    std::shared_ptr<SpatialMaterial> MaterialFactory::CreateSpatialUnlit(const Vec4& albedo) {
+        auto material = std::make_shared<SpatialMaterial>(
+            BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::SpatialUnlit)
+        );
+        material->SetAlbedo(albedo);
+        return material;
+    }
+
+    std::shared_ptr<SkyMaterial> MaterialFactory::CreateSky(const Vec4& color) {
+        auto material = std::make_shared<SkyMaterial>();
+        material->SetSkyColor(color);
+        return material;
+    }
+
+    std::shared_ptr<SkyMaterial> MaterialFactory::CreateSkyCubemap(std::shared_ptr<TextureCubeMap> cubemap) {
+        auto material = std::make_shared<SkyMaterial>();
+        material->SetCubemap(std::move(cubemap));
         return material;
     }
 

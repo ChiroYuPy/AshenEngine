@@ -9,26 +9,31 @@
 namespace ash {
 
     /**
-     * @brief Built-in shader sources embedded in the engine
+     * @brief Built-in shader types (Godot-inspired naming)
      */
     class BuiltInShaders {
     public:
         enum class Type {
-            Unlit,              // Simple unlit shader (color/texture)
-            UnlitColor,         // Unlit with solid color
-            UnlitTexture,       // Unlit with texture
-            BlinnPhong,         // Classic Blinn-Phong lighting
-            PBR,                // Physically Based Rendering
-            Skybox,             // Skybox rendering
-            PostProcess,        // Post-processing quad
-            Debug,              // Debug visualization (normals, UVs, etc.)
-            DebugNormals,       // Visualize normals
-            DebugUVs,           // Visualize UVs
-            Wireframe           // Wireframe rendering
+            // 2D Shaders
+            CanvasItem,         // Basic 2D shader for sprites/UI
+            CanvasItemTextured, // Textured 2D shader
+
+            // 3D Shaders
+            Spatial,            // Basic 3D shader with Lambert lighting
+            SpatialUnlit,       // Unlit 3D shader
+
+            // Environment
+            Sky,                // Skybox shader
+
+            // Particles (future)
+            // Particles2D,
+            // Particles3D,
+
+            MAX_TYPES
         };
 
         /**
-         * @brief Get shader source code for a built-in shader
+         * @brief Get vertex and fragment shader source for a type
          */
         static std::pair<std::string, std::string> GetSource(Type type);
 
@@ -38,39 +43,38 @@ namespace ash {
         static ShaderProgram Create(Type type);
 
         /**
-         * @brief Get shader type name as string
+         * @brief Get human-readable shader name
          */
         static std::string GetTypeName(Type type);
 
         /**
-         * @brief Check if a shader type exists
+         * @brief Check if type is valid
          */
         static bool IsValid(Type type);
 
     private:
-        // Vertex shaders
-        static std::string GetUnlitVertexShader();
-        static std::string GetBlinnPhongVertexShader();
-        static std::string GetPBRVertexShader();
-        static std::string GetSkyboxVertexShader();
-        static std::string GetPostProcessVertexShader();
-        static std::string GetDebugVertexShader();
-        static std::string GetWireframeVertexShader();
+        // 2D Vertex Shaders
+        static std::string GetCanvasItemVertexShader();
 
-        // Fragment shaders
-        static std::string GetUnlitColorFragmentShader();
-        static std::string GetUnlitTextureFragmentShader();
-        static std::string GetBlinnPhongFragmentShader();
-        static std::string GetPBRFragmentShader();
-        static std::string GetSkyboxFragmentShader();
-        static std::string GetPostProcessFragmentShader();
-        static std::string GetDebugNormalsFragmentShader();
-        static std::string GetDebugUVsFragmentShader();
-        static std::string GetWireframeFragmentShader();
+        // 2D Fragment Shaders
+        static std::string GetCanvasItemColorFragmentShader();
+        static std::string GetCanvasItemTexturedFragmentShader();
+
+        // 3D Vertex Shaders
+        static std::string GetSpatialVertexShader();
+        static std::string GetSpatialUnlitVertexShader();
+
+        // 3D Fragment Shaders
+        static std::string GetSpatialFragmentShader();
+        static std::string GetSpatialUnlitFragmentShader();
+
+        // Environment Shaders
+        static std::string GetSkyVertexShader();
+        static std::string GetSkyFragmentShader();
     };
 
     /**
-     * @brief Manager for built-in shaders with caching
+     * @brief Shader manager with caching
      */
     class BuiltInShaderManager {
     public:
@@ -79,19 +83,8 @@ namespace ash {
             return instance;
         }
 
-        /**
-         * @brief Get or create a built-in shader
-         */
         std::shared_ptr<ShaderProgram> Get(BuiltInShaders::Type type);
-
-        /**
-         * @brief Clear all cached shaders
-         */
         void Clear();
-
-        /**
-         * @brief Preload all built-in shaders
-         */
         void PreloadAll();
 
     private:

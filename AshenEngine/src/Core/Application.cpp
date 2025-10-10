@@ -16,12 +16,12 @@ namespace ash {
     Application::Application(ApplicationSettings settings)
         : m_Settings(std::move(settings)), m_Running(false) {
         if (s_Instance) {
-            Logger::error("Application already exists!");
+            Logger::Error("Application already exists!");
             return;
         }
         s_Instance = this;
 
-        Logger::info() << "Application started: " << m_Settings.Name << " v" << m_Settings.Version;
+        Logger::Info() << "Application started: " << m_Settings.Name << " v" << m_Settings.Version;
 
         WindowProperties windowProperties;
         windowProperties.Title = m_Settings.Name + " v" + m_Settings.Version;

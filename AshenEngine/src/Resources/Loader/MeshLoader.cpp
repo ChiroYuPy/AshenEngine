@@ -54,8 +54,8 @@ namespace ash {
                                     mtl_basedir.c_str(),
                                     true); // triangulate
 
-        if (!warn.empty()) Logger::warn() << "OBJ Warning: " << warn;
-        if (!err.empty()) Logger::error() << "OBJ Error: " << err;
+        if (!warn.empty()) Logger::Warn() << "OBJ Warning: " << warn;
+        if (!err.empty()) Logger::Error() << "OBJ Error: " << err;
         if (!ret) {
             throw std::runtime_error("Failed to load OBJ: " + path.string());
         }
@@ -91,7 +91,7 @@ namespace ash {
 
                 // Should already be triangulated
                 if (fv != 3) {
-                    Logger::warn() << "Non-triangular face with " << fv << " vertices found";
+                    Logger::Warn() << "Non-triangular face with " << fv << " vertices found";
                     index_offset += fv;
                     continue;
                 }
@@ -153,7 +153,7 @@ namespace ash {
             mesh.SetData(builder.BuildVertexData(), indices);
             modelData.meshes.push_back(std::move(mesh));
 
-            Logger::info() << "Loaded mesh: " << shape.name
+            Logger::Info() << "Loaded mesh: " << shape.name
                           << " (" << vertexCount << " vertices, "
                           << indices.size() / 3 << " triangles)";
         }
@@ -169,7 +169,7 @@ namespace ash {
         }
 
         if (data.hasMultipleMeshes) {
-            Logger::warn() << "Multiple meshes found in " << path.filename().string()
+            Logger::Warn() << "Multiple meshes found in " << path.filename().string()
                           << ", using first mesh only";
         }
 

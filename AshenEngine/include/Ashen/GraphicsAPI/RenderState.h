@@ -5,10 +5,8 @@
 #include "Ashen/Math/Math.h"
 
 namespace ash {
-
-    class RenderCommand {
+    class RenderState {
     public:
-
         static void Clear(ClearBuffer buffers = ClearBuffer::Color | ClearBuffer::Depth);
 
         static void SetClearColor(const Vec4 &color);
@@ -31,9 +29,11 @@ namespace ash {
 
         static void EnableBlending(bool enable);
 
-        static void SetBlendFunc(BlendFactor src = BlendFactor::SrcAlpha, BlendFactor dst = BlendFactor::OneMinusSrcAlpha);
+        static void SetBlendFunc(BlendFactor src = BlendFactor::SrcAlpha,
+                                 BlendFactor dst = BlendFactor::OneMinusSrcAlpha);
 
-        static void SetBlendFuncSeparate(BlendFactor srcRGB, BlendFactor dstRGB, BlendFactor srcAlpha, BlendFactor dstAlpha);
+        static void SetBlendFuncSeparate(BlendFactor srcRGB, BlendFactor dstRGB, BlendFactor srcAlpha,
+                                         BlendFactor dstAlpha);
 
         static void SetBlendOp(BlendEquation op = BlendEquation::Add);
 
@@ -70,10 +70,15 @@ namespace ash {
         static void EnableMultisample(bool enable);
 
         [[nodiscard]] static bool IsDepthTestEnabled();
+
         [[nodiscard]] static bool IsBlendingEnabled();
+
         [[nodiscard]] static bool IsCullingEnabled();
+
         [[nodiscard]] static bool IsStencilEnabled();
+
         [[nodiscard]] static bool IsWireframeEnabled();
+
         [[nodiscard]] static bool IsScissorEnabled();
 
     private:

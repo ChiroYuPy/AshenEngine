@@ -2,7 +2,7 @@
 
 #include "Ashen/Core/Input.h"
 #include "Ashen/Events/ApplicationEvent.h"
-#include "Ashen/GraphicsAPI/RenderCommand.h"
+#include "Ashen/GraphicsAPI/RenderState.h"
 #include "Ashen/Resources/ResourceManager.h"
 
 #include "Voxelity/entities/Player.h"
@@ -73,7 +73,7 @@ namespace voxelity {
         // Debug stats
         static int frameCount = 0;
         if (++frameCount % 120 == 0) {
-            ash::Logger::info() << "Chunks: " << m_world->getLoadedChunkCount()
+            ash::Logger::Info() << "Chunks: " << m_world->getLoadedChunkCount()
                     << " | Pending Load: " << m_world->getPendingLoadCount()
                     << " | Pending Mesh: " << m_world->getPendingMeshCount()
                     << " | Ticks: " << ticksExecuted
@@ -84,8 +84,8 @@ namespace voxelity {
     void VoxelWorldLayer::OnRender() {
         if (!m_camera || !m_worldRenderer) return;
 
-        ash::RenderCommand::EnableDepthTest(true);
-        ash::RenderCommand::SetDepthFunc(ash::RenderCommand::DepthFunc::Less);
+        ash::RenderState::EnableDepthTest(true);
+        ash::RenderState::SetDepthFunc(ash::DepthFunc::Less);
 
         renderSkybox();
         renderWorld();

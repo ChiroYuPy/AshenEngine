@@ -213,62 +213,67 @@ namespace ash {
     // ========== MeshPrimitives ==========
 
     Mesh MeshPrimitives::CreateCube(const float size) {
-        const float s = size * 0.5f;
+    const float s = size * 0.5f;
 
-        MeshBuilder builder;
-        builder.WithAttributes(
-            VertexAttribute::Position |
-            VertexAttribute::Normal |
-            VertexAttribute::TexCoord
-        );
+    MeshBuilder builder;
+    builder.WithAttributes(
+        VertexAttribute::Position |
+        VertexAttribute::Normal |
+        VertexAttribute::TexCoord
+    );
 
-        // Face avant (z+)
-        builder.AddVertex(Vec3(-s, -s, s), Vec3(0, 0, 1), Vec2(0, 0));
-        builder.AddVertex(Vec3(s, -s, s), Vec3(0, 0, 1), Vec2(1, 0));
-        builder.AddVertex(Vec3(s, s, s), Vec3(0, 0, 1), Vec2(1, 1));
-        builder.AddVertex(Vec3(-s, s, s), Vec3(0, 0, 1), Vec2(0, 1));
+    // ----- Définition des vertices -----
+    // Chaque face a 4 vertices, chaque vertex a position, normale, uv
 
-        // Face arrière (z-)
-        builder.AddVertex(Vec3(s, -s, -s), Vec3(0, 0, -1), Vec2(0, 0));
-        builder.AddVertex(Vec3(-s, -s, -s), Vec3(0, 0, -1), Vec2(1, 0));
-        builder.AddVertex(Vec3(-s, s, -s), Vec3(0, 0, -1), Vec2(1, 1));
-        builder.AddVertex(Vec3(s, s, -s), Vec3(0, 0, -1), Vec2(0, 1));
+    // Face avant (z+)
+    builder.AddVertex(Vec3(-s, -s,  s), Vec3(0, 0, 1), Vec2(0, 0));
+    builder.AddVertex(Vec3( s, -s,  s), Vec3(0, 0, 1), Vec2(1, 0));
+    builder.AddVertex(Vec3( s,  s,  s), Vec3(0, 0, 1), Vec2(1, 1));
+    builder.AddVertex(Vec3(-s,  s,  s), Vec3(0, 0, 1), Vec2(0, 1));
 
-        // Face droite (x+)
-        builder.AddVertex(Vec3(s, -s, s), Vec3(1, 0, 0), Vec2(0, 0));
-        builder.AddVertex(Vec3(s, -s, -s), Vec3(1, 0, 0), Vec2(1, 0));
-        builder.AddVertex(Vec3(s, s, -s), Vec3(1, 0, 0), Vec2(1, 1));
-        builder.AddVertex(Vec3(s, s, s), Vec3(1, 0, 0), Vec2(0, 1));
+    // Face arrière (z-)
+    builder.AddVertex(Vec3( s, -s, -s), Vec3(0, 0, -1), Vec2(0, 0));
+    builder.AddVertex(Vec3(-s, -s, -s), Vec3(0, 0, -1), Vec2(1, 0));
+    builder.AddVertex(Vec3(-s,  s, -s), Vec3(0, 0, -1), Vec2(1, 1));
+    builder.AddVertex(Vec3( s,  s, -s), Vec3(0, 0, -1), Vec2(0, 1));
 
-        // Face gauche (x-)
-        builder.AddVertex(Vec3(-s, -s, -s), Vec3(-1, 0, 0), Vec2(0, 0));
-        builder.AddVertex(Vec3(-s, -s, s), Vec3(-1, 0, 0), Vec2(1, 0));
-        builder.AddVertex(Vec3(-s, s, s), Vec3(-1, 0, 0), Vec2(1, 1));
-        builder.AddVertex(Vec3(-s, s, -s), Vec3(-1, 0, 0), Vec2(0, 1));
+    // Face droite (x+)
+    builder.AddVertex(Vec3( s, -s,  s), Vec3(1, 0, 0), Vec2(0, 0));
+    builder.AddVertex(Vec3( s, -s, -s), Vec3(1, 0, 0), Vec2(1, 0));
+    builder.AddVertex(Vec3( s,  s, -s), Vec3(1, 0, 0), Vec2(1, 1));
+    builder.AddVertex(Vec3( s,  s,  s), Vec3(1, 0, 0), Vec2(0, 1));
 
-        // Face supérieure (y+)
-        builder.AddVertex(Vec3(-s, s, s), Vec3(0, 1, 0), Vec2(0, 0));
-        builder.AddVertex(Vec3(s, s, s), Vec3(0, 1, 0), Vec2(1, 0));
-        builder.AddVertex(Vec3(s, s, -s), Vec3(0, 1, 0), Vec2(1, 1));
-        builder.AddVertex(Vec3(-s, s, -s), Vec3(0, 1, 0), Vec2(0, 1));
+    // Face gauche (x-)
+    builder.AddVertex(Vec3(-s, -s, -s), Vec3(-1, 0, 0), Vec2(0, 0));
+    builder.AddVertex(Vec3(-s, -s,  s), Vec3(-1, 0, 0), Vec2(1, 0));
+    builder.AddVertex(Vec3(-s,  s,  s), Vec3(-1, 0, 0), Vec2(1, 1));
+    builder.AddVertex(Vec3(-s,  s, -s), Vec3(-1, 0, 0), Vec2(0, 1));
 
-        // Face inférieure (y-)
-        builder.AddVertex(Vec3(-s, -s, -s), Vec3(0, -1, 0), Vec2(0, 0));
-        builder.AddVertex(Vec3(s, -s, -s), Vec3(0, -1, 0), Vec2(1, 0));
-        builder.AddVertex(Vec3(s, -s, s), Vec3(0, -1, 0), Vec2(1, 1));
-        builder.AddVertex(Vec3(-s, -s, s), Vec3(0, -1, 0), Vec2(0, 1));
+    // Face supérieure (y+)
+    builder.AddVertex(Vec3(-s,  s,  s), Vec3(0, 1, 0), Vec2(0, 0));
+    builder.AddVertex(Vec3( s,  s,  s), Vec3(0, 1, 0), Vec2(1, 0));
+    builder.AddVertex(Vec3( s,  s, -s), Vec3(0, 1, 0), Vec2(1, 1));
+    builder.AddVertex(Vec3(-s,  s, -s), Vec3(0, 1, 0), Vec2(0, 1));
 
-        // Indices pour chaque face (2 triangles par face)
-        for (uint32_t i = 0; i < 6; ++i) {
-            const uint32_t base = i * 4;
-            builder.AddTriangle(base, base + 1, base + 2);
-            builder.AddTriangle(base, base + 2, base + 3);
-        }
+    // Face inférieure (y-)
+    builder.AddVertex(Vec3(-s, -s, -s), Vec3(0, -1, 0), Vec2(0, 0));
+    builder.AddVertex(Vec3( s, -s, -s), Vec3(0, -1, 0), Vec2(1, 0));
+    builder.AddVertex(Vec3( s, -s,  s), Vec3(0, -1, 0), Vec2(1, 1));
+    builder.AddVertex(Vec3(-s, -s,  s), Vec3(0, -1, 0), Vec2(0, 1));
 
-        Mesh mesh;
-        mesh.SetData(builder.BuildVertexData(), builder.GetIndices());
-        return mesh;
+    // ----- Création des indices -----
+    // 2 triangles par face, 4 vertices par face
+    for (uint32_t i = 0; i < 6; ++i) {
+        const uint32_t base = i * 4;
+        builder.AddTriangle(base, base + 1, base + 2);
+        builder.AddTriangle(base, base + 2, base + 3);
     }
+
+    // ----- Création finale du mesh -----
+    Mesh mesh;
+    mesh.SetData(builder.BuildVertexData(), builder.GetIndices());
+    return mesh;
+}
 
     Mesh MeshPrimitives::CreateSphere(float radius, uint32_t segments, uint32_t rings) {
         MeshBuilder builder;

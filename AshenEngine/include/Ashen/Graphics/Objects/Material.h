@@ -10,9 +10,7 @@
 #include "Ashen/Math/Math.h"
 
 namespace ash {
-    /**
-     * @brief Material property value types
-     */
+
     using MaterialValue = std::variant<float, int, bool, Vec2, Vec3, Vec4, Mat3, Mat4, std::shared_ptr<Texture2D>>;
 
     /**
@@ -59,97 +57,82 @@ namespace ash {
     };
 
     /**
-     * @brief Unlit material (no lighting)
+     * @brief CanvasItemMaterial - For 2D rendering (Godot-style)
      */
-    class UnlitMaterial : public Material {
+    class CanvasItemMaterial : public Material {
     public:
-        UnlitMaterial();
-        explicit UnlitMaterial(std::shared_ptr<ShaderProgram> customShader);
+        CanvasItemMaterial();
+        explicit CanvasItemMaterial(std::shared_ptr<ShaderProgram> customShader);
 
-        void SetColor(const Vec4& color);
+        void SetAlbedo(const Vec4& color);
         void SetTexture(std::shared_ptr<Texture2D> texture);
 
-        [[nodiscard]] Vec4 GetColor() const;
+        [[nodiscard]] Vec4 GetAlbedo() const;
     };
 
     /**
-     * @brief Blinn-Phong material
+     * @brief SpatialMaterial - For 3D rendering with lighting (Godot-style)
      */
-    class BlinnPhongMaterial : public Material {
+    class SpatialMaterial : public Material {
     public:
-        BlinnPhongMaterial();
-        explicit BlinnPhongMaterial(std::shared_ptr<ShaderProgram> customShader);
+        SpatialMaterial();
+        explicit SpatialMaterial(std::shared_ptr<ShaderProgram> customShader);
 
-        void SetDiffuse(const Vec3& color);
-        void SetSpecular(const Vec3& color);
-        void SetShininess(float value);
-        void SetDiffuseMap(std::shared_ptr<Texture2D> texture);
+        // Albedo
+        void SetAlbedo(const Vec4& color);
+        void SetAlbedoTexture(std::shared_ptr<Texture2D> texture);
 
-        [[nodiscard]] Vec3 GetDiffuse() const;
-        [[nodiscard]] Vec3 GetSpecular() const;
-        [[nodiscard]] float GetShininess() const;
-    };
-
-    /**
-     * @brief PBR Material
-     */
-    class PBRMaterial : public Material {
-    public:
-        PBRMaterial();
-        explicit PBRMaterial(std::shared_ptr<ShaderProgram> customShader);
-
-        // Base properties
-        void SetAlbedo(const Vec3& color);
+        // Surface properties
         void SetMetallic(float value);
         void SetRoughness(float value);
-        void SetEmissive(const Vec3& color);
+        void SetSpecular(float value);
 
-        // Texture maps
-        void SetAlbedoMap(std::shared_ptr<Texture2D> texture);
-        void SetMetallicRoughnessMap(std::shared_ptr<Texture2D> texture);
-        void SetNormalMap(std::shared_ptr<Texture2D> texture);
-        void SetAOMap(std::shared_ptr<Texture2D> texture);
-        void SetEmissiveMap(std::shared_ptr<Texture2D> texture);
+        // Flags
+        void SetUnshaded(bool unshaded);
 
         // Getters
-        [[nodiscard]] Vec3 GetAlbedo() const;
+        [[nodiscard]] Vec4 GetAlbedo() const;
         [[nodiscard]] float GetMetallic() const;
         [[nodiscard]] float GetRoughness() const;
-        [[nodiscard]] Vec3 GetEmissive() const;
+        [[nodiscard]] float GetSpecular() const;
     };
 
     /**
-     * @brief Skybox material
+     * @brief SkyMaterial - For skybox rendering
      */
-    class SkyboxMaterial : public Material {
+    class SkyMaterial : public Material {
     public:
-        SkyboxMaterial();
-        explicit SkyboxMaterial(std::shared_ptr<ShaderProgram> customShader);
+        SkyMaterial();
+        explicit SkyMaterial(std::shared_ptr<ShaderProgram> customShader);
 
-        void SetCubemap(const std::shared_ptr<TextureCubeMap> &cubemap) const;
+        void SetSkyColor(const Vec4& color);
+        void SetCubemap(const std::shared_ptr<TextureCubeMap>& cubemap);
+
+        [[nodiscard]] Vec4 GetSkyColor() const;
     };
 
     /**
-     * @brief Factory for creating materials with built-in shaders
+     * @brief Material factory for creating materials
      */
     class MaterialFactory {
     public:
-        static std::shared_ptr<UnlitMaterial> CreateUnlit(const Vec4& color = Vec4(1.0f));
-        static std::shared_ptr<UnlitMaterial> CreateUnlitTextured(std::shared_ptr<Texture2D> texture);
+        // 2D Materials
+        static std::shared_ptr<CanvasItemMaterial> CreateCanvasItem(const Vec4& albedo = Vec4(1.0f));
+        static std::shared_ptr<CanvasItemMaterial> CreateCanvasItemTextured(std::shared_ptr<Texture2D> texture);
 
-        static std::shared_ptr<BlinnPhongMaterial> CreateBlinnPhong(
-            const Vec3& diffuse = Vec3(0.8f),
-            const Vec3& specular = Vec3(0.5f),
-            float shininess = 32.0f
-        );
-
-        static std::shared_ptr<PBRMaterial> CreatePBR(
-            const Vec3& albedo = Vec3(1.0f),
+        // 3D Materials
+        static std::shared_ptr<SpatialMaterial> CreateSpatial(
+            const Vec4& albedo = Vec4(1.0f),
             float metallic = 0.0f,
-            float roughness = 0.5f
+            float roughness = 0.5f,
+            float specular = 0.5f
         );
 
-        static std::shared_ptr<SkyboxMaterial> CreateSkybox(std::shared_ptr<TextureCubeMap> cubemap);
+        static std::shared_ptr<SpatialMaterial> CreateSpatialUnlit(const Vec4& albedo = Vec4(1.0f));
+
+        // Environment
+        static std::shared_ptr<SkyMaterial> CreateSky(const Vec4& color = Vec4(0.5f, 0.7f, 1.0f, 1.0f));
+        static std::shared_ptr<SkyMaterial> CreateSkyCubemap(std::shared_ptr<TextureCubeMap> cubemap);
     };
 
 }

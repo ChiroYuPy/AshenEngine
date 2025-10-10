@@ -6,7 +6,7 @@
 
 #include "Ashen/Graphics/Skybox/ISkybox.h"
 #include "Ashen/Graphics/Rendering/Renderer.h"
-#include "Ashen/GraphicsAPI/RenderCommand.h"
+#include "Ashen/GraphicsAPI/RenderState.h"
 #include "Ashen/GraphicsAPI/Buffer.h"
 #include "Ashen/GraphicsAPI/Shader.h"
 #include "Ashen/GraphicsAPI/Texture.h"
@@ -25,8 +25,8 @@ namespace ash {
         }
 
         void Render(const glm::mat4 &view, const glm::mat4 &projection) override {
-            RenderCommand::SetDepthWrite(false);
-            RenderCommand::SetDepthFunc(RenderCommand::DepthFunc::LessEqual);
+            RenderState::SetDepthWrite(false);
+            RenderState::SetDepthFunc(DepthFunc::LessOrEqual);
 
             m_shader->Bind();
             m_shader->SetMat4("uView", glm::mat4(glm::mat3(view)));
@@ -37,8 +37,8 @@ namespace ash {
 
             Renderer::DrawArrays(*m_vao, 36);
 
-            RenderCommand::SetDepthWrite(true);
-            RenderCommand::SetDepthFunc(RenderCommand::DepthFunc::Less);
+            RenderState::SetDepthWrite(true);
+            RenderState::SetDepthFunc(DepthFunc::Less);
         }
 
         [[nodiscard]] Ref<TextureCubeMap> GetTexture() const { return m_texture; }

@@ -31,25 +31,25 @@ namespace voxelity {
 
     bool WorldInteractor::placeBlockAt(const glm::ivec3 &position, const int blockType) const {
         if (m_world.getVoxel(position.x, position.y, position.z) != VoxelID::AIR) {
-            ash::Logger::warn() << "Cannot place block: position already occupied";
+            ash::Logger::Warn() << "Cannot place block: position already occupied";
             return false;
         }
 
         m_world.setVoxel(position.x, position.y, position.z, blockType);
 
-        ash::Logger::info() << std::format("Block placed at ({}, {}, {})", position.x, position.y, position.z);
+        ash::Logger::Info() << std::format("Block placed at ({}, {}, {})", position.x, position.y, position.z);
         return true;
     }
 
     bool WorldInteractor::breakBlockAt(const glm::ivec3 &position) const {
         if (m_world.getVoxel(position.x, position.y, position.z) == VoxelID::AIR) {
-            ash::Logger::warn() << "Cannot break block: no block at position";
+            ash::Logger::Warn() << "Cannot break block: no block at position";
             return false;
         }
 
         m_world.setVoxel(position.x, position.y, position.z, VoxelID::AIR);
 
-        ash::Logger::info() << std::format("Block broken at ({}, {}, {})", position.x, position.y, position.z);
+        ash::Logger::Info() << std::format("Block broken at ({}, {}, {})", position.x, position.y, position.z);
         return true;
     }
 

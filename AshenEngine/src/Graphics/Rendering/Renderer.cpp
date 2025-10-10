@@ -5,34 +5,34 @@
 #include "Ashen/Core/Logger.h"
 #include "Ashen/Graphics/Rendering/Renderer2D.h"
 #include "Ashen/Graphics/Rendering/Renderer3D.h"
-#include "Ashen/GraphicsAPI/RenderCommand.h"
+#include "Ashen/GraphicsAPI/RenderState.h"
 #include "Ashen/GraphicsAPI/VertexArray.h"
 
 namespace ash {
     Renderer::Statistics Renderer::s_Stats;
 
     void Renderer::Init() {
-        RenderCommand::EnableDepthTest(true);
-        RenderCommand::SetDepthFunc(DepthFunc::Less);
-        RenderCommand::EnableCulling(true);
-        RenderCommand::SetCullFace(CullFaceMode::Back);
-        RenderCommand::SetFrontFace(FrontFace::CounterClockwise);
+        RenderState::EnableDepthTest(true);
+        RenderState::SetDepthFunc(DepthFunc::Less);
+        RenderState::EnableCulling(true);
+        RenderState::SetCullFace(CullFaceMode::Back);
+        RenderState::SetFrontFace(FrontFace::CounterClockwise);
 
         Renderer2D::Init();
         Renderer3D::Init();
 
-        Logger::info("Renderer initialized");
+        Logger::Info("Renderer initialized");
     }
 
     void Renderer::Shutdown() {
         Renderer2D::Shutdown();
         Renderer3D::Shutdown();
-        Logger::info("Renderer shutdown");
+        Logger::Info("Renderer shutdown");
     }
 
     void Renderer::BeginFrame() {
-        RenderCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
-        RenderCommand::Clear();
+        RenderState::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+        RenderState::Clear();
         ResetStats();
     }
 
@@ -40,7 +40,7 @@ namespace ash {
     }
 
     void Renderer::OnWindowResize(const uint32_t width, const uint32_t height) {
-        RenderCommand::SetViewport(width, height);
+        RenderState::SetViewport(width, height);
     }
 
     void Renderer::DrawIndexed(const VertexArray &vao, const uint32_t indexCount) {

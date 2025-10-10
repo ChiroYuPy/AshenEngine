@@ -15,7 +15,7 @@ namespace ash {
     static uint8_t s_GLFWWindowCount = 0;
 
     static void GLFWErrorCallback(int error, const char* description) {
-        Logger::error("GLFW Error ({0}): {1}", error, description);
+        Logger::Error("GLFW Error ({0}): {1}", error, description);
     }
 
     Window::Window(const WindowProperties &props) {
@@ -34,7 +34,7 @@ namespace ash {
     void Window::Create() {
         if (s_GLFWWindowCount == 0) {
             if (!glfwInit())
-                Logger::error("Failed to initialize GLFW!");
+                Logger::Error("Failed to initialize GLFW!");
             glfwSetErrorCallback(GLFWErrorCallback);
         }
 
@@ -70,7 +70,7 @@ namespace ash {
 
     void Window::SetupCallbacks() const {
         if (!glfwGetWindowUserPointer(m_Handle)) {
-            Logger::error("Window user pointer not set!");
+            Logger::Error("Window user pointer not set!");
             return;
         }
 

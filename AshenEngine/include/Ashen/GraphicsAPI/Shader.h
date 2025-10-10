@@ -214,7 +214,7 @@ namespace ash {
 
                 if (m_Config.throwOnWarning)
                     throw std::runtime_error("ShaderProgram validation failed:\n" + infoLog);
-                Logger::error() << "ShaderProgram validation warning:\n" << infoLog;
+                Logger::Error() << "ShaderProgram validation warning:\n" << infoLog;
             }
         }
 
@@ -268,7 +268,7 @@ namespace ash {
             if (blockIndex != GL_INVALID_INDEX) {
                 glUniformBlockBinding(m_ID, blockIndex, bindingPoint);
             } else if (m_Config.warnOnMissingUniform) {
-                Logger::error() << "Warning: Uniform block '" << name << "' not found!";
+                Logger::Error() << "Warning: Uniform block '" << name << "' not found!";
             }
         }
 
@@ -278,7 +278,7 @@ namespace ash {
             if (blockIndex != GL_INVALID_INDEX) {
                 glShaderStorageBlockBinding(m_ID, blockIndex, bindingPoint);
             } else if (m_Config.warnOnMissingUniform) {
-                Logger::error() << "Warning: Storage block '" << name << "' not found!";
+                Logger::Error() << "Warning: Storage block '" << name << "' not found!";
             }
         }
 
@@ -351,7 +351,7 @@ namespace ash {
             const GLint loc = glGetUniformLocation(m_ID, name.c_str());
 
             if (loc == -1 && m_Config.warnOnMissingUniform && !m_WarnedUniforms.contains(name)) {
-                Logger::error() << "Warning: uniform '" << name << "' doesn't exist!";
+                Logger::Error() << "Warning: uniform '" << name << "' doesn't exist!";
                 m_WarnedUniforms.insert(name);
             }
 
