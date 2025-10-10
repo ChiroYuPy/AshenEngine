@@ -292,6 +292,6 @@ namespace ash {
         static void LogAvailableResources();
     };
 
-} // namespace ash
+}
 
 #endif // ASHEN_RESOURCEMANAGER_H

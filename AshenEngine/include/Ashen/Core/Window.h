@@ -72,6 +72,6 @@ namespace ash {
 
         WindowData m_Data;
     };
-} // namespace ash
+}
 
 #endif // ASHEN_GLFWWINDOW_H

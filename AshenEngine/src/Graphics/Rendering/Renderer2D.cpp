@@ -443,7 +443,7 @@ namespace ash {
         }
 
         for (size_t i = 0; i < quadVertexCount; i++) {
-            Vec4 pos = transform * s_Data.Quads.VertexPositions[i];
+            const Vec4 pos = transform * s_Data.Quads.VertexPositions[i];
             s_Data.Quads.VertexBufferPtr->Position = Vec3(pos.x, pos.y, pos.z);
             s_Data.Quads.VertexBufferPtr->Color = tintColor;
             s_Data.Quads.VertexBufferPtr->TexCoord = s_Data.Quads.TexCoords[i];
@@ -476,7 +476,7 @@ namespace ash {
     void Renderer2D::DrawRotatedQuad(const Vec3 &position, const Vec2 &size,
                                      const float rotation, const Ref<Texture2D> &texture,
                                      const Vec4 &tintColor) {
-        Mat4 transform = glm::translate(Mat4(1.0f), position)
+        const Mat4 transform = glm::translate(Mat4(1.0f), position)
                          * glm::rotate(Mat4(1.0f), rotation, Vec3(0.0f, 0.0f, 1.0f))
                          * glm::scale(Mat4(1.0f), Vec3(size.x, size.y, 1.0f));
         DrawQuad(transform, texture, tintColor);

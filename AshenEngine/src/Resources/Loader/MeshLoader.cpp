@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <unordered_map>
-
 #include <tiny_obj_loader.h>
 
 #include "Ashen/Core/Logger.h"
@@ -29,10 +28,9 @@ namespace std {
     template<>
     struct hash<ash::VertexKey> {
         size_t operator()(const ash::VertexKey& vk) const {
-            const size_t h1 = hash<int>{}(vk.posIdx);
-            const size_t h2 = hash<int>{}(vk.normalIdx);
-            const size_t h3 = hash<int>{}(vk.texCoordIdx);
-            // Correction: parenthèses pour la priorité des opérateurs
+            size_t h1 = hash<int>{}(vk.posIdx);
+            size_t h2 = hash<int>{}(vk.normalIdx);
+            size_t h3 = hash<int>{}(vk.texCoordIdx);
             return h1 ^ (h2 << 1) ^ (h3 << 2);
         }
     };
@@ -40,14 +38,12 @@ namespace std {
 
 namespace ash {
 
-    Mesh MeshLoader::LoadSingle(const fs::path& path, const bool flipUVs) {
+    ModelData MeshLoader::Load(const fs::path& path, bool flipUVs) {
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
         std::string warn, err;
 
-        // Correction: Le 5ème paramètre est mtl_basedir, pas flipUVs
-        // Pour charger les matériaux, spécifier le chemin du dossier
         std::string mtl_basedir = path.parent_path().string();
         if (!mtl_basedir.empty()) {
             mtl_basedir += "/";
@@ -55,68 +51,71 @@ namespace ash {
 
         bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err,
                                     path.string().c_str(),
-                                    mtl_basedir.c_str());
+                                    mtl_basedir.c_str(),
+                                    true); // triangulate
 
-        if (!warn.empty()) Logger::warn() << warn;
-        if (!err.empty()) Logger::error() << err;
-        if (!ret) throw std::runtime_error("Failed to load OBJ: " + path.string());
+        if (!warn.empty()) Logger::warn() << "OBJ Warning: " << warn;
+        if (!err.empty()) Logger::error() << "OBJ Error: " << err;
+        if (!ret) {
+            throw std::runtime_error("Failed to load OBJ: " + path.string());
+        }
 
-        // Vérifier qu'il y a des shapes
         if (shapes.empty()) {
             throw std::runtime_error("No shapes found in OBJ file: " + path.string());
         }
 
-        MeshBuilder builder;
+        ModelData modelData;
+        modelData.hasMultipleMeshes = shapes.size() > 1;
 
-        // Détecter les attributs disponibles
-        VertexAttribute attributes = VertexAttribute::Position;
-        if (!attrib.normals.empty()) {
-            attributes = attributes | VertexAttribute::Normal;
-        }
-        if (!attrib.texcoords.empty()) {
-            attributes = attributes | VertexAttribute::TexCoord;
-        }
-        builder.WithAttributes(attributes);
-
-        std::vector<uint32_t> indices;
-        std::unordered_map<VertexKey, uint32_t> vertexMap; // Pour déduplication
-        uint32_t vertexCount = 0;
-
-        // Parcourir tous les shapes
+        // Process each shape as a separate mesh
         for (const auto& shape : shapes) {
-            size_t index_offset = 0;
+            MeshBuilder builder;
 
+            // Detect available attributes
+            VertexAttribute attributes = VertexAttribute::Position;
+            if (!attrib.normals.empty()) {
+                attributes = attributes | VertexAttribute::Normal;
+            }
+            if (!attrib.texcoords.empty()) {
+                attributes = attributes | VertexAttribute::TexCoord;
+            }
+            builder.WithAttributes(attributes);
+
+            std::vector<uint32_t> indices;
+            std::unordered_map<VertexKey, uint32_t> vertexMap;
+            uint32_t vertexCount = 0;
+
+            size_t index_offset = 0;
             for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); ++f) {
                 size_t fv = shape.mesh.num_face_vertices[f];
 
-                // Vérifier que c'est un triangle (tinyobjloader devrait trianguler automatiquement)
+                // Should already be triangulated
                 if (fv != 3) {
-                    Logger::warn() << "Non-triangular face detected with " << fv
-                                   << " vertices. Consider enabling triangulation.";
+                    Logger::warn() << "Non-triangular face with " << fv << " vertices found";
+                    index_offset += fv;
+                    continue;
                 }
 
-                for (size_t v = 0; v < fv; ++v) {
+                for (size_t v = 0; v < 3; ++v) {
                     tinyobj::index_t idx = shape.mesh.indices[index_offset + v];
 
-                    // Créer une clé pour la déduplication
                     VertexKey key;
                     key.posIdx = idx.vertex_index;
                     key.normalIdx = idx.normal_index;
                     key.texCoordIdx = idx.texcoord_index;
 
-                    // Vérifier si ce vertex existe déjà
                     auto it = vertexMap.find(key);
                     if (it != vertexMap.end()) {
-                        // Vertex existe déjà, réutiliser l'index
                         indices.push_back(it->second);
                     } else {
-                        // Nouveau vertex
+                        // Position (always present)
                         Vec3 pos{
                             attrib.vertices[3 * idx.vertex_index + 0],
                             attrib.vertices[3 * idx.vertex_index + 1],
                             attrib.vertices[3 * idx.vertex_index + 2]
                         };
 
+                        // Normal (optional)
                         std::optional<Vec3> normal = std::nullopt;
                         if (idx.normal_index >= 0 && !attrib.normals.empty()) {
                             normal = Vec3{
@@ -126,12 +125,12 @@ namespace ash {
                             };
                         }
 
+                        // UV (optional)
                         std::optional<Vec2> uv = std::nullopt;
                         if (idx.texcoord_index >= 0 && !attrib.texcoords.empty()) {
                             float u = attrib.texcoords[2 * idx.texcoord_index + 0];
                             float v = attrib.texcoords[2 * idx.texcoord_index + 1];
 
-                            // Correction: flipper les UVs si demandé
                             if (flipUVs) {
                                 v = 1.0f - v;
                             }
@@ -141,7 +140,6 @@ namespace ash {
 
                         builder.AddVertex(pos, normal, uv);
 
-                        // Stocker l'index du nouveau vertex
                         vertexMap[key] = vertexCount;
                         indices.push_back(vertexCount);
                         vertexCount++;
@@ -149,21 +147,37 @@ namespace ash {
                 }
                 index_offset += fv;
             }
+
+            // Create mesh
+            Mesh mesh;
+            mesh.SetData(builder.BuildVertexData(), indices);
+            modelData.meshes.push_back(std::move(mesh));
+
+            Logger::info() << "Loaded mesh: " << shape.name
+                          << " (" << vertexCount << " vertices, "
+                          << indices.size() / 3 << " triangles)";
         }
 
-        Mesh mesh;
-        mesh.SetData(builder.BuildVertexData(), indices);
+        return modelData;
+    }
 
-        // Correction: utiliser vertexCount au lieu de builder.GetIndices().size()
-        Logger::info() << "Loaded OBJ mesh: " << path.filename().string()
-                       << " (" << vertexCount << " unique vertices, "
-                       << indices.size() / 3 << " triangles)";
+    Mesh MeshLoader::LoadSingle(const fs::path& path, bool flipUVs) {
+        ModelData data = Load(path, flipUVs);
 
-        return mesh;
+        if (data.meshes.empty()) {
+            throw std::runtime_error("No meshes loaded from: " + path.string());
+        }
+
+        if (data.hasMultipleMeshes) {
+            Logger::warn() << "Multiple meshes found in " << path.filename().string()
+                          << ", using first mesh only";
+        }
+
+        return std::move(data.meshes[0]);
     }
 
     bool MeshLoader::IsSupported(const std::string& extension) {
-        static const std::vector<std::string> supported = {".obj"};
+        static const std::vector<std::string> supported = {".obj", ".OBJ"};
         return std::ranges::find(supported, extension) != supported.end();
     }
 
@@ -173,10 +187,11 @@ namespace ash {
 
     std::vector<std::string> MeshLoader::ScanForMeshes(const fs::path& directory) {
         std::vector<std::string> meshes;
-        const auto files = FileSystem::ScanDirectory(directory, GetSupportedFormats(), true);
+        auto files = FileSystem::ScanDirectory(directory, GetSupportedFormats(), true);
 
-        for (const auto& file : files)
-            meshes.push_back(file.filename().string());
+        for (const auto& file : files) {
+            meshes.push_back(file.stem().string());
+        }
 
         return meshes;
     }

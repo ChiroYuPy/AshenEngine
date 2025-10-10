@@ -181,7 +181,7 @@ struct Material {
     vec3 diffuse;
     vec3 specular;
     float shininess;
-    bool hasTexture;
+    bool u_HasTexture;
     sampler2D diffuseMap;
 };
 
@@ -200,25 +200,25 @@ out vec4 FragColor;
 
 void main() {
     vec3 baseColor = u_Material.diffuse;
-    if (u_Material.hasTexture) {
+    if (u_Material.u_HasTexture) {
         baseColor = texture(u_Material.diffuseMap, v_TexCoord).rgb;
     }
-    
+
     // Ambient
     vec3 ambient = u_Light.ambient * baseColor;
-    
+
     // Diffuse
     vec3 norm = normalize(v_Normal);
     vec3 lightDir = normalize(u_Light.position - v_FragPos);
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = u_Light.diffuse * diff * baseColor;
-    
+
     // Specular (Blinn-Phong)
     vec3 viewDir = normalize(u_ViewPos - v_FragPos);
     vec3 halfwayDir = normalize(lightDir + viewDir);
     float spec = pow(max(dot(norm, halfwayDir), 0.0), u_Material.shininess);
     vec3 specular = u_Light.specular * spec * u_Material.specular;
-    
+
     vec3 result = ambient + diffuse + specular;
     FragColor = vec4(result, 1.0);
 }
@@ -239,13 +239,13 @@ struct Material {
     float metallic;
     float roughness;
     vec3 emissive;
-    
-    bool hasAlbedoMap;
-    bool hasMetallicRoughnessMap;
-    bool hasNormalMap;
-    bool hasAOMap;
-    bool hasEmissiveMap;
-    
+
+    bool u_HasAlbedoMap;
+    bool u_HasMetallicRoughnessMap;
+    bool u_HasNormalMap;
+    bool u_HasAOMap;
+    bool u_HasEmissiveMap;
+
     sampler2D albedoMap;
     sampler2D metallicRoughnessMap;
     sampler2D normalMap;
@@ -272,21 +272,21 @@ float DistributionGGX(vec3 N, vec3 H, float roughness) {
     float a2 = a * a;
     float NdotH = max(dot(N, H), 0.0);
     float NdotH2 = NdotH * NdotH;
-    
+
     float num = a2;
     float denom = (NdotH2 * (a2 - 1.0) + 1.0);
     denom = PI * denom * denom;
-    
+
     return num / denom;
 }
 
 float GeometrySchlickGGX(float NdotV, float roughness) {
     float r = (roughness + 1.0);
     float k = (r * r) / 8.0;
-    
+
     float num = NdotV;
     float denom = NdotV * (1.0 - k) + k;
-    
+
     return num / denom;
 }
 
@@ -295,43 +295,43 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
     float NdotL = max(dot(N, L), 0.0);
     float ggx2 = GeometrySchlickGGX(NdotV, roughness);
     float ggx1 = GeometrySchlickGGX(NdotL, roughness);
-    
+
     return ggx1 * ggx2;
 }
 
 void main() {
     // Sample material properties
     vec3 albedo = material.albedo;
-    if (material.hasAlbedoMap) {
+    if (material.u_HasAlbedoMap) {
         albedo = pow(texture(material.albedoMap, v_TexCoord).rgb, vec3(2.2));
     }
-    
+
     float metallic = material.metallic;
     float roughness = material.roughness;
-    if (material.hasMetallicRoughnessMap) {
+    if (material.u_HasMetallicRoughnessMap) {
         vec3 mr = texture(material.metallicRoughnessMap, v_TexCoord).rgb;
         metallic = mr.b;
         roughness = mr.g;
     }
-    
+
     float ao = 1.0;
-    if (material.hasAOMap) {
+    if (material.u_HasAOMap) {
         ao = texture(material.aoMap, v_TexCoord).r;
     }
-    
+
     vec3 normal = v_Normal;
-    if (material.hasNormalMap) {
+    if (material.u_HasNormalMap) {
         normal = texture(material.normalMap, v_TexCoord).rgb;
         normal = normal * 2.0 - 1.0;
         normal = normalize(v_TBN * normal);
     }
-    
+
     vec3 N = normalize(normal);
     vec3 V = normalize(u_ViewPos - v_FragPos);
-    
+
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo, metallic);
-    
+
     // Reflectance equation
     vec3 Lo = vec3(0.0);
     for(int i = 0; i < 4; ++i) {
@@ -340,29 +340,29 @@ void main() {
         float distance = length(u_LightPositions[i] - v_FragPos);
         float attenuation = 1.0 / (distance * distance);
         vec3 radiance = u_LightColors[i] * attenuation;
-        
+
         // Cook-Torrance BRDF
         float NDF = DistributionGGX(N, H, roughness);
         float G = GeometrySmith(N, V, L, roughness);
         vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
-        
+
         vec3 kS = F;
         vec3 kD = vec3(1.0) - kS;
         kD *= 1.0 - metallic;
-        
+
         vec3 numerator = NDF * G * F;
         float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001;
         vec3 specular = numerator / denominator;
-        
+
         float NdotL = max(dot(N, L), 0.0);
         Lo += (kD * albedo / PI + specular) * radiance * NdotL;
     }
-    
+
     vec3 ambient = vec3(0.03) * albedo * ao;
     vec3 color = ambient + Lo;
-    
+
     // Add emissive
-    if (material.hasEmissiveMap) {
+    if (material.u_HasEmissiveMap) {
         color += texture(material.emissiveMap, v_TexCoord).rgb;
     } else {
         color += material.emissive;

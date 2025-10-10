@@ -222,43 +222,43 @@ namespace ash {
             VertexAttribute::TexCoord
         );
 
-        // Front face
+        // Face avant (z+)
         builder.AddVertex(Vec3(-s, -s, s), Vec3(0, 0, 1), Vec2(0, 0));
         builder.AddVertex(Vec3(s, -s, s), Vec3(0, 0, 1), Vec2(1, 0));
         builder.AddVertex(Vec3(s, s, s), Vec3(0, 0, 1), Vec2(1, 1));
         builder.AddVertex(Vec3(-s, s, s), Vec3(0, 0, 1), Vec2(0, 1));
 
-        // Back face
+        // Face arrière (z-)
         builder.AddVertex(Vec3(s, -s, -s), Vec3(0, 0, -1), Vec2(0, 0));
         builder.AddVertex(Vec3(-s, -s, -s), Vec3(0, 0, -1), Vec2(1, 0));
         builder.AddVertex(Vec3(-s, s, -s), Vec3(0, 0, -1), Vec2(1, 1));
         builder.AddVertex(Vec3(s, s, -s), Vec3(0, 0, -1), Vec2(0, 1));
 
-        // Right face
+        // Face droite (x+)
         builder.AddVertex(Vec3(s, -s, s), Vec3(1, 0, 0), Vec2(0, 0));
         builder.AddVertex(Vec3(s, -s, -s), Vec3(1, 0, 0), Vec2(1, 0));
         builder.AddVertex(Vec3(s, s, -s), Vec3(1, 0, 0), Vec2(1, 1));
         builder.AddVertex(Vec3(s, s, s), Vec3(1, 0, 0), Vec2(0, 1));
 
-        // Left face
+        // Face gauche (x-)
         builder.AddVertex(Vec3(-s, -s, -s), Vec3(-1, 0, 0), Vec2(0, 0));
         builder.AddVertex(Vec3(-s, -s, s), Vec3(-1, 0, 0), Vec2(1, 0));
         builder.AddVertex(Vec3(-s, s, s), Vec3(-1, 0, 0), Vec2(1, 1));
         builder.AddVertex(Vec3(-s, s, -s), Vec3(-1, 0, 0), Vec2(0, 1));
 
-        // Top face
+        // Face supérieure (y+)
         builder.AddVertex(Vec3(-s, s, s), Vec3(0, 1, 0), Vec2(0, 0));
         builder.AddVertex(Vec3(s, s, s), Vec3(0, 1, 0), Vec2(1, 0));
         builder.AddVertex(Vec3(s, s, -s), Vec3(0, 1, 0), Vec2(1, 1));
         builder.AddVertex(Vec3(-s, s, -s), Vec3(0, 1, 0), Vec2(0, 1));
 
-        // Bottom face
+        // Face inférieure (y-)
         builder.AddVertex(Vec3(-s, -s, -s), Vec3(0, -1, 0), Vec2(0, 0));
         builder.AddVertex(Vec3(s, -s, -s), Vec3(0, -1, 0), Vec2(1, 0));
         builder.AddVertex(Vec3(s, -s, s), Vec3(0, -1, 0), Vec2(1, 1));
         builder.AddVertex(Vec3(-s, -s, s), Vec3(0, -1, 0), Vec2(0, 1));
 
-        // Indices for all 6 faces
+        // Indices pour chaque face (2 triangles par face)
         for (uint32_t i = 0; i < 6; ++i) {
             const uint32_t base = i * 4;
             builder.AddTriangle(base, base + 1, base + 2);

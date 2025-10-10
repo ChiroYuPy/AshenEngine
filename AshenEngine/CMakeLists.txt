@@ -42,6 +42,9 @@ set(TINYOBJ_SOURCES
         include/Ashen/Graphics/Camera/CameraController.h
         include/Ashen/BuiltIn/BuiltInShader.h
         src/BuiltIn/BuiltInShader.cpp
+        include/Ashen/Graphics/Scene/Scene.h
+        include/Ashen/Graphics/Rendering/DebugRenderer.h
+        src/Graphics/Rendering/DebugRenderer.cpp
 )
 
 # ===========================

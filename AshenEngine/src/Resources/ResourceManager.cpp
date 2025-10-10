@@ -468,4 +468,4 @@ namespace ash {
                Materials().Count();
     }
 
-} // namespace ash
+}

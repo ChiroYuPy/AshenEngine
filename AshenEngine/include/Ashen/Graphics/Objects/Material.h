@@ -152,6 +152,6 @@ namespace ash {
         static std::shared_ptr<SkyboxMaterial> CreateSkybox(std::shared_ptr<TextureCubeMap> cubemap);
     };
 
-} // namespace ash
+}
 
 #endif // ASHEN_MATERIAL_H

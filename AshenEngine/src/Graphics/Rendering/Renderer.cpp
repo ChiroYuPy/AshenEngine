@@ -13,10 +13,10 @@ namespace ash {
 
     void Renderer::Init() {
         RenderCommand::EnableDepthTest(true);
-        RenderCommand::SetDepthFunc(RenderCommand::DepthFunc::Less);
+        RenderCommand::SetDepthFunc(DepthFunc::Less);
         RenderCommand::EnableCulling(true);
-        RenderCommand::SetCullFace(RenderCommand::CullFace::Back);
-        RenderCommand::SetFrontFace(RenderCommand::FrontFace::CCW);
+        RenderCommand::SetCullFace(CullFaceMode::Back);
+        RenderCommand::SetFrontFace(FrontFace::CounterClockwise);
 
         Renderer2D::Init();
         Renderer3D::Init();

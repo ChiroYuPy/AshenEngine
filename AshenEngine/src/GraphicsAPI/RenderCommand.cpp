@@ -1,16 +1,11 @@
 #include "Ashen/GraphicsAPI/RenderCommand.h"
 
-namespace ash {
-    void RenderCommand::Clear() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
+#include "Ashen/GraphicsAPI/GLEnums.h"
 
-    void RenderCommand::Clear(const bool color, const bool depth, const bool stencil) {
-        GLbitfield mask = 0;
-        if (color) mask |= GL_COLOR_BUFFER_BIT;
-        if (depth) mask |= GL_DEPTH_BUFFER_BIT;
-        if (stencil) mask |= GL_STENCIL_BUFFER_BIT;
-        glClear(mask);
+namespace ash {
+
+    void RenderCommand::Clear(ClearBuffer buffers) {
+        glClear(static_cast<GLbitfield>(buffers));
     }
 
     void RenderCommand::SetClearColor(const Vec4 &color) {
@@ -19,18 +14,6 @@ namespace ash {
 
     void RenderCommand::SetClearColor(const float r, const float g, const float b, const float a) {
         glClearColor(r, g, b, a);
-    }
-
-    void RenderCommand::ClearColorBuffer() {
-        glClear(GL_COLOR_BUFFER_BIT);
-    }
-
-    void RenderCommand::ClearDepthBuffer() {
-        glClear(GL_DEPTH_BUFFER_BIT);
-    }
-
-    void RenderCommand::ClearStencilBuffer() {
-        glClear(GL_STENCIL_BUFFER_BIT);
     }
 
     // ---- Viewport / Scissor ----
@@ -102,7 +85,7 @@ namespace ash {
                             static_cast<GLenum>(srcAlpha), static_cast<GLenum>(dstAlpha));
     }
 
-    void RenderCommand::SetBlendOp(const BlendOp op) {
+    void RenderCommand::SetBlendOp(const BlendEquation op) {
         glBlendEquation(static_cast<GLenum>(op));
     }
 
@@ -121,7 +104,7 @@ namespace ash {
             glDisable(GL_CULL_FACE);
     }
 
-    void RenderCommand::SetCullFace(const CullFace mode) {
+    void RenderCommand::SetCullFace(const CullFaceMode mode) {
         glCullFace(static_cast<GLenum>(mode));
     }
 
@@ -131,10 +114,8 @@ namespace ash {
 
     // ---- Polygon ----
 
-    void RenderCommand::SetWireframe(const bool enable) {
-        if (s_Wireframe == enable) return;
-        s_Wireframe = enable;
-        glPolygonMode(GL_FRONT_AND_BACK, enable ? GL_LINE : GL_FILL);
+    void RenderCommand::SetPolygonMode(const CullFaceMode faces, const PolygonMode mode) {
+        glPolygonMode(static_cast<GLenum>(faces), static_cast<GLenum>(mode));
     }
 
     void RenderCommand::SetPointSize(const float size) {
@@ -172,7 +153,7 @@ namespace ash {
             glDisable(GL_STENCIL_TEST);
     }
 
-    void RenderCommand::SetStencilFunc(const StencilFunc func, const int ref, const uint32_t mask) {
+    void RenderCommand::SetStencilFunc(const StencilOp func, const int ref, const uint32_t mask) {
         glStencilFunc(static_cast<GLenum>(func), ref, mask);
     }
 
@@ -201,4 +182,16 @@ namespace ash {
         else
             glDisable(GL_MULTISAMPLE);
     }
+
+    bool RenderCommand::IsDepthTestEnabled() { return s_DepthEnabled; }
+
+    bool RenderCommand::IsBlendingEnabled() { return s_BlendEnabled; }
+
+    bool RenderCommand::IsCullingEnabled() { return s_CullingEnabled; }
+
+    bool RenderCommand::IsStencilEnabled() { return s_StencilEnabled; }
+
+    bool RenderCommand::IsWireframeEnabled() { return s_Wireframe; }
+
+    bool RenderCommand::IsScissorEnabled() { return s_ScissorEnabled; }
 }
