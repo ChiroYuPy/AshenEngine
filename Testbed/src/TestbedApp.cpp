@@ -207,9 +207,9 @@ namespace ash {
             };
         }
 
-        void RenderMaterialShowcaseScene() {
+        void RenderMaterialShowcaseScene() const {
             // std::array pour les matériaux Spatial
-            std::array<Ref<SpatialMaterial>, 5> materials = {
+            const std::array<Ref<SpatialMaterial>, 5> materials = {
                 m_RedMaterial, m_BlueMaterial, m_GreenMaterial,
                 m_MetallicMaterial, m_RoughMaterial
             };
@@ -222,7 +222,7 @@ namespace ash {
             }
 
             // std::array pour les matériaux Toon
-            std::array<Ref<ToonMaterial>, 3> toonMats = {
+            const std::array<Ref<ToonMaterial>, 3> toonMats = {
                 m_ToonRedMaterial, m_ToonBlueMaterial, m_ToonGreenMaterial
             };
 
@@ -233,7 +233,7 @@ namespace ash {
             }
         }
 
-        void RenderPrimitiveMeshesScene() {
+        void RenderPrimitiveMeshesScene() const {
             // Custom mesh au centre
             Mat4 transform = glm::translate(Mat4(1.0f), Vec3(0, 1, 0))
                            * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation * 0.5f), Vec3(0, 1, 0))
@@ -241,16 +241,16 @@ namespace ash {
             Renderer3D::Submit(m_CustomMesh, m_BlueMaterial, transform);
 
             // Primitives et matériaux en cercle
-            std::array<Ref<Mesh>, 4> meshes = {
+            const std::array<Ref<Mesh>, 4> meshes = {
                 m_CubeMesh, m_SphereMesh, m_CubeMesh, m_SphereMesh
             };
 
-            std::array<Ref<Material>, 4> materials = {
+            const std::array<Ref<Material>, 4> materials = {
                 m_RedMaterial, m_GreenMaterial, m_ToonBlueMaterial, m_ToonRedMaterial
             };
 
             for (int i = 0; i < 4; ++i) {
-                float angle = i * glm::half_pi<float>();
+                const float angle = i * glm::half_pi<float>();
                 Vec3 pos(std::cos(angle) * 5.0f, 0, std::sin(angle) * 5.0f);
                 transform = glm::translate(Mat4(1.0f), pos);
                 Renderer3D::Submit(meshes[i], materials[i], transform);
