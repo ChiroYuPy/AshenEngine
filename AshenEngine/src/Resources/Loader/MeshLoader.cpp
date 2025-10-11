@@ -28,9 +28,9 @@ namespace std {
     template<>
     struct hash<ash::VertexKey> {
         size_t operator()(const ash::VertexKey& vk) const {
-            size_t h1 = hash<int>{}(vk.posIdx);
-            size_t h2 = hash<int>{}(vk.normalIdx);
-            size_t h3 = hash<int>{}(vk.texCoordIdx);
+            const size_t h1 = hash<int>{}(vk.posIdx);
+            const size_t h2 = hash<int>{}(vk.normalIdx);
+            const size_t h3 = hash<int>{}(vk.texCoordIdx);
             return h1 ^ (h2 << 1) ^ (h3 << 2);
         }
     };
@@ -187,7 +187,7 @@ namespace ash {
 
     std::vector<std::string> MeshLoader::ScanForMeshes(const fs::path& directory) {
         std::vector<std::string> meshes;
-        auto files = FileSystem::ScanDirectory(directory, GetSupportedFormats(), true);
+        const auto files = FileSystem::ScanDirectory(directory, GetSupportedFormats(), true);
 
         for (const auto& file : files) {
             meshes.push_back(file.stem().string());

@@ -40,9 +40,9 @@ OpenSimplex2S::OpenSimplex2S(long seed) {
  */
 double OpenSimplex2S::noise2(const double x, const double y) {
     // Get points for A2* lattice
-    double s = 0.366025403784439 * (x + y);
-    double xs = x + s;
-    double ys = y + s;
+    const double s = 0.366025403784439 * (x + y);
+    const double xs = x + s;
+    const double ys = y + s;
 
     return noise2_Base(xs, ys);
 }
@@ -54,8 +54,8 @@ double OpenSimplex2S::noise2(const double x, const double y) {
  */
 double OpenSimplex2S::noise2_XBeforeY(const double x, const double y) {
     // Skew transform and rotation baked into one.
-    double xx = x * 0.7071067811865476;
-    double yy = y * 1.224744871380249;
+    const double xx = x * 0.7071067811865476;
+    const double yy = y * 1.224744871380249;
 
     return noise2_Base(yy + xx, yy - xx);
 }
@@ -68,35 +68,35 @@ double OpenSimplex2S::noise2_Base(const double xs, const double ys) {
     double value = 0;
 
     // Get base points and offsets
-    int xsb = fastFloor(xs);
-    int ysb = fastFloor(ys);
-    double xsi = xs - xsb;
-    double ysi = ys - ysb;
+    const int xsb = fastFloor(xs);
+    const int ysb = fastFloor(ys);
+    const double xsi = xs - xsb;
+    const double ysi = ys - ysb;
 
     // Index to point list
-    int a = static_cast<int>(xsi + ysi);
-    int index = (a << 2) | static_cast<int>(xsi - ysi / 2 + 1 - a / 2.0) << 3
+    const int a = static_cast<int>(xsi + ysi);
+    const int index = (a << 2) | static_cast<int>(xsi - ysi / 2 + 1 - a / 2.0) << 3
                 | static_cast<int>(ysi - xsi / 2 + 1 - a / 2.0) << 4;
 
-    double ssi = (xsi + ysi) * -0.211324865405187;
-    double xi = xsi + ssi;
-    double yi = ysi + ssi;
+    const double ssi = (xsi + ysi) * -0.211324865405187;
+    const double xi = xsi + ssi;
+    const double yi = ysi + ssi;
 
     // Point contributions
     for (int i = 0; i < 4; i++) {
-        LatticePoint2D c = LOOKUP_2D[index + i];
+        const LatticePoint2D c = LOOKUP_2D[index + i];
 
-        double dx = xi + c.dx;
-        double dy = yi + c.dy;
+        const double dx = xi + c.dx;
+        const double dy = yi + c.dy;
         double attn = 2.0 / 3.0 - dx * dx - dy * dy;
         if (attn <= 0) {
             continue;
         }
 
-        int pxm = (xsb + c.xsv) & PMASK;
-        int pym = (ysb + c.ysv) & PMASK;
-        Grad2 grad = permGrad2[perm[pxm] ^ pym];
-        double extrapolation = grad.dx * dx + grad.dy * dy;
+        const int pxm = (xsb + c.xsv) & PMASK;
+        const int pym = (ysb + c.ysv) & PMASK;
+        const Grad2 grad = permGrad2[perm[pxm] ^ pym];
+        const double extrapolation = grad.dx * dx + grad.dy * dy;
 
         attn *= attn;
         value += attn * attn * extrapolation;
@@ -115,10 +115,10 @@ double OpenSimplex2S::noise3_Classic(const double x, const double y, const doubl
     // Re-orient the cubic lattices via rotation, to produce the expected look on cardinal planar
     // slices. If texturing skybox that don't tend to have cardinal plane faces, you could even
     // remove this. Orthonormal rotation. Not a skew transform.
-    double r = (2.0 / 3.0) * (x + y + z);
-    double xr = r - x;
-    double yr = r - y;
-    double zr = r - z;
+    const double r = (2.0 / 3.0) * (x + y + z);
+    const double xr = r - x;
+    const double yr = r - y;
+    const double zr = r - z;
 
     // Evaluate both lattices to form a BCC lattice.
     return noise3_BCC(xr, yr, zr);
@@ -135,12 +135,12 @@ double OpenSimplex2S::noise3_Classic(const double x, const double y, const doubl
 double OpenSimplex2S::noise3_XYBeforeZ(const double x, const double y, const double z) {
     // Re-orient the cubic lattices without skewing, to make X and Y triangular like 2D.
     // Orthonormal rotation. Not a skew transform.
-    double xy = x + y;
-    double s2 = xy * -0.211324865405187;
-    double zz = z * 0.577350269189626;
-    double xr = x + s2 - zz;
-    double yr = y + s2 - zz;
-    double zr = xy * 0.577350269189626 + zz;
+    const double xy = x + y;
+    const double s2 = xy * -0.211324865405187;
+    const double zz = z * 0.577350269189626;
+    const double xr = x + s2 - zz;
+    const double yr = y + s2 - zz;
+    const double zr = xy * 0.577350269189626 + zz;
 
     // Evaluate both lattices to form a BCC lattice.
     return noise3_BCC(xr, yr, zr);
@@ -157,12 +157,12 @@ double OpenSimplex2S::noise3_XYBeforeZ(const double x, const double y, const dou
 double OpenSimplex2S::noise3_XZBeforeY(const double x, const double y, const double z) {
     // Re-orient the cubic lattices without skewing, to make X and Z triangular like 2D.
     // Orthonormal rotation. Not a skew transform.
-    double xz = x + z;
-    double s2 = xz * -0.211324865405187;
-    double yy = y * 0.577350269189626;
-    double xr = x + s2 - yy;
-    double zr = z + s2 - yy;
-    double yr = xz * 0.577350269189626 + yy;
+    const double xz = x + z;
+    const double s2 = xz * -0.211324865405187;
+    const double yy = y * 0.577350269189626;
+    const double xr = x + s2 - yy;
+    const double zr = z + s2 - yy;
+    const double yr = xz * 0.577350269189626 + yy;
 
     // Evaluate both lattices to form a BCC lattice.
     return noise3_BCC(xr, yr, zr);
@@ -176,36 +176,36 @@ double OpenSimplex2S::noise3_XZBeforeY(const double x, const double y, const dou
  */
 double OpenSimplex2S::noise3_BCC(const double xr, const double yr, const double zr) {
     // Get base and offsets inside cube of first lattice.
-    int xrb = fastFloor(xr);
-    int yrb = fastFloor(yr);
-    int zrb = fastFloor(zr);
-    double xri = xr - xrb;
-    double yri = yr - yrb;
-    double zri = zr - zrb;
+    const int xrb = fastFloor(xr);
+    const int yrb = fastFloor(yr);
+    const int zrb = fastFloor(zr);
+    const double xri = xr - xrb;
+    const double yri = yr - yrb;
+    const double zri = zr - zrb;
 
     // Identify which octant of the cube we're in. This determines which cell
     // in the other cubic lattice we're in, and also narrows down one point on each.
-    int xht = static_cast<int>(xri + 0.5);
-    int yht = static_cast<int>(yri + 0.5);
-    int zht = static_cast<int>(zri + 0.5);
-    int index = (xht << 0) | (yht << 1) | (zht << 2);
+    const int xht = static_cast<int>(xri + 0.5);
+    const int yht = static_cast<int>(yri + 0.5);
+    const int zht = static_cast<int>(zri + 0.5);
+    const int index = (xht << 0) | (yht << 1) | (zht << 2);
 
     // Point contributions
     double value = 0;
-    LatticePoint3D *c = &LOOKUP_3D[index];
+    const LatticePoint3D *c = &LOOKUP_3D[index];
     while (c != nullptr) {
-        double dxr = xri + c->dxr;
-        double dyr = yri + c->dyr;
-        double dzr = zri + c->dzr;
+        const double dxr = xri + c->dxr;
+        const double dyr = yri + c->dyr;
+        const double dzr = zri + c->dzr;
         double attn = 0.75 - dxr * dxr - dyr * dyr - dzr * dzr;
         if (attn < 0) {
             c = c->nextOnFailure;
         } else {
-            int pxm = (xrb + c->xrv) & PMASK;
-            int pym = (yrb + c->yrv) & PMASK;
-            int pzm = (zrb + c->zrv) & PMASK;
-            Grad3 grad = permGrad3[perm[perm[pxm] ^ pym] ^ pzm];
-            double extrapolation = grad.dx * dxr + grad.dy * dyr + grad.dz * dzr;
+            const int pxm = (xrb + c->xrv) & PMASK;
+            const int pym = (yrb + c->yrv) & PMASK;
+            const int pzm = (zrb + c->zrv) & PMASK;
+            const Grad3 grad = permGrad3[perm[perm[pxm] ^ pym] ^ pzm];
+            const double extrapolation = grad.dx * dxr + grad.dy * dyr + grad.dz * dzr;
 
             attn *= attn;
             value += attn * attn * extrapolation;
@@ -220,11 +220,11 @@ double OpenSimplex2S::noise3_BCC(const double xr, const double yr, const double 
  */
 double OpenSimplex2S::noise4_Classic(const double x, const double y, const double z, const double w) {
     // Get points for A4 lattice
-    double s = 0.309016994374947 * (x + y + z + w);
-    double xs = x + s;
-    double ys = y + s;
-    double zs = z + s;
-    double ws = w + s;
+    const double s = 0.309016994374947 * (x + y + z + w);
+    const double xs = x + s;
+    const double ys = y + s;
+    const double zs = z + s;
+    const double ws = w + s;
 
     return noise4_Base(xs, ys, zs, ws);
 }
@@ -235,12 +235,12 @@ double OpenSimplex2S::noise4_Classic(const double x, const double y, const doubl
  * Recommended for noise(x, y, sin(time), cos(time)) trick.
  */
 double OpenSimplex2S::noise4_XYBeforeZW(const double x, const double y, const double z, const double w) {
-    double s2 = (x + y) * -0.28522513987434876941 + (z + w) * 0.83897065470611435718;
-    double t2 = (z + w) * 0.21939749883706435719 + (x + y) * -0.48214856493302476942;
-    double xs = x + s2;
-    double ys = y + s2;
-    double zs = z + t2;
-    double ws = w + t2;
+    const double s2 = (x + y) * -0.28522513987434876941 + (z + w) * 0.83897065470611435718;
+    const double t2 = (z + w) * 0.21939749883706435719 + (x + y) * -0.48214856493302476942;
+    const double xs = x + s2;
+    const double ys = y + s2;
+    const double zs = z + t2;
+    const double ws = w + t2;
 
     return noise4_Base(xs, ys, zs, ws);
 }
@@ -250,12 +250,12 @@ double OpenSimplex2S::noise4_XYBeforeZW(const double x, const double y, const do
  * Recommended for 3D terrain, where X and Z (or Y and W) are horizontal.
  */
 double OpenSimplex2S::noise4_XZBeforeYW(const double x, const double y, const double z, const double w) {
-    double s2 = (x + z) * -0.28522513987434876941 + (y + w) * 0.83897065470611435718;
-    double t2 = (y + w) * 0.21939749883706435719 + (x + z) * -0.48214856493302476942;
-    double xs = x + s2;
-    double ys = y + t2;
-    double zs = z + s2;
-    double ws = w + t2;
+    const double s2 = (x + z) * -0.28522513987434876941 + (y + w) * 0.83897065470611435718;
+    const double t2 = (y + w) * 0.21939749883706435719 + (x + z) * -0.48214856493302476942;
+    const double xs = x + s2;
+    const double ys = y + t2;
+    const double zs = z + s2;
+    const double ws = w + t2;
 
     return noise4_Base(xs, ys, zs, ws);
 }
@@ -266,13 +266,13 @@ double OpenSimplex2S::noise4_XZBeforeYW(const double x, const double y, const do
  * Recommended for time-varied animations which textures a 3D object (W=time)
  */
 double OpenSimplex2S::noise4_XYZBeforeW(const double x, const double y, const double z, const double w) {
-    double xyz = x + y + z;
-    double ww = w * 1.118033988749894;
-    double s2 = xyz * -0.16666666666666666 + ww;
-    double xs = x + s2;
-    double ys = y + s2;
-    double zs = z + s2;
-    double ws = -0.5 * xyz + ww;
+    const double xyz = x + y + z;
+    const double ww = w * 1.118033988749894;
+    const double s2 = xyz * -0.16666666666666666 + ww;
+    const double xs = x + s2;
+    const double ys = y + s2;
+    const double zs = z + s2;
+    const double ws = -0.5 * xyz + ww;
 
     return noise4_Base(xs, ys, zs, ws);
 }
@@ -287,42 +287,42 @@ double OpenSimplex2S::noise4_Base(const double xs, const double ys, const double
     double value = 0;
 
     // Get base points and offsets
-    int xsb = fastFloor(xs);
-    int ysb = fastFloor(ys);
-    int zsb = fastFloor(zs);
-    int wsb = fastFloor(ws);
-    double xsi = xs - xsb;
-    double ysi = ys - ysb;
-    double zsi = zs - zsb;
-    double wsi = ws - wsb;
+    const int xsb = fastFloor(xs);
+    const int ysb = fastFloor(ys);
+    const int zsb = fastFloor(zs);
+    const int wsb = fastFloor(ws);
+    const double xsi = xs - xsb;
+    const double ysi = ys - ysb;
+    const double zsi = zs - zsb;
+    const double wsi = ws - wsb;
 
     // Unskewed offsets
-    double ssi = (xsi + ysi + zsi + wsi) * -0.138196601125011;
-    double xi = xsi + ssi;
-    double yi = ysi + ssi;
-    double zi = zsi + ssi;
-    double wi = wsi + ssi;
+    const double ssi = (xsi + ysi + zsi + wsi) * -0.138196601125011;
+    const double xi = xsi + ssi;
+    const double yi = ysi + ssi;
+    const double zi = zsi + ssi;
+    const double wi = wsi + ssi;
 
-    int index = ((fastFloor(xs * 4) & 3) << 0) | ((fastFloor(ys * 4) & 3) << 2)
+    const int index = ((fastFloor(xs * 4) & 3) << 0) | ((fastFloor(ys * 4) & 3) << 2)
                 | ((fastFloor(zs * 4) & 3) << 4) | ((fastFloor(ws * 4) & 3) << 6);
 
     // Point contributions
     for (int i = 0; i < LOOKUP_4D_SIZE[index]; ++i) {
-        auto &c = LOOKUP_4D[index][i];
-        double dx = xi + c.dx;
-        double dy = yi + c.dy;
-        double dz = zi + c.dz;
-        double dw = wi + c.dw;
+        const auto &c = LOOKUP_4D[index][i];
+        const double dx = xi + c.dx;
+        const double dy = yi + c.dy;
+        const double dz = zi + c.dz;
+        const double dw = wi + c.dw;
         double attn = 0.8 - dx * dx - dy * dy - dz * dz - dw * dw;
         if (attn > 0) {
             attn *= attn;
 
-            int pxm = (xsb + c.xsv) & PMASK;
-            int pym = (ysb + c.ysv) & PMASK;
-            int pzm = (zsb + c.zsv) & PMASK;
-            int pwm = (wsb + c.wsv) & PMASK;
-            Grad4 grad = permGrad4[perm[perm[perm[pxm] ^ pym] ^ pzm] ^ pwm];
-            double extrapolation = grad.dx * dx + grad.dy * dy + grad.dz * dz + grad.dw * dw;
+            const int pxm = (xsb + c.xsv) & PMASK;
+            const int pym = (ysb + c.ysv) & PMASK;
+            const int pzm = (zsb + c.zsv) & PMASK;
+            const int pwm = (wsb + c.wsv) & PMASK;
+            const Grad4 grad = permGrad4[perm[perm[perm[pxm] ^ pym] ^ pzm] ^ pwm];
+            const double extrapolation = grad.dx * dx + grad.dy * dy + grad.dz * dz + grad.dw * dw;
 
             value += attn * attn * extrapolation;
         }
@@ -331,14 +331,14 @@ double OpenSimplex2S::noise4_Base(const double xs, const double ys, const double
 }
 
 int OpenSimplex2S::fastFloor(const double x) {
-    int xi = static_cast<int>(x);
+    const int xi = static_cast<int>(x);
     return x < xi ? xi - 1 : xi;
 }
 
 OpenSimplex2S::LatticePoint2D::LatticePoint2D(const int a_xsv, const int a_ysv) {
     xsv = a_xsv;
     ysv = a_ysv;
-    double ssv = (a_xsv + a_ysv) * -0.211324865405187;
+    const double ssv = (a_xsv + a_ysv) * -0.211324865405187;
     dx = -a_xsv - ssv;
     dy = -a_ysv - ssv;
 }
@@ -361,7 +361,7 @@ OpenSimplex2S::LatticePoint4D::LatticePoint4D(const int a_xsv, const int a_ysv, 
     ysv = a_ysv;
     zsv = a_zsv;
     wsv = a_wsv;
-    double ssv = (a_xsv + a_ysv + a_zsv + a_wsv) * -0.138196601125011;
+    const double ssv = (a_xsv + a_ysv + a_zsv + a_wsv) * -0.138196601125011;
     dx = -a_xsv - ssv;
     dy = -a_ysv - ssv;
     dz = -a_zsv - ssv;
@@ -487,7 +487,7 @@ void OpenSimplex2S::initLatticePoints() {
         LOOKUP_3D[i] = *c0;
     }
 
-    unsigned char lookup4DPregenSize[256]{
+    const unsigned char lookup4DPregenSize[256]{
     // clang-format off
     20, 15, 16, 17, 15, 16, 12, 15, 16, 12, 10, 14, 17, 15, 14, 17,
     15, 16, 12, 15, 16, 14, 14, 13, 12, 14, 11, 12, 15, 13, 12, 14,
@@ -508,7 +508,7 @@ void OpenSimplex2S::initLatticePoints() {
         // clang-format on
     };
 
-    unsigned char lookup4DPregen[256][20]{
+    const unsigned char lookup4DPregen[256][20]{
     // clang-format off
     { 0x15, 0x45, 0x51, 0x54, 0x55, 0x56, 0x59, 0x5A, 0x65, 0x66, 0x69, 0x6A, 0x95, 0x96, 0x99, 0x9A, 0xA5, 0xA6, 0xA9, 0xAA },
     { 0x15, 0x45, 0x51, 0x55, 0x56, 0x59, 0x5A, 0x65, 0x66, 0x6A, 0x95, 0x96, 0x9A, 0xA6, 0xAA, 0x00, 0x00, 0x00, 0x00, 0x00 },

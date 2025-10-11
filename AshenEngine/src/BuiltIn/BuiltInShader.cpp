@@ -311,7 +311,7 @@ void main() {
     // ========== Shader Manager ==========
 
     std::shared_ptr<ShaderProgram> BuiltInShaderManager::Get(BuiltInShaders::Type type) {
-        auto it = m_Shaders.find(type);
+        const auto it = m_Shaders.find(type);
         if (it != m_Shaders.end())
             return it->second;
 

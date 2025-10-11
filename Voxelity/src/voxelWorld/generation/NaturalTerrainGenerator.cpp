@@ -38,7 +38,7 @@ namespace voxelity {
         humidity = (humidity + 1.0) * 0.5;
 
         // Ajuster la température selon l'altitude
-        double altitudeTemp = std::max(0.0, temperature - (elevation - SEA_LEVEL) * 0.01);
+        const double altitudeTemp = std::max(0.0, temperature - (elevation - SEA_LEVEL) * 0.01);
 
         if (elevation < SEA_LEVEL - 5) return BiomeType::OCEAN;
         if (elevation < BEACH_HEIGHT && elevation > SEA_LEVEL - 5) return BiomeType::BEACH;
@@ -53,9 +53,9 @@ namespace voxelity {
     }
 
     double NaturalTerrainGenerator::getCaveNoise(const glm::ivec3 &worldPos) {
-        double cave1 = noise.noise3_XYBeforeZ(worldPos.x * CAVE_SCALE, worldPos.y * CAVE_SCALE,
+        const double cave1 = noise.noise3_XYBeforeZ(worldPos.x * CAVE_SCALE, worldPos.y * CAVE_SCALE,
                                               worldPos.z * CAVE_SCALE);
-        double cave2 = noise.noise3_XYBeforeZ(worldPos.x * CAVE_SCALE * 1.5 + 500, worldPos.y * CAVE_SCALE * 1.5,
+        const double cave2 = noise.noise3_XYBeforeZ(worldPos.x * CAVE_SCALE * 1.5 + 500, worldPos.y * CAVE_SCALE * 1.5,
                                               worldPos.z * CAVE_SCALE * 1.5 + 500);
         return std::abs(cave1) + std::abs(cave2);
     }
@@ -116,17 +116,17 @@ namespace voxelity {
 
     VoxelType NaturalTerrainGenerator::generateVoxel(const glm::ivec3 &worldPos) {
         // Bruit continental pour les grandes formes
-        double continentNoise = noise.noise2(worldPos.x * CONTINENT_SCALE, worldPos.z * CONTINENT_SCALE);
+        const double continentNoise = noise.noise2(worldPos.x * CONTINENT_SCALE, worldPos.z * CONTINENT_SCALE);
 
         // Bruit d'élévation principal
-        double elevationNoise = noise.noise2(worldPos.x * ELEVATION_SCALE, worldPos.z * ELEVATION_SCALE);
+        const double elevationNoise = noise.noise2(worldPos.x * ELEVATION_SCALE, worldPos.z * ELEVATION_SCALE);
 
         // Bruit de détail pour les variations fines
-        double detailNoise = noise.noise2(worldPos.x * DETAIL_SCALE, worldPos.z * DETAIL_SCALE);
+        const double detailNoise = noise.noise2(worldPos.x * DETAIL_SCALE, worldPos.z * DETAIL_SCALE);
 
         // Combiner les bruits pour l'élévation finale
-        double combinedElevation = continentNoise * 30.0 + elevationNoise * 20.0 + detailNoise * 8.0;
-        int groundHeight = static_cast<int>(SEA_LEVEL + combinedElevation);
+        const double combinedElevation = continentNoise * 30.0 + elevationNoise * 20.0 + detailNoise * 8.0;
+        const int groundHeight = static_cast<int>(SEA_LEVEL + combinedElevation);
 
         // Déterminer le biome
         BiomeType biome = getBiome(worldPos, groundHeight);
@@ -134,7 +134,7 @@ namespace voxelity {
 
         // Gestion des cavernes
         if (worldPos.y < groundHeight - 5 && worldPos.y > 10) {
-            double caveValue = getCaveNoise(worldPos);
+            const double caveValue = getCaveNoise(worldPos);
             if (caveValue < 0.1) {
                 // Seuil pour créer des cavernes
                 return VoxelID::AIR;
@@ -177,12 +177,12 @@ namespace voxelity {
                 const int worldZ = chunkPos.z * VoxelArray::SIZE + z;
 
                 // Calculer l'élévation une seule fois par colonne
-                double continentNoise = noise.noise2(worldX * CONTINENT_SCALE, worldZ * CONTINENT_SCALE);
-                double elevationNoise = noise.noise2(worldX * ELEVATION_SCALE, worldZ * ELEVATION_SCALE);
-                double detailNoise = noise.noise2(worldX * DETAIL_SCALE, worldZ * DETAIL_SCALE);
+                const double continentNoise = noise.noise2(worldX * CONTINENT_SCALE, worldZ * CONTINENT_SCALE);
+                const double elevationNoise = noise.noise2(worldX * ELEVATION_SCALE, worldZ * ELEVATION_SCALE);
+                const double detailNoise = noise.noise2(worldX * DETAIL_SCALE, worldZ * DETAIL_SCALE);
 
-                double combinedElevation = continentNoise * 30.0 + elevationNoise * 20.0 + detailNoise * 8.0;
-                int groundHeight = static_cast<int>(SEA_LEVEL + combinedElevation);
+                const double combinedElevation = continentNoise * 30.0 + elevationNoise * 20.0 + detailNoise * 8.0;
+                const int groundHeight = static_cast<int>(SEA_LEVEL + combinedElevation);
 
                 heightMap[x][z] = groundHeight;
                 biomeMap[x][z] = getBiome(glm::ivec3(worldX, groundHeight, worldZ), groundHeight);
@@ -207,7 +207,7 @@ namespace voxelity {
                         // Cavernes
                         if (worldY > 10) {
                             glm::ivec3 worldPos(worldX, worldY, worldZ);
-                            double caveValue = getCaveNoise(worldPos);
+                            const double caveValue = getCaveNoise(worldPos);
                             if (caveValue < 0.1) {
                                 voxelID = VoxelID::AIR;
                             } else {

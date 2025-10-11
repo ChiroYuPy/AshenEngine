@@ -1,6 +1,6 @@
 #include "Voxelity/voxelWorld/render/WorldRenderer.h"
 
-#include "Ashen/GraphicsAPI/RenderState.h"
+#include "Ashen/GraphicsAPI/RenderContext.h"
 
 namespace voxelity {
     WorldRenderer::WorldRenderer(World &world, ash::Camera &camera, ash::ShaderProgram &shader)
@@ -32,8 +32,8 @@ namespace voxelity {
     }
 
     void WorldRenderer::renderOpaquePass() const {
-        ash::RenderState::SetDepthWrite(true);
-        ash::RenderState::EnableBlending(false);
+        ash::RenderContext::SetDepthWrite(true);
+        ash::RenderContext::EnableBlending(false);
 
         m_world.forEachChunk([&](const ChunkCoord &, const Chunk *chunk) {
             if (chunk && chunk->hasMesh())
@@ -42,19 +42,19 @@ namespace voxelity {
     }
 
     void WorldRenderer::renderTransparentPass() const {
-        ash::RenderState::EnableBlending(true);
-        ash::RenderState::SetBlendFunc(
+        ash::RenderContext::EnableBlending(true);
+        ash::RenderContext::SetBlendFunc(
             ash::BlendFactor::SrcAlpha,
             ash::BlendFactor::OneMinusSrcAlpha
         );
-        ash::RenderState::SetDepthWrite(false);
+        ash::RenderContext::SetDepthWrite(false);
 
         m_world.forEachChunk([&](const ChunkCoord &, const Chunk *chunk) {
             if (chunk && chunk->hasMesh())
                 chunk->drawTransparent(m_shader);
         });
 
-        ash::RenderState::SetDepthWrite(true);
-        ash::RenderState::EnableBlending(false);
+        ash::RenderContext::SetDepthWrite(true);
+        ash::RenderContext::EnableBlending(false);
     }
 }

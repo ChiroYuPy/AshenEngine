@@ -58,22 +58,22 @@ namespace voxelity {
     }
 
     void ChunkManager::updateLoadedChunks(const glm::vec3 &playerPos, const int renderDistance) {
-        glm::ivec3 playerChunk = World::toChunkCoord(playerPos.x, playerPos.y, playerPos.z);
+        const glm::ivec3 playerChunk = World::toChunkCoord(playerPos.x, playerPos.y, playerPos.z);
 
         if (playerChunk != m_lastPlayerChunk || renderDistance != m_lastRenderDistance) {
             m_lastPlayerChunk = playerChunk;
             m_lastRenderDistance = renderDistance;
 
             std::vector<ChunkCoord> requiredChunks = getChunksInRadius(playerChunk, renderDistance);
-            std::unordered_set<ChunkCoord> requiredSet(requiredChunks.begin(), requiredChunks.end());
+            const std::unordered_set<ChunkCoord> requiredSet(requiredChunks.begin(), requiredChunks.end());
 
             // Ajouter nouveaux chunks à générer
             for (const auto &coord: requiredChunks) {
                 if (!m_chunks.contains(coord) && !m_chunksInQueue.contains(coord)) {
-                    int dx = coord.x - playerChunk.x;
-                    int dy = coord.y - playerChunk.y;
-                    int dz = coord.z - playerChunk.z;
-                    int priority = dx * dx + dy * dy + dz * dz;
+                    const int dx = coord.x - playerChunk.x;
+                    const int dy = coord.y - playerChunk.y;
+                    const int dz = coord.z - playerChunk.z;
+                    const int priority = dx * dx + dy * dy + dz * dz;
                     queueChunkLoad(coord, priority);
                 }
             }
@@ -122,10 +122,10 @@ namespace voxelity {
             // (y compris ceux qui ont été générés précédemment mais n'avaient pas tous leurs voisins)
             for (const auto &coord: newlyGeneratedChunks) {
                 // Calculer la priorité basée sur la distance au dernier chunk du joueur
-                int dx = coord.x - m_lastPlayerChunk.x;
-                int dy = coord.y - m_lastPlayerChunk.y;
-                int dz = coord.z - m_lastPlayerChunk.z;
-                int priority = dx * dx + dy * dy + dz * dz;
+                const int dx = coord.x - m_lastPlayerChunk.x;
+                const int dy = coord.y - m_lastPlayerChunk.y;
+                const int dz = coord.z - m_lastPlayerChunk.z;
+                const int priority = dx * dx + dy * dy + dz * dz;
 
                 // Essayer de mesher le chunk nouvellement généré
                 markChunkForMeshRebuild(coord, priority);
@@ -143,13 +143,13 @@ namespace voxelity {
                 };
 
                 for (const auto &neighbor: neighbors) {
-                    if (Chunk *neighborChunk = getChunk(neighbor)) {
+                    if (const Chunk *neighborChunk = getChunk(neighbor)) {
                         if (neighborChunk->isDirty()) {
                             // Calculer la priorité pour le voisin
-                            int ndx = neighbor.x - m_lastPlayerChunk.x;
-                            int ndy = neighbor.y - m_lastPlayerChunk.y;
-                            int ndz = neighbor.z - m_lastPlayerChunk.z;
-                            int neighborPriority = ndx * ndx + ndy * ndy + ndz * ndz;
+                            const int ndx = neighbor.x - m_lastPlayerChunk.x;
+                            const int ndy = neighbor.y - m_lastPlayerChunk.y;
+                            const int ndz = neighbor.z - m_lastPlayerChunk.z;
+                            const int neighborPriority = ndx * ndx + ndy * ndy + ndz * ndz;
 
                             markChunkForMeshRebuild(neighbor, neighborPriority);
                         }
@@ -195,13 +195,13 @@ namespace voxelity {
 
     void ChunkManager::forEachChunkInRadius(const glm::vec3 &center, const int radius,
                                             const std::function<void(const ChunkCoord &, Chunk *)> &func) {
-        glm::ivec3 centerChunk = World::toChunkCoord(
+        const glm::ivec3 centerChunk = World::toChunkCoord(
             static_cast<int>(center.x),
             static_cast<int>(center.y),
             static_cast<int>(center.z)
         );
 
-        std::vector<ChunkCoord> coords = getChunksInRadius(centerChunk, radius);
+        const std::vector<ChunkCoord> coords = getChunksInRadius(centerChunk, radius);
         for (const auto &coord: coords) {
             if (Chunk *chunk = getChunk(coord)) {
                 func(coord, chunk);
@@ -279,7 +279,7 @@ namespace voxelity {
                 if (!m_running) break;
                 if (m_meshBuildQueue.empty()) continue;
 
-                MeshBuildRequest request = m_meshBuildQueue.top();
+                const MeshBuildRequest request = m_meshBuildQueue.top();
                 m_meshBuildQueue.pop();
                 coord = request.coord;
             }
@@ -395,10 +395,10 @@ namespace voxelity {
     }
 
     VoxelType ChunkManager::getVoxelSafe(const int worldX, const int worldY, const int worldZ) const {
-        ChunkCoord chunkCoord = World::toChunkCoord(worldX, worldY, worldZ);
-        glm::ivec3 localPos = World::toLocalCoord(worldX, worldY, worldZ);
+        const ChunkCoord chunkCoord = World::toChunkCoord(worldX, worldY, worldZ);
+        const glm::ivec3 localPos = World::toLocalCoord(worldX, worldY, worldZ);
 
-        Chunk *chunk = const_cast<ChunkManager *>(this)->getChunk(chunkCoord);
+        const Chunk *chunk = const_cast<ChunkManager *>(this)->getChunk(chunkCoord);
         if (chunk)
             return chunk->get(localPos.x, localPos.y, localPos.z);
 

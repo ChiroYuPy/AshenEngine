@@ -33,7 +33,7 @@ namespace ash {
 
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_Resources.find(id);
+            const auto it = m_Resources.find(id);
             if (it != m_Resources.end()) {
                 return it->second;
             }
@@ -66,7 +66,7 @@ namespace ash {
         // Check if already loaded
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_Resources.find(id);
+            const auto it = m_Resources.find(id);
             if (it != m_Resources.end()) {
                 return it->second;
             }
@@ -120,7 +120,7 @@ namespace ash {
         // Check if already loaded
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_Resources.find(id);
+            const auto it = m_Resources.find(id);
             if (it != m_Resources.end()) {
                 return it->second;
             }
@@ -170,7 +170,7 @@ namespace ash {
         // Check if already loaded
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_Resources.find(id);
+            const auto it = m_Resources.find(id);
             if (it != m_Resources.end()) {
                 return it->second;
             }
@@ -196,7 +196,7 @@ namespace ash {
         const std::string id = "__primitive__cube";
 
         std::lock_guard<std::mutex> lock(m_Mutex);
-        auto it = m_Resources.find(id);
+        const auto it = m_Resources.find(id);
         if (it != m_Resources.end()) {
             return it->second;
         }
@@ -212,7 +212,7 @@ namespace ash {
         const std::string id = "__primitive__sphere";
 
         std::lock_guard<std::mutex> lock(m_Mutex);
-        auto it = m_Resources.find(id);
+        const auto it = m_Resources.find(id);
         if (it != m_Resources.end()) {
             return it->second;
         }
@@ -227,7 +227,7 @@ namespace ash {
         const std::string id = "__primitive__plane";
 
         std::lock_guard<std::mutex> lock(m_Mutex);
-        auto it = m_Resources.find(id);
+        const auto it = m_Resources.find(id);
         if (it != m_Resources.end()) {
             return it->second;
         }
@@ -242,7 +242,7 @@ namespace ash {
         const std::string id = "__primitive__quad";
 
         std::lock_guard<std::mutex> lock(m_Mutex);
-        auto it = m_Resources.find(id);
+        const auto it = m_Resources.find(id);
         if (it != m_Resources.end()) {
             return it->second;
         }
@@ -266,7 +266,7 @@ namespace ash {
         // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_CanvasItemMaterials.find(id);
+            const auto it = m_CanvasItemMaterials.find(id);
             if (it != m_CanvasItemMaterials.end()) {
                 return it->second;
             }
@@ -293,14 +293,14 @@ namespace ash {
         // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_CanvasItemMaterials.find(id);
+            const auto it = m_CanvasItemMaterials.find(id);
             if (it != m_CanvasItemMaterials.end()) {
                 return it->second;
             }
         }
 
         // Load texture (doesn't need our lock)
-        auto texture = TextureManager::Instance().Get(textureName);
+        const auto texture = TextureManager::Instance().Get(textureName);
         auto material = MaterialFactory::CreateCanvasItemTextured(texture);
 
         // Store result
@@ -324,7 +324,7 @@ namespace ash {
         // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_SpatialMaterials.find(id);
+            const auto it = m_SpatialMaterials.find(id);
             if (it != m_SpatialMaterials.end()) {
                 return it->second;
             }
@@ -351,7 +351,7 @@ namespace ash {
         // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_SpatialMaterials.find(id);
+            const auto it = m_SpatialMaterials.find(id);
             if (it != m_SpatialMaterials.end()) {
                 return it->second;
             }
@@ -378,7 +378,7 @@ namespace ash {
         // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_SkyMaterials.find(id);
+            const auto it = m_SkyMaterials.find(id);
             if (it != m_SkyMaterials.end()) {
                 return it->second;
             }
@@ -405,7 +405,7 @@ namespace ash {
         // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_Resources.find(id);
+            const auto it = m_Resources.find(id);
             if (it != m_Resources.end()) {
                 return it->second;
             }
@@ -427,19 +427,19 @@ namespace ash {
 
     std::shared_ptr<CanvasItemMaterial> MaterialManager::GetCanvasItem(const std::string& id) {
         std::lock_guard<std::mutex> lock(m_Mutex);
-        auto it = m_CanvasItemMaterials.find(id);
+        const auto it = m_CanvasItemMaterials.find(id);
         return (it != m_CanvasItemMaterials.end()) ? it->second : nullptr;
     }
 
     std::shared_ptr<SpatialMaterial> MaterialManager::GetSpatial(const std::string& id) {
         std::lock_guard<std::mutex> lock(m_Mutex);
-        auto it = m_SpatialMaterials.find(id);
+        const auto it = m_SpatialMaterials.find(id);
         return (it != m_SpatialMaterials.end()) ? it->second : nullptr;
     }
 
     std::shared_ptr<SkyMaterial> MaterialManager::GetSky(const std::string& id) {
         std::lock_guard<std::mutex> lock(m_Mutex);
-        auto it = m_SkyMaterials.find(id);
+        const auto it = m_SkyMaterials.find(id);
         return (it != m_SkyMaterials.end()) ? it->second : nullptr;
     }
 

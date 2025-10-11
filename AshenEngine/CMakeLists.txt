@@ -13,7 +13,7 @@ set(CORE_SOURCES
         src/Core/Platform.cpp
         src/Core/Window.cpp
 
-        src/GraphicsAPI/RenderState.cpp
+        src/GraphicsAPI/RenderContext.cpp
         src/GraphicsAPI/GraphicsContext.cpp
 
         src/Graphics/Rendering/Renderer.cpp

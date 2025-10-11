@@ -5,18 +5,18 @@
 #include "Ashen/Core/Logger.h"
 #include "Ashen/Graphics/Rendering/Renderer2D.h"
 #include "Ashen/Graphics/Rendering/Renderer3D.h"
-#include "Ashen/GraphicsAPI/RenderState.h"
+#include "Ashen/GraphicsAPI/RenderContext.h"
 #include "Ashen/GraphicsAPI/VertexArray.h"
 
 namespace ash {
     Renderer::Statistics Renderer::s_Stats;
 
     void Renderer::Init() {
-        RenderState::EnableDepthTest(true);
-        RenderState::SetDepthFunc(DepthFunc::Less);
-        RenderState::EnableCulling(true);
-        RenderState::SetCullFace(CullFaceMode::Back);
-        RenderState::SetFrontFace(FrontFace::CounterClockwise);
+        RenderContext::EnableDepthTest(true);
+        RenderContext::SetDepthFunc(DepthFunc::Less);
+        RenderContext::EnableCulling(true);
+        RenderContext::SetCullFace(CullFaceMode::Back);
+        RenderContext::SetFrontFace(FrontFace::CounterClockwise);
 
         Renderer2D::Init();
         Renderer3D::Init();
@@ -31,8 +31,8 @@ namespace ash {
     }
 
     void Renderer::BeginFrame() {
-        RenderState::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
-        RenderState::Clear();
+        RenderContext::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+        RenderContext::Clear();
         ResetStats();
     }
 
@@ -40,7 +40,7 @@ namespace ash {
     }
 
     void Renderer::OnWindowResize(const uint32_t width, const uint32_t height) {
-        RenderState::SetViewport(width, height);
+        RenderContext::SetViewport(width, height);
     }
 
     void Renderer::DrawIndexed(const VertexArray &vao, const uint32_t indexCount) {

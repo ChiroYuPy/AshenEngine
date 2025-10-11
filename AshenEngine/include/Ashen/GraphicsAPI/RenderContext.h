@@ -5,7 +5,7 @@
 #include "Ashen/Math/Math.h"
 
 namespace ash {
-    class RenderState {
+    class RenderContext {
     public:
         static void Clear(ClearBuffer buffers = ClearBuffer::Color | ClearBuffer::Depth);
 

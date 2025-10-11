@@ -6619,7 +6619,7 @@ class input_stream_adapter
     // end up as the same value, e.g., 0xFFFFFFFF.
     std::char_traits<char>::int_type get_character()
     {
-        auto res = sb->sbumpc();
+        const auto res = sb->sbumpc();
         // set eof manually, as we don't use the istream interface.
         if (JSON_HEDLEY_UNLIKELY(res == std::char_traits<char>::eof()))
         {
@@ -6631,7 +6631,7 @@ class input_stream_adapter
     template<class T>
     std::size_t get_elements(T* dest, const std::size_t count = 1)
     {
-        auto res = static_cast<std::size_t>(sb->sgetn(reinterpret_cast<char*>(dest), static_cast<std::streamsize>(count * sizeof(T))));
+        const auto res = static_cast<std::size_t>(sb->sgetn(reinterpret_cast<char*>(dest), static_cast<std::streamsize>(count * sizeof(T))));
         if (JSON_HEDLEY_UNLIKELY(res < count * sizeof(T)))
         {
             is->clear(is->rdstate() | std::ios::eofbit);
@@ -6997,7 +6997,7 @@ contiguous_bytes_input_adapter input_adapter(CharT b)
     {
         JSON_THROW(parse_error::create(101, 0, "attempting to parse an empty input; check that your input string or stream contains the expected JSON", nullptr));
     }
-    auto length = std::strlen(reinterpret_cast<const char*>(b));
+    const auto length = std::strlen(reinterpret_cast<const char*>(b));
     const auto* ptr = reinterpret_cast<const char*>(b);
     return input_adapter(ptr, ptr + length); // cppcheck-suppress[nullPointerArithmeticRedundantCheck]
 }
@@ -11997,7 +11997,7 @@ class binary_reader
                 }
                 if (!dim.empty())  // if ndarray, convert to an object in JData annotated array format
                 {
-                    for (auto i : dim) // test if any dimension in an ndarray is 0, if so, return a 1D empty container
+                    for (const auto i : dim) // test if any dimension in an ndarray is 0, if so, return a 1D empty container
                     {
                         if ( i == 0 )
                         {
@@ -13566,7 +13566,7 @@ class primitive_iterator_t
 
     primitive_iterator_t operator++(int)& noexcept // NOLINT(cert-dcl21-cpp)
     {
-        auto result = *this;
+        const auto result = *this;
         ++m_it;
         return result;
     }
@@ -13579,7 +13579,7 @@ class primitive_iterator_t
 
     primitive_iterator_t operator--(int)& noexcept // NOLINT(cert-dcl21-cpp)
     {
-        auto result = *this;
+        const auto result = *this;
         --m_it;
         return result;
     }

@@ -23,13 +23,13 @@ namespace voxelity {
     }
 
     void World::setVoxel(const int worldX, const int worldY, const int worldZ, const VoxelType type) {
-        ChunkCoord chunkCoord = toChunkCoord(worldX, worldY, worldZ);
-        ash::IVec3 localPos = toLocalCoord(worldX, worldY, worldZ);
+        const ChunkCoord chunkCoord = toChunkCoord(worldX, worldY, worldZ);
+        const ash::IVec3 localPos = toLocalCoord(worldX, worldY, worldZ);
 
         Chunk *chunk = m_chunkManager->getOrCreateChunk(chunkCoord);
         if (!chunk) return;
 
-        VoxelType oldType = chunk->get(localPos.x, localPos.y, localPos.z);
+        const VoxelType oldType = chunk->get(localPos.x, localPos.y, localPos.z);
         if (oldType == type) return;
 
         chunk->set(localPos.x, localPos.y, localPos.z, type);
@@ -129,8 +129,8 @@ namespace voxelity {
             if ((lx == 0 && dx == -1) || (lx == VoxelArray::SIZE - 1 && dx == 1) ||
                 (ly == 0 && dy == -1) || (ly == VoxelArray::SIZE - 1 && dy == 1) ||
                 (lz == 0 && dz == -1) || (lz == VoxelArray::SIZE - 1 && dz == 1)) {
-                ChunkCoord neighborCoord = {chunkCoord.x + dx, chunkCoord.y + dy, chunkCoord.z + dz};
-                Chunk *neighbor = getChunk(neighborCoord);
+                const ChunkCoord neighborCoord = {chunkCoord.x + dx, chunkCoord.y + dy, chunkCoord.z + dz};
+                const Chunk *neighbor = getChunk(neighborCoord);
                 if (neighbor) {
                     m_chunkManager->markChunkForMeshRebuild(neighborCoord);
                 }

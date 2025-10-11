@@ -96,7 +96,7 @@ namespace ash {
     }
 
     void DebugRenderer::DrawRay(const Vec3& origin, const Vec3& direction, float length, const Vec3& color) {
-        Vec3 end = origin + glm::normalize(direction) * length;
+        const Vec3 end = origin + glm::normalize(direction) * length;
         DrawLine(origin, end, color);
     }
 
@@ -121,13 +121,13 @@ namespace ash {
     }
 
     void DebugRenderer::DrawWireCube(const Vec3& center, const Vec3& size, const Vec3& color) {
-        Vec3 halfSize = size * 0.5f;
+        const Vec3 halfSize = size * 0.5f;
         DrawBox(center - halfSize, center + halfSize, color);
     }
 
     void DebugRenderer::DrawWireCube(const Mat4& transform, const Vec3& color) {
         // Define cube corners in local space
-        Vec3 corners[8] = {
+        const Vec3 corners[8] = {
             Vec3(-0.5f, -0.5f, -0.5f), Vec3( 0.5f, -0.5f, -0.5f),
             Vec3( 0.5f, -0.5f,  0.5f), Vec3(-0.5f, -0.5f,  0.5f),
             Vec3(-0.5f,  0.5f, -0.5f), Vec3( 0.5f,  0.5f, -0.5f),
@@ -162,12 +162,12 @@ namespace ash {
     }
 
     void DebugRenderer::DrawWireSphere(const Vec3& center, float radius, const Vec3& color, int segments) {
-        float angleStep = glm::two_pi<float>() / segments;
+        const float angleStep = glm::two_pi<float>() / segments;
 
         // Draw 3 circles (XY, XZ, YZ planes)
         for (int i = 0; i < segments; ++i) {
-            float angle1 = i * angleStep;
-            float angle2 = (i + 1) * angleStep;
+            const float angle1 = i * angleStep;
+            const float angle2 = (i + 1) * angleStep;
 
             // XY plane
             Vec3 p1 = center + Vec3(cos(angle1) * radius, sin(angle1) * radius, 0);
@@ -193,12 +193,12 @@ namespace ash {
     }
 
     void DebugRenderer::DrawGrid(const Vec3& center, float size, int divisions, const Vec3& color) {
-        float step = size / divisions;
-        float halfSize = size * 0.5f;
+        const float step = size / divisions;
+        const float halfSize = size * 0.5f;
 
         // Lines parallel to X axis
         for (int i = 0; i <= divisions; ++i) {
-            float z = -halfSize + i * step;
+            const float z = -halfSize + i * step;
             DrawLine(
                 center + Vec3(-halfSize, 0, z),
                 center + Vec3( halfSize, 0, z),
@@ -208,7 +208,7 @@ namespace ash {
 
         // Lines parallel to Z axis
         for (int i = 0; i <= divisions; ++i) {
-            float x = -halfSize + i * step;
+            const float x = -halfSize + i * step;
             DrawLine(
                 center + Vec3(x, 0, -halfSize),
                 center + Vec3(x, 0,  halfSize),
@@ -219,7 +219,7 @@ namespace ash {
 
     void DebugRenderer::DrawFrustum(const Mat4& viewProjection, const Vec3& color) {
         // Extract frustum corners from inverse view-projection matrix
-        Mat4 invVP = glm::inverse(viewProjection);
+        const Mat4 invVP = glm::inverse(viewProjection);
 
         Vec3 corners[8];
         int index = 0;

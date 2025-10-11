@@ -218,7 +218,7 @@ namespace ash {
             }
 
             // Render ground plane
-            Mat4 groundTransform = glm::translate(Mat4(1.0f), Vec3(0, -1, 0))
+            const Mat4 groundTransform = glm::translate(Mat4(1.0f), Vec3(0, -1, 0))
                                  * glm::scale(Mat4(1.0f), Vec3(20, 1, 20));
             Renderer3D::Submit(m_PlaneMesh, m_GroundMaterial, groundTransform);
 
@@ -259,7 +259,7 @@ namespace ash {
             Renderer3D::Submit(m_CubeMesh, m_RoughMaterial, transform);
         }
 
-        void RenderMultipleObjectsScene() {
+        void RenderMultipleObjectsScene() const {
             // Central custom mesh
             Mat4 transform = glm::translate(Mat4(1.0f), Vec3(0, 0, 0))
                            * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation * 0.5f), Vec3(0, 1, 0))
@@ -268,8 +268,8 @@ namespace ash {
 
             // Orbiting spheres
             for (int i = 0; i < 4; ++i) {
-                float angle = m_Time + (i * glm::two_pi<float>() / 4.0f);
-                float radius = 5.0f;
+                const float angle = m_Time + (i * glm::two_pi<float>() / 4.0f);
+                const float radius = 5.0f;
                 Vec3 position(
                     std::cos(angle) * radius,
                     std::sin(m_Time * 2.0f + i) * 0.5f + 1.5f,
@@ -291,7 +291,7 @@ namespace ash {
             Renderer3D::Submit(m_CubeMesh, m_UnlitMaterial, transform);
         }
 
-        void RenderLightingDemoScene() {
+        void RenderLightingDemoScene() const {
             // Central sphere to show lighting
             Mat4 transform = glm::translate(Mat4(1.0f), Vec3(0, 0, 0))
                            * glm::scale(Mat4(1.0f), Vec3(2.0f));
@@ -305,11 +305,11 @@ namespace ash {
             }
 
             // Ring of objects to show light falloff
-            const int objectCount = 8;
-            const float ringRadius = 6.0f;
+            constexpr int objectCount = 8;
+            constexpr float ringRadius = 6.0f;
 
             for (int i = 0; i < objectCount; ++i) {
-                float angle = (i * glm::two_pi<float>()) / objectCount;
+                const float angle = (i * glm::two_pi<float>()) / objectCount;
                 Vec3 position(
                     std::cos(angle) * ringRadius,
                     0,
@@ -339,7 +339,7 @@ namespace ash {
             const float boxHeight = 100.0f;
 
             // Semi-transparent background
-            Vec2 screenSize = Application::Get().GetWindow().GetSizeF();
+            const Vec2 screenSize = Application::Get().GetWindow().GetSizeF();
             Renderer2D::DrawQuad(
                 Vec2(padding + boxWidth * 0.5f, screenSize.y - padding - boxHeight * 0.5f),
                 Vec2(boxWidth, boxHeight),
@@ -348,9 +348,9 @@ namespace ash {
 
             // Info text would go here (needs text rendering)
             // For now, just draw colored indicators
-            float indicatorSize = 10.0f;
-            float x = padding + 10.0f;
-            float y = screenSize.y - padding - 20.0f;
+            const float indicatorSize = 10.0f;
+            const float x = padding + 10.0f;
+            const float y = screenSize.y - padding - 20.0f;
 
             // Scene indicator
             for (int i = 0; i < 3; ++i) {

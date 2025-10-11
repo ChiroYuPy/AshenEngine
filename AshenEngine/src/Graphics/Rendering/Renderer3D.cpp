@@ -5,7 +5,7 @@
 #include "Ashen/Graphics/Objects/Mesh.h"
 #include "Ashen/Graphics/Objects/Material.h"
 #include "Ashen/Graphics/Rendering/DebugRenderer.h"
-#include "Ashen/GraphicsAPI/RenderState.h"
+#include "Ashen/GraphicsAPI/RenderContext.h"
 
 namespace ash {
 
@@ -66,11 +66,11 @@ namespace ash {
         s_Data->cameraPosition = camera.GetPosition();
 
         // Setup render state
-        RenderState::EnableDepthTest(true);
-        RenderState::SetDepthFunc(DepthFunc::Less);
-        RenderState::EnableCulling(true);
-        RenderState::SetCullFace(CullFaceMode::Back);
-        RenderState::SetFrontFace(FrontFace::CounterClockwise);
+        RenderContext::EnableDepthTest(true);
+        RenderContext::SetDepthFunc(DepthFunc::Less);
+        RenderContext::EnableCulling(true);
+        RenderContext::SetCullFace(CullFaceMode::Back);
+        RenderContext::SetFrontFace(FrontFace::CounterClockwise);
     }
 
     void Renderer3D::EndScene() {
@@ -110,12 +110,18 @@ namespace ash {
         shader->SetMat4("u_View", s_Data->viewMatrix);
         shader->SetMat4("u_Proj", s_Data->projectionMatrix);
 
-        const Mat3 normalMatrix = glm::transpose(glm::inverse(Mat3(transform)));
-        shader->SetMat3("u_NormalMatrix", normalMatrix);
-        shader->SetVec3("u_ViewPos", s_Data->cameraPosition);
+        // Check if shader needs lighting uniforms (has these in its source)
+        // We detect this by checking if it has v_FragPos output (spatial shaders)
+        const bool needsLighting = shader->HasUniform("u_CameraPos");
 
-        // Setup lighting
-        SetupLighting(shader);
+        if (needsLighting) {
+            const Mat3 normalMatrix = glm::transpose(glm::inverse(Mat3(transform)));
+            shader->SetMat3("u_NormalMatrix", normalMatrix);
+            shader->SetVec3("u_ViewPos", s_Data->cameraPosition);
+
+            // Setup lighting
+            SetupLighting(shader);
+        }
 
         // Apply material
         material->Bind();
@@ -167,7 +173,7 @@ namespace ash {
     }
 
     void Renderer3D::SetWireframeMode(const bool enabled) {
-        RenderState::SetPolygonMode(CullFaceMode::FrontAndBack, enabled ? PolygonMode::Line : PolygonMode::Fill);
+        RenderContext::SetPolygonMode(CullFaceMode::FrontAndBack, enabled ? PolygonMode::Line : PolygonMode::Fill);
     }
 
     void Renderer3D::FlushRenderQueue() {

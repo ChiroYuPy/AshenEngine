@@ -79,9 +79,9 @@ namespace std {
     template<>
     struct hash<voxelity::ChunkCoord> {
         size_t operator()(const voxelity::ChunkCoord &coord) const noexcept {
-            size_t h1 = hash<int>{}(coord.x);
-            size_t h2 = hash<int>{}(coord.y);
-            size_t h3 = hash<int>{}(coord.z);
+            const size_t h1 = hash<int>{}(coord.x);
+            const size_t h2 = hash<int>{}(coord.y);
+            const size_t h3 = hash<int>{}(coord.z);
             return h1 ^ (h2 << 1) ^ (h3 << 2);
         }
     };
