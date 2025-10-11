@@ -85,6 +85,14 @@ namespace ash {
                     m_CurrentScene = 2; // Lighting demo
                     return true;
                 }
+                if (e.GetKeyCode() == Key::D3) {
+                    m_CurrentScene = 3; // Toon scene
+                    return true;
+                }
+                if (e.GetKeyCode() == Key::D4) {
+                    m_CurrentScene = 4; // Mixed scene (Toon + Spatial)
+                    return true;
+                }
                 return false;
             });
 
@@ -97,6 +105,7 @@ namespace ash {
                 m_CameraController->OnMouseScroll(e.GetYOffset());
                 return false;
             });
+
         }
 
     private:
@@ -123,63 +132,52 @@ namespace ash {
         }
 
         void SetupMaterials() {
-            // Spatial materials (3D with lighting)
+            // Materials Spatial existants...
             m_RedMaterial = AssetLibrary::Materials().CreateSpatial(
                 "red_spatial",
-                Vec4(0.8f, 0.2f, 0.2f, 1.0f), // Red albedo
-                0.0f,  // Non-metallic
-                0.6f,  // Medium roughness
-                0.5f   // Medium specular
+                Vec4(0.8f, 0.2f, 0.2f, 1.0f),
+                0.0f, 0.6f, 0.5f
             );
 
             m_BlueMaterial = AssetLibrary::Materials().CreateSpatial(
                 "blue_spatial",
-                Vec4(0.2f, 0.4f, 0.8f, 1.0f), // Blue albedo
-                0.0f,
-                0.4f,
-                0.5f
+                Vec4(0.2f, 0.4f, 0.8f, 1.0f),
+                0.0f, 0.4f, 0.5f
             );
 
             m_GreenMaterial = AssetLibrary::Materials().CreateSpatial(
                 "green_spatial",
-                Vec4(0.2f, 0.8f, 0.3f, 1.0f), // Green albedo
-                0.0f,
-                0.5f,
+                Vec4(0.2f, 0.8f, 0.3f, 1.0f),
+                0.0f, 0.5f, 0.5f
+            );
+
+            // NOUVEAUX: Materials Toon
+            m_ToonRedMaterial = AssetLibrary::Materials().CreateToon(
+                "toon_red",
+                Vec4(0.9f, 0.2f, 0.2f, 1.0f),
+                3,      // 3 niveaux de shading
+                0.716f  // Rim light amount
+            );
+
+            m_ToonBlueMaterial = AssetLibrary::Materials().CreateToon(
+                "toon_blue",
+                Vec4(0.2f, 0.4f, 0.9f, 1.0f),
+                4,      // 4 niveaux de shading
+                0.8f    // Plus de rim light
+            );
+
+            m_ToonGreenMaterial = AssetLibrary::Materials().CreateToon(
+                "toon_green",
+                Vec4(0.2f, 0.9f, 0.3f, 1.0f),
+                5,      // 5 niveaux (plus lisse)
                 0.5f
             );
 
-            // Metallic material
-            m_MetallicMaterial = AssetLibrary::Materials().CreateSpatial(
-                "metallic_spatial",
-                Vec4(0.9f, 0.9f, 0.9f, 1.0f), // Silver-ish
-                0.9f,  // Very metallic
-                0.2f,  // Low roughness (shiny)
-                0.5f
-            );
-
-            // Rough material
-            m_RoughMaterial = AssetLibrary::Materials().CreateSpatial(
-                "rough_spatial",
-                Vec4(0.6f, 0.5f, 0.4f, 1.0f), // Brown-ish
-                0.0f,
-                0.95f, // Very rough
-                0.3f
-            );
-
-            // Unlit material (no lighting)
-            m_UnlitMaterial = AssetLibrary::Materials().CreateSpatialUnlit(
-                "unlit_spatial",
-                Vec4(1.0f, 0.8f, 0.2f, 1.0f) // Bright yellow
-            );
-
-            // Ground plane material
-            m_GroundMaterial = AssetLibrary::Materials().CreateSpatial(
-                "ground_spatial",
-                Vec4(0.3f, 0.3f, 0.3f, 1.0f),
-                0.0f,
-                0.9f,
-                0.2f
-            );
+            // Personnaliser les paramètres du shader toon
+            auto toonMat = m_ToonRedMaterial;
+            toonMat->SetOutlineColor(Vec3(0.1f, 0.0f, 0.0f));  // Outline rouge foncé
+            toonMat->SetOutlineThickness(0.05f);
+            toonMat->SetSpecularGlossiness(64.0f);  // Specular plus net
         }
 
         void SetupLights() {
@@ -215,16 +213,17 @@ namespace ash {
                 case 0: RenderBasicMaterialsScene(); break;
                 case 1: RenderMultipleObjectsScene(); break;
                 case 2: RenderLightingDemoScene(); break;
+                case 3: RenderToonScene(); break;           // NOUVEAU
+                case 4: RenderMixedScene(); break;          // NOUVEAU
             }
 
-            // Render ground plane
+            // Ground plane
             const Mat4 groundTransform = glm::translate(Mat4(1.0f), Vec3(0, -1, 0))
-                                 * glm::scale(Mat4(1.0f), Vec3(20, 1, 20));
+                                        * glm::scale(Mat4(1.0f), Vec3(20, 1, 20));
             Renderer3D::Submit(m_PlaneMesh, m_GroundMaterial, groundTransform);
 
             Renderer3D::EndScene();
 
-            // Display stats
             if (m_ShowStats) {
                 const auto& stats = Renderer3D::GetStats();
                 Logger::Info() << "Scene " << m_CurrentScene + 1
@@ -232,6 +231,73 @@ namespace ash {
                               << " | Triangles: " << stats.triangles
                               << " | Vertices: " << stats.vertices;
             }
+        }
+
+        void RenderToonScene() const {
+            // Rangée de cubes avec shader toon
+            Mat4 transform = glm::translate(Mat4(1.0f), Vec3(-4, 0, 0))
+                           * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation), Vec3(0, 1, 0));
+            Renderer3D::Submit(m_CubeMesh, m_ToonRedMaterial, transform);
+
+            transform = glm::translate(Mat4(1.0f), Vec3(0, 0, 0))
+                      * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation), Vec3(0, 1, 0));
+            Renderer3D::Submit(m_CubeMesh, m_ToonBlueMaterial, transform);
+
+            transform = glm::translate(Mat4(1.0f), Vec3(4, 0, 0))
+                      * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation), Vec3(0, 1, 0));
+            Renderer3D::Submit(m_CubeMesh, m_ToonGreenMaterial, transform);
+
+            // Sphères en orbite avec shader toon
+            for (int i = 0; i < 4; ++i) {
+                const float angle = m_Time + (i * glm::two_pi<float>() / 4.0f);
+                const float radius = 5.0f;
+                Vec3 position(
+                    std::cos(angle) * radius,
+                    std::sin(m_Time * 2.0f + i) * 0.5f + 1.5f,
+                    std::sin(angle) * radius
+                );
+
+                transform = glm::translate(Mat4(1.0f), position)
+                          * glm::scale(Mat4(1.0f), Vec3(0.8f));
+
+                auto material = (i % 3 == 0) ? m_ToonRedMaterial :
+                               (i % 3 == 1) ? m_ToonBlueMaterial :
+                                              m_ToonGreenMaterial;
+
+                Renderer3D::Submit(m_SphereMesh, material, transform);
+            }
+
+            // Grand objet central pour bien voir les effets
+            transform = glm::translate(Mat4(1.0f), Vec3(0, 2, 0))
+                      * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation * 0.5f), Vec3(0, 1, 0))
+                      * glm::scale(Mat4(1.0f), Vec3(1.5f));
+            Renderer3D::Submit(m_CustomMesh, m_ToonBlueMaterial, transform);
+        }
+
+        void RenderMixedScene() const {
+            // Objets Spatial (réalistes)
+            Mat4 transform = glm::translate(Mat4(1.0f), Vec3(-6, 0, 0))
+                           * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation), Vec3(0, 1, 0));
+            Renderer3D::Submit(m_CubeMesh, m_MetallicMaterial, transform);
+
+            transform = glm::translate(Mat4(1.0f), Vec3(-3, 0, 0))
+                      * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation), Vec3(0, 1, 0));
+            Renderer3D::Submit(m_SphereMesh, m_BlueMaterial, transform);
+
+            // Objets Toon (stylisés)
+            transform = glm::translate(Mat4(1.0f), Vec3(3, 0, 0))
+                      * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation), Vec3(0, 1, 0));
+            Renderer3D::Submit(m_CubeMesh, m_ToonRedMaterial, transform);
+
+            transform = glm::translate(Mat4(1.0f), Vec3(6, 0, 0))
+                      * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation), Vec3(0, 1, 0));
+            Renderer3D::Submit(m_SphereMesh, m_ToonBlueMaterial, transform);
+
+            // Objet central hybride
+            transform = glm::translate(Mat4(1.0f), Vec3(0, 1, 0))
+                      * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation * 0.7f), Vec3(1, 1, 0))
+                      * glm::scale(Mat4(1.0f), Vec3(1.2f));
+            Renderer3D::Submit(m_CustomMesh, m_ToonGreenMaterial, transform);
         }
 
         void RenderBasicMaterialsScene() {
@@ -401,6 +467,9 @@ namespace ash {
         Ref<SpatialMaterial> m_RoughMaterial;
         Ref<SpatialMaterial> m_UnlitMaterial;
         Ref<SpatialMaterial> m_GroundMaterial;
+        Ref<ToonMaterial> m_ToonRedMaterial;
+        Ref<ToonMaterial> m_ToonBlueMaterial;
+        Ref<ToonMaterial> m_ToonGreenMaterial;
 
         // Lighting
         DirectionalLight m_DirectionalLight;

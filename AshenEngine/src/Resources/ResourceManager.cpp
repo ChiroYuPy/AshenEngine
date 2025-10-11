@@ -39,7 +39,6 @@ namespace ash {
             }
         }
 
-        // Create the shader without lock
         auto shader = BuiltInShaderManager::Instance().Get(type);
 
         {
@@ -51,7 +50,6 @@ namespace ash {
     }
 
     std::shared_ptr<ShaderProgram> ShaderManager::Load(const std::string& id) {
-        // Get paths without holding lock
         const auto vertPath = ResourcePaths::Instance().GetPath(id + ".vert");
         const auto fragPath = ResourcePaths::Instance().GetPath(id + ".frag");
 
@@ -63,7 +61,6 @@ namespace ash {
         const fs::path& vertPath,
         const fs::path& fragPath
     ) {
-        // Check if already loaded
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             const auto it = m_Resources.find(id);
@@ -72,12 +69,10 @@ namespace ash {
             }
         }
 
-        // Load shader without holding lock
         auto shader = std::make_shared<ShaderProgram>(
             ShaderLoader::Load(vertPath, fragPath)
         );
 
-        // Store result
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             m_Resources[id] = shader;
@@ -117,7 +112,6 @@ namespace ash {
         const fs::path& path,
         const TextureConfig& config
     ) {
-        // Check if already loaded
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             const auto it = m_Resources.find(id);
@@ -126,12 +120,10 @@ namespace ash {
             }
         }
 
-        // Load without holding lock
         auto texture = std::make_shared<Texture2D>(
             TextureLoader::Load2D(path, config)
         );
 
-        // Store result
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             m_Resources[id] = texture;
@@ -149,7 +141,6 @@ namespace ash {
     // ========== MeshManager ==========
 
     std::shared_ptr<Mesh> MeshManager::Load(const std::string& id) {
-        // Try to find mesh file
         const fs::path basePath = ResourcePaths::Instance().Root();
 
         for (const auto& ext : MeshLoader::GetSupportedFormats()) {
@@ -167,7 +158,6 @@ namespace ash {
         const fs::path& path,
         const bool flipUVs
     ) {
-        // Check if already loaded
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             const auto it = m_Resources.find(id);
@@ -176,12 +166,10 @@ namespace ash {
             }
         }
 
-        // Load without holding lock
         auto mesh = std::make_shared<Mesh>(
             MeshLoader::LoadSingle(path, flipUVs)
         );
 
-        // Store result
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             m_Resources[id] = mesh;
@@ -201,7 +189,6 @@ namespace ash {
             return it->second;
         }
 
-        // Create without releasing lock (primitives are fast)
         auto mesh = std::make_shared<Mesh>(MeshPrimitives::CreateCube());
         m_Resources[id] = mesh;
 
@@ -263,7 +250,6 @@ namespace ash {
         const std::string& id,
         const Vec4& albedo
     ) {
-        // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             const auto it = m_CanvasItemMaterials.find(id);
@@ -272,10 +258,8 @@ namespace ash {
             }
         }
 
-        // Create without holding lock
         auto material = MaterialFactory::CreateCanvasItem(albedo);
 
-        // Store result
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             m_CanvasItemMaterials[id] = material;
@@ -290,7 +274,6 @@ namespace ash {
         const std::string& id,
         const std::string& textureName
     ) {
-        // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             const auto it = m_CanvasItemMaterials.find(id);
@@ -299,11 +282,9 @@ namespace ash {
             }
         }
 
-        // Load texture (doesn't need our lock)
         const auto texture = TextureManager::Instance().Get(textureName);
         auto material = MaterialFactory::CreateCanvasItemTextured(texture);
 
-        // Store result
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             m_CanvasItemMaterials[id] = material;
@@ -321,7 +302,6 @@ namespace ash {
         float roughness,
         float specular
     ) {
-        // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             const auto it = m_SpatialMaterials.find(id);
@@ -330,10 +310,8 @@ namespace ash {
             }
         }
 
-        // Create without holding lock
         auto material = MaterialFactory::CreateSpatial(albedo, metallic, roughness, specular);
 
-        // Store result
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             m_SpatialMaterials[id] = material;
@@ -348,7 +326,6 @@ namespace ash {
         const std::string& id,
         const Vec4& albedo
     ) {
-        // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             const auto it = m_SpatialMaterials.find(id);
@@ -357,10 +334,8 @@ namespace ash {
             }
         }
 
-        // Create without holding lock
         auto material = MaterialFactory::CreateSpatialUnlit(albedo);
 
-        // Store result
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             m_SpatialMaterials[id] = material;
@@ -371,11 +346,36 @@ namespace ash {
         return material;
     }
 
+    std::shared_ptr<ToonMaterial> MaterialManager::CreateToon(
+        const std::string& id,
+        const Vec4& albedo,
+        int toonLevels,
+        float rimAmount
+    ) {
+        {
+            std::lock_guard<std::mutex> lock(m_Mutex);
+            const auto it = m_ToonMaterials.find(id);
+            if (it != m_ToonMaterials.end()) {
+                return it->second;
+            }
+        }
+
+        auto material = MaterialFactory::CreateToon(albedo, toonLevels, rimAmount);
+
+        {
+            std::lock_guard<std::mutex> lock(m_Mutex);
+            m_ToonMaterials[id] = material;
+            m_Resources[id] = material;
+        }
+
+        Logger::Info() << "Created Toon material: " << id;
+        return material;
+    }
+
     std::shared_ptr<SkyMaterial> MaterialManager::CreateSky(
         const std::string& id,
         const Vec4& color
     ) {
-        // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             const auto it = m_SkyMaterials.find(id);
@@ -384,10 +384,8 @@ namespace ash {
             }
         }
 
-        // Create without holding lock
         auto material = MaterialFactory::CreateSky(color);
 
-        // Store result
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             m_SkyMaterials[id] = material;
@@ -402,7 +400,6 @@ namespace ash {
         const std::string& id,
         const std::string& shaderName
     ) {
-        // Check if already exists
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             const auto it = m_Resources.find(id);
@@ -411,11 +408,9 @@ namespace ash {
             }
         }
 
-        // Load shader (doesn't need our lock)
         auto shader = ShaderManager::Instance().Get(shaderName);
         auto material = std::make_shared<Material>(shader);
 
-        // Store result
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
             m_Resources[id] = material;
@@ -435,6 +430,12 @@ namespace ash {
         std::lock_guard<std::mutex> lock(m_Mutex);
         const auto it = m_SpatialMaterials.find(id);
         return (it != m_SpatialMaterials.end()) ? it->second : nullptr;
+    }
+
+    std::shared_ptr<ToonMaterial> MaterialManager::GetToon(const std::string& id) {
+        std::lock_guard<std::mutex> lock(m_Mutex);
+        const auto it = m_ToonMaterials.find(id);
+        return (it != m_ToonMaterials.end()) ? it->second : nullptr;
     }
 
     std::shared_ptr<SkyMaterial> MaterialManager::GetSky(const std::string& id) {

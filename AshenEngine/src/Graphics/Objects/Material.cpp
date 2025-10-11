@@ -238,6 +238,68 @@ namespace ash {
         return GetFloat("u_Specular").value_or(0.5f);
     }
 
+    // ========== ToonMaterial ==========
+
+    ToonMaterial::ToonMaterial()
+        : Material(BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::Toon)) {
+        SetAlbedo(Vec4(1.0f));
+        SetToonLevels(3);
+        SetOutlineThickness(0.03f);
+        SetOutlineColor(Vec3(0.0f));
+        SetSpecularGlossiness(32.0f);
+        SetRimAmount(0.716f);
+        SetRimThreshold(0.1f);
+        SetBool("u_UseAlbedoTexture", false);
+    }
+
+    ToonMaterial::ToonMaterial(std::shared_ptr<ShaderProgram> customShader)
+        : Material(std::move(customShader)) {
+        SetAlbedo(Vec4(1.0f));
+        SetToonLevels(3);
+        SetBool("u_UseAlbedoTexture", false);
+    }
+
+    void ToonMaterial::SetAlbedo(const Vec4& color) {
+        SetVec4("u_Albedo", color);
+    }
+
+    void ToonMaterial::SetAlbedoTexture(std::shared_ptr<Texture2D> texture) {
+        Material::SetTexture("u_AlbedoTexture", std::move(texture));
+        SetBool("u_UseAlbedoTexture", true);
+    }
+
+    void ToonMaterial::SetToonLevels(int levels) {
+        SetInt("u_ToonLevels", levels);
+    }
+
+    void ToonMaterial::SetOutlineThickness(float thickness) {
+        SetFloat("u_OutlineThickness", thickness);
+    }
+
+    void ToonMaterial::SetOutlineColor(const Vec3& color) {
+        SetVec3("u_OutlineColor", color);
+    }
+
+    void ToonMaterial::SetSpecularGlossiness(float glossiness) {
+        SetFloat("u_SpecularGlossiness", glossiness);
+    }
+
+    void ToonMaterial::SetRimAmount(float amount) {
+        SetFloat("u_RimAmount", amount);
+    }
+
+    void ToonMaterial::SetRimThreshold(float threshold) {
+        SetFloat("u_RimThreshold", threshold);
+    }
+
+    Vec4 ToonMaterial::GetAlbedo() const {
+        return GetVec4("u_Albedo").value_or(Vec4(1.0f));
+    }
+
+    int ToonMaterial::GetToonLevels() const {
+        return GetInt("u_ToonLevels").value_or(3);
+    }
+
     // ========== SkyMaterial ==========
 
     SkyMaterial::SkyMaterial()
@@ -302,6 +364,18 @@ namespace ash {
             BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::SpatialUnlit)
         );
         material->SetAlbedo(albedo);
+        return material;
+    }
+
+    std::shared_ptr<ToonMaterial> MaterialFactory::CreateToon(
+        const Vec4& albedo,
+        int toonLevels,
+        float rimAmount
+    ) {
+        auto material = std::make_shared<ToonMaterial>();
+        material->SetAlbedo(albedo);
+        material->SetToonLevels(toonLevels);
+        material->SetRimAmount(rimAmount);
         return material;
     }
 

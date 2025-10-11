@@ -80,7 +80,6 @@ void main() {
     vec4 worldPos = u_Model * vec4(a_Position, 1.0);
     v_FragPos = worldPos.xyz;
 
-    // Simple normal transformation (works for uniform scaling)
     mat3 normalMatrix = mat3(transpose(inverse(u_Model)));
     v_Normal = normalize(normalMatrix * a_Normal);
 
@@ -99,7 +98,7 @@ in vec3 v_FragPos;
 in vec3 v_Normal;
 in vec2 v_TexCoord;
 
-// Material properties (Godot-style)
+// Material properties
 uniform vec4 u_Albedo = vec4(1.0);
 uniform sampler2D u_AlbedoTexture;
 uniform bool u_UseAlbedoTexture = false;
@@ -112,7 +111,7 @@ uniform float u_Specular = 0.5;
 uniform vec3 u_CameraPos;
 uniform vec3 u_AmbientLight = vec3(0.03);
 
-// Simple directional light
+// Directional light
 uniform vec3 u_LightDirection = vec3(-0.5, -1.0, -0.3);
 uniform vec3 u_LightColor = vec3(1.0);
 uniform float u_LightEnergy = 1.0;
@@ -222,6 +221,84 @@ void main() {
 )";
     }
 
+    // ========== Toon/Cell-Shaded Shader ==========
+
+    std::string BuiltInShaders::GetToonVertexShader() {
+        return GetSpatialVertexShader(); // Same as spatial
+    }
+
+    std::string BuiltInShaders::GetToonFragmentShader() {
+        return R"(
+#version 410 core
+
+in vec3 v_FragPos;
+in vec3 v_Normal;
+in vec2 v_TexCoord;
+
+// Material
+uniform vec4 u_Albedo = vec4(1.0);
+uniform sampler2D u_AlbedoTexture;
+uniform bool u_UseAlbedoTexture = false;
+
+// Toon parameters
+uniform int u_ToonLevels = 3;          // Number of discrete shading levels
+uniform float u_OutlineThickness = 0.03;
+uniform vec3 u_OutlineColor = vec3(0.0, 0.0, 0.0);
+uniform float u_SpecularGlossiness = 32.0;
+uniform float u_RimAmount = 0.716;
+uniform float u_RimThreshold = 0.1;
+
+// Lighting
+uniform vec3 u_CameraPos;
+uniform vec3 u_AmbientLight = vec3(0.1);
+uniform vec3 u_LightDirection = vec3(-0.5, -1.0, -0.3);
+uniform vec3 u_LightColor = vec3(1.0);
+uniform float u_LightEnergy = 1.0;
+
+out vec4 FragColor;
+
+float ToonShade(float intensity) {
+    float level = floor(intensity * float(u_ToonLevels));
+    return level / float(u_ToonLevels);
+}
+
+void main() {
+    vec3 albedo = u_Albedo.rgb;
+    if (u_UseAlbedoTexture) {
+        albedo *= texture(u_AlbedoTexture, v_TexCoord).rgb;
+    }
+
+    vec3 normal = normalize(v_Normal);
+    vec3 lightDir = normalize(-u_LightDirection);
+    vec3 viewDir = normalize(u_CameraPos - v_FragPos);
+
+    // Diffuse lighting with toon shading
+    float NdotL = max(dot(normal, lightDir), 0.0);
+    float toonDiffuse = ToonShade(NdotL);
+    vec3 diffuse = toonDiffuse * u_LightColor * u_LightEnergy;
+
+    // Specular highlight (toon style)
+    vec3 halfVector = normalize(lightDir + viewDir);
+    float NdotH = max(dot(normal, halfVector), 0.0);
+    float specularIntensity = pow(NdotH, u_SpecularGlossiness);
+    float toonSpecular = smoothstep(0.005, 0.01, specularIntensity);
+    vec3 specular = toonSpecular * u_LightColor * u_LightEnergy;
+
+    // Rim lighting
+    float rimDot = 1.0 - dot(viewDir, normal);
+    float rimIntensity = rimDot * NdotL;
+    rimIntensity = smoothstep(u_RimAmount - 0.01, u_RimAmount + 0.01, rimIntensity);
+    vec3 rim = rimIntensity * u_LightColor * u_LightEnergy;
+
+    // Combine lighting
+    vec3 lighting = u_AmbientLight + diffuse + specular + rim;
+    vec3 result = albedo * lighting;
+
+    FragColor = vec4(result, u_Albedo.a);
+}
+)";
+    }
+
     // ========== Environment Shaders ==========
 
     std::string BuiltInShaders::GetSkyVertexShader() {
@@ -238,7 +315,7 @@ out vec3 v_TexCoord;
 void main() {
     v_TexCoord = a_Position;
     vec4 pos = u_Proj * mat4(mat3(u_View)) * vec4(a_Position, 1.0);
-    gl_Position = pos.xyww; // Ensure skybox is always at far plane
+    gl_Position = pos.xyww;
 }
 )";
     }
@@ -259,7 +336,6 @@ void main() {
     if (u_UseSkybox) {
         FragColor = texture(u_Skybox, v_TexCoord);
     } else {
-        // Simple gradient sky
         float t = v_TexCoord.y * 0.5 + 0.5;
         FragColor = mix(vec4(1.0), u_SkyColor, t);
     }
@@ -279,6 +355,8 @@ void main() {
                 return {GetSpatialVertexShader(), GetSpatialFragmentShader()};
             case Type::SpatialUnlit:
                 return {GetSpatialUnlitVertexShader(), GetSpatialUnlitFragmentShader()};
+            case Type::Toon:
+                return {GetToonVertexShader(), GetToonFragmentShader()};
             case Type::Sky:
                 return {GetSkyVertexShader(), GetSkyFragmentShader()};
             default:
@@ -298,6 +376,7 @@ void main() {
             case Type::CanvasItemTextured: return "CanvasItemTextured";
             case Type::Spatial: return "Spatial";
             case Type::SpatialUnlit: return "SpatialUnlit";
+            case Type::Toon: return "Toon";
             case Type::Sky: return "Sky";
             default: return "Unknown";
         }
@@ -332,6 +411,7 @@ void main() {
         Get(BuiltInShaders::Type::CanvasItemTextured);
         Get(BuiltInShaders::Type::Spatial);
         Get(BuiltInShaders::Type::SpatialUnlit);
+        Get(BuiltInShaders::Type::Toon);
         Get(BuiltInShaders::Type::Sky);
         
         Logger::Info() << "Preloaded all built-in shaders";

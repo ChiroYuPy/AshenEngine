@@ -105,33 +105,31 @@ namespace ash {
 
         shader->Bind();
 
-        // Setup matrices
+        // Setup transformation matrices
         shader->SetMat4("u_Model", transform);
         shader->SetMat4("u_View", s_Data->viewMatrix);
         shader->SetMat4("u_Proj", s_Data->projectionMatrix);
 
-        // Check if shader needs lighting uniforms (has these in its source)
-        // We detect this by checking if it has v_FragPos output (spatial shaders)
+        // Check if shader needs lighting uniforms
         const bool needsLighting = shader->HasUniform("u_CameraPos");
 
         if (needsLighting) {
-            const Mat3 normalMatrix = glm::transpose(glm::inverse(Mat3(transform)));
-            shader->SetMat3("u_NormalMatrix", normalMatrix);
-            shader->SetVec3("u_ViewPos", s_Data->cameraPosition);
-
-            // Setup lighting
+            shader->SetVec3("u_CameraPos", s_Data->cameraPosition);
             SetupLighting(shader);
         }
 
-        // Apply material
-        material->Bind();
+        // Apply material properties (this will set all material-specific uniforms)
+        material->Apply();
 
-        // Draw
+        // Draw mesh
         mesh->Draw();
 
+        // Update stats
         s_Data->stats.drawCalls++;
         s_Data->stats.triangles += mesh->GetIndexCount() / 3;
         s_Data->stats.vertices += mesh->GetVertexCount();
+
+        shader->Unbind();
     }
 
     void Renderer3D::SetDirectionalLight(const DirectionalLight& light) {
@@ -140,11 +138,12 @@ namespace ash {
     }
 
     void Renderer3D::AddPointLight(const PointLight& light) {
-        constexpr size_t MAX_POINT_LIGHTS = 16;
-        if (s_Data->pointLights.size() < MAX_POINT_LIGHTS)
+        constexpr size_t MAX_POINT_LIGHTS = 4;
+        if (s_Data->pointLights.size() < MAX_POINT_LIGHTS) {
             s_Data->pointLights.push_back(light);
-        else
-            Logger::Warn("Maximum number of point lights reached (16)");
+        } else {
+            Logger::Warn("Maximum number of point lights reached (4)");
+        }
     }
 
     void Renderer3D::ClearLights() {
@@ -177,8 +176,9 @@ namespace ash {
     }
 
     void Renderer3D::FlushRenderQueue() {
-        for (const auto&[mesh, material, transform] : s_Data->renderQueue)
+        for (const auto& [mesh, material, transform] : s_Data->renderQueue) {
             DrawImmediate(mesh, material, transform);
+        }
 
         s_Data->renderQueue.clear();
     }
@@ -202,18 +202,18 @@ namespace ash {
             shader->SetFloat("u_LightEnergy", 1.0f);
         }
 
-        // Point lights (max 4 for simplicity)
+        // Point lights (max 4)
         const int pointLightCount = std::min(static_cast<int>(s_Data->pointLights.size()), 4);
         shader->SetInt("u_PointLightCount", pointLightCount);
 
         for (int i = 0; i < pointLightCount; ++i) {
-            const auto&[position, color, intensity] = s_Data->pointLights[i];
-            shader->SetVec3("u_PointLightPositions[" + std::to_string(i) + "]", position);
-            shader->SetVec3("u_PointLightColors[" + std::to_string(i) + "]", color);
-            shader->SetFloat("u_PointLightEnergies[" + std::to_string(i) + "]", intensity);
+            const auto& light = s_Data->pointLights[i];
+            shader->SetVec3("u_PointLightPositions[" + std::to_string(i) + "]", light.position);
+            shader->SetVec3("u_PointLightColors[" + std::to_string(i) + "]", light.color);
+            shader->SetFloat("u_PointLightEnergies[" + std::to_string(i) + "]", light.intensity);
 
-            // Calculate range from intensity (simple heuristic)
-            const float range = std::sqrt(intensity) * 10.0f;
+            // Calculate range from intensity (simple heuristic: sqrt(intensity) * 10)
+            const float range = std::sqrt(light.intensity) * 10.0f;
             shader->SetFloat("u_PointLightRanges[" + std::to_string(i) + "]", range);
         }
     }

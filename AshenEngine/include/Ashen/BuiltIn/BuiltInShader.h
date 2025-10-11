@@ -9,7 +9,7 @@
 namespace ash {
 
     /**
-     * @brief Built-in shader types (Godot-inspired naming)
+     * @brief Built-in shader types
      */
     class BuiltInShaders {
     public:
@@ -19,15 +19,12 @@ namespace ash {
             CanvasItemTextured, // Textured 2D shader
 
             // 3D Shaders
-            Spatial,            // Basic 3D shader with Lambert lighting
+            Spatial,            // Basic 3D shader with Blinn-Phong lighting
             SpatialUnlit,       // Unlit 3D shader
+            Toon,               // Cell-shaded/Toon shader
 
             // Environment
             Sky,                // Skybox shader
-
-            // Particles (future)
-            // Particles2D,
-            // Particles3D,
 
             MAX_TYPES
         };
@@ -63,10 +60,12 @@ namespace ash {
         // 3D Vertex Shaders
         static std::string GetSpatialVertexShader();
         static std::string GetSpatialUnlitVertexShader();
+        static std::string GetToonVertexShader();
 
         // 3D Fragment Shaders
         static std::string GetSpatialFragmentShader();
         static std::string GetSpatialUnlitFragmentShader();
+        static std::string GetToonFragmentShader();
 
         // Environment Shaders
         static std::string GetSkyVertexShader();

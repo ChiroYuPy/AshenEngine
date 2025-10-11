@@ -158,7 +158,7 @@ namespace ash {
     };
 
     /**
-     * @brief Material manager (Godot-style)
+     * @brief Material manager
      */
     class MaterialManager : public ResourceManager<Material> {
     public:
@@ -192,6 +192,14 @@ namespace ash {
             const Vec4& albedo = Vec4(1.0f)
         );
 
+        // Toon materials
+        std::shared_ptr<ToonMaterial> CreateToon(
+            const std::string& id,
+            const Vec4& albedo = Vec4(1.0f),
+            int toonLevels = 3,
+            float rimAmount = 0.716f
+        );
+
         // Sky materials
         std::shared_ptr<SkyMaterial> CreateSky(
             const std::string& id,
@@ -212,6 +220,7 @@ namespace ash {
         // Getters
         std::shared_ptr<CanvasItemMaterial> GetCanvasItem(const std::string& id);
         std::shared_ptr<SpatialMaterial> GetSpatial(const std::string& id);
+        std::shared_ptr<ToonMaterial> GetToon(const std::string& id);
         std::shared_ptr<SkyMaterial> GetSky(const std::string& id);
 
         void Clear() override {
@@ -219,6 +228,7 @@ namespace ash {
             m_Resources.clear();
             m_CanvasItemMaterials.clear();
             m_SpatialMaterials.clear();
+            m_ToonMaterials.clear();
             m_SkyMaterials.clear();
         }
 
@@ -227,6 +237,7 @@ namespace ash {
 
         std::unordered_map<std::string, std::shared_ptr<CanvasItemMaterial>> m_CanvasItemMaterials;
         std::unordered_map<std::string, std::shared_ptr<SpatialMaterial>> m_SpatialMaterials;
+        std::unordered_map<std::string, std::shared_ptr<ToonMaterial>> m_ToonMaterials;
         std::unordered_map<std::string, std::shared_ptr<SkyMaterial>> m_SkyMaterials;
     };
 

@@ -57,7 +57,7 @@ namespace ash {
     };
 
     /**
-     * @brief CanvasItemMaterial - For 2D rendering (Godot-style)
+     * @brief CanvasItemMaterial - For 2D rendering
      */
     class CanvasItemMaterial : public Material {
     public:
@@ -71,7 +71,7 @@ namespace ash {
     };
 
     /**
-     * @brief SpatialMaterial - For 3D rendering with lighting (Godot-style)
+     * @brief SpatialMaterial - For 3D rendering with lighting
      */
     class SpatialMaterial : public Material {
     public:
@@ -95,6 +95,31 @@ namespace ash {
         [[nodiscard]] float GetMetallic() const;
         [[nodiscard]] float GetRoughness() const;
         [[nodiscard]] float GetSpecular() const;
+    };
+
+    /**
+     * @brief ToonMaterial - For cell-shaded/toon rendering
+     */
+    class ToonMaterial : public Material {
+    public:
+        ToonMaterial();
+        explicit ToonMaterial(std::shared_ptr<ShaderProgram> customShader);
+
+        // Albedo
+        void SetAlbedo(const Vec4& color);
+        void SetAlbedoTexture(std::shared_ptr<Texture2D> texture);
+
+        // Toon properties
+        void SetToonLevels(int levels);              // Number of discrete shading bands (default: 3)
+        void SetOutlineThickness(float thickness);   // Outline width (default: 0.03)
+        void SetOutlineColor(const Vec3& color);     // Outline color (default: black)
+        void SetSpecularGlossiness(float glossiness);// Specular sharpness (default: 32)
+        void SetRimAmount(float amount);             // Rim light intensity (default: 0.716)
+        void SetRimThreshold(float threshold);       // Rim light threshold (default: 0.1)
+
+        // Getters
+        [[nodiscard]] Vec4 GetAlbedo() const;
+        [[nodiscard]] int GetToonLevels() const;
     };
 
     /**
@@ -129,6 +154,13 @@ namespace ash {
         );
 
         static std::shared_ptr<SpatialMaterial> CreateSpatialUnlit(const Vec4& albedo = Vec4(1.0f));
+
+        // Toon/Cell-Shaded Materials
+        static std::shared_ptr<ToonMaterial> CreateToon(
+            const Vec4& albedo = Vec4(1.0f),
+            int toonLevels = 3,
+            float rimAmount = 0.716f
+        );
 
         // Environment
         static std::shared_ptr<SkyMaterial> CreateSky(const Vec4& color = Vec4(0.5f, 0.7f, 1.0f, 1.0f));
