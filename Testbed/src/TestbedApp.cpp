@@ -93,6 +93,18 @@ namespace ash {
                     m_CurrentScene = 4; // Mixed scene (Toon + Spatial)
                     return true;
                 }
+                if (e.GetKeyCode() == Key::D5) {
+                    m_CurrentScene = 5; // Mixed Materials
+                    return true;
+                }
+                if (e.GetKeyCode() == Key::D6) {
+                    m_CurrentScene = 6; // Performance Test
+                    return true;
+                }
+                if (e.GetKeyCode() == Key::D7) {
+                    m_CurrentScene = 7; // Complete Demo
+                    return true;
+                }
                 return false;
             });
 
@@ -174,7 +186,7 @@ namespace ash {
             );
 
             // Personnaliser les paramètres du shader toon
-            auto toonMat = m_ToonRedMaterial;
+            const auto toonMat = m_ToonRedMaterial;
             toonMat->SetOutlineColor(Vec3(0.1f, 0.0f, 0.0f));  // Outline rouge foncé
             toonMat->SetOutlineThickness(0.05f);
             toonMat->SetSpecularGlossiness(64.0f);  // Specular plus net
@@ -195,10 +207,130 @@ namespace ash {
             };
         }
 
+        void RenderMaterialShowcaseScene() {
+            // std::array pour les matériaux Spatial
+            std::array<Ref<SpatialMaterial>, 5> materials = {
+                m_RedMaterial, m_BlueMaterial, m_GreenMaterial,
+                m_MetallicMaterial, m_RoughMaterial
+            };
+
+            // Cubes Spatial en ligne
+            for (int i = 0; i < 5; ++i) {
+                Mat4 transform = glm::translate(Mat4(1.0f), Vec3(-6.0f + i * 3.0f, 0, -2))
+                               * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation), Vec3(0, 1, 0));
+                Renderer3D::Submit(m_CubeMesh, materials[i], transform);
+            }
+
+            // std::array pour les matériaux Toon
+            std::array<Ref<ToonMaterial>, 3> toonMats = {
+                m_ToonRedMaterial, m_ToonBlueMaterial, m_ToonGreenMaterial
+            };
+
+            for (int i = 0; i < 3; ++i) {
+                Mat4 transform = glm::translate(Mat4(1.0f), Vec3(-3.0f + i * 3.0f, 0, 2))
+                               * glm::scale(Mat4(1.0f), Vec3(0.8f));
+                Renderer3D::Submit(m_SphereMesh, toonMats[i], transform);
+            }
+        }
+
+        void RenderPrimitiveMeshesScene() {
+            // Custom mesh au centre
+            Mat4 transform = glm::translate(Mat4(1.0f), Vec3(0, 1, 0))
+                           * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation * 0.5f), Vec3(0, 1, 0))
+                           * glm::scale(Mat4(1.0f), Vec3(1.5f));
+            Renderer3D::Submit(m_CustomMesh, m_BlueMaterial, transform);
+
+            // Primitives et matériaux en cercle
+            std::array<Ref<Mesh>, 4> meshes = {
+                m_CubeMesh, m_SphereMesh, m_CubeMesh, m_SphereMesh
+            };
+
+            std::array<Ref<Material>, 4> materials = {
+                m_RedMaterial, m_GreenMaterial, m_ToonBlueMaterial, m_ToonRedMaterial
+            };
+
+            for (int i = 0; i < 4; ++i) {
+                float angle = i * glm::half_pi<float>();
+                Vec3 pos(std::cos(angle) * 5.0f, 0, std::sin(angle) * 5.0f);
+                transform = glm::translate(Mat4(1.0f), pos);
+                Renderer3D::Submit(meshes[i], materials[i], transform);
+            }
+        }
+
+        void RenderMotionTransformScene() const {
+            // Mesh central rotatif
+            Mat4 transform = glm::translate(Mat4(1.0f), Vec3(0, 1, 0))
+                           * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation), Vec3(0, 1, 0))
+                           * glm::scale(Mat4(1.0f), Vec3(1.2f));
+            Renderer3D::Submit(m_CustomMesh, m_MetallicMaterial, transform);
+
+            // Sphères en orbite avec bobbing
+            for (int i = 0; i < 4; ++i) {
+                const float angle = m_Time * 0.5f + (i * glm::half_pi<float>());
+                Vec3 pos(std::cos(angle) * 4.0f,
+                         std::sin(m_Time * 2.0f + i) * 0.8f + 1.5f,
+                         std::sin(angle) * 4.0f);
+                transform = glm::translate(Mat4(1.0f), pos)
+                          * glm::scale(Mat4(1.0f), Vec3(0.5f));
+                Renderer3D::Submit(m_SphereMesh, m_ToonBlueMaterial, transform);
+            }
+
+            // Cubes oscillants
+            for (int i = 0; i < 3; ++i) {
+                const float speed = 1.0f + i * 0.5f;
+                const float height = std::sin(m_Time * speed) * 2.0f + 2.0f;
+                transform = glm::translate(Mat4(1.0f), Vec3(-4.0f + i * 4.0f, height, -5))
+                          * glm::rotate(Mat4(1.0f), glm::radians(m_Time * 45.0f), Vec3(1, 0, 1));
+                Renderer3D::Submit(m_CubeMesh, m_GreenMaterial, transform);
+            }
+        }
+
+        void RenderPerformanceTestScene() {
+            // Grille 10x10 de cubes
+            for (int x = 0; x < 10; ++x) {
+                for (int z = 0; z < 10; ++z) {
+                    Vec3 pos(-15.0f + x * 3.0f, 0, -15.0f + z * 3.0f);
+                    Mat4 transform = glm::translate(Mat4(1.0f), pos)
+                                   * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation + x * 10.0f), Vec3(0, 1, 0));
+
+                    auto mat = ((x + z) % 2 == 0) ? m_RedMaterial : m_BlueMaterial;
+                    Renderer3D::Submit(m_CubeMesh, mat, transform);
+                }
+            }
+
+            m_ShowStats = true; // Force affichage stats
+        }
+
+        void RenderShowcaseScene() const {
+            // Composition artistique complète
+            // Centre: custom mesh avec lumière dramatique
+            Mat4 transform = glm::translate(Mat4(1.0f), Vec3(0, 1.5, 0))
+                           * glm::rotate(Mat4(1.0f), glm::radians(m_CubeRotation * 0.3f), Vec3(0, 1, 0))
+                           * glm::scale(Mat4(1.0f), Vec3(2.0f));
+            Renderer3D::Submit(m_CustomMesh, m_ToonBlueMaterial, transform);
+
+            // Satellites toon
+            for (int i = 0; i < 6; ++i) {
+                const float angle = m_Time * 0.2f + (i * glm::two_pi<float>() / 6.0f);
+                Vec3 pos(std::cos(angle) * 6.0f, std::sin(i) * 1.5f + 1.0f, std::sin(angle) * 6.0f);
+                transform = glm::translate(Mat4(1.0f), pos)
+                          * glm::scale(Mat4(1.0f), Vec3(0.6f));
+                auto mat = (i % 3 == 0) ? m_ToonRedMaterial :
+                           (i % 3 == 1) ? m_ToonGreenMaterial : m_ToonBlueMaterial;
+                Renderer3D::Submit(m_SphereMesh, mat, transform);
+            }
+
+            // Objets décoratifs PBR
+            for (int i = 0; i < 4; ++i) {
+                Vec3 pos((i % 2) * 8.0f - 4.0f, 0.5f, (i / 2) * 8.0f - 4.0f);
+                transform = glm::translate(Mat4(1.0f), pos)
+                          * glm::rotate(Mat4(1.0f), glm::radians(m_Time * 20.0f), Vec3(0, 1, 0));
+                Renderer3D::Submit(m_CubeMesh, m_MetallicMaterial, transform);
+            }
+        }
+
         void Render3DScene() {
             Renderer3D::BeginScene(*m_Camera);
-
-            // Setup lighting
             Renderer3D::SetDirectionalLight(m_DirectionalLight);
             Renderer3D::ClearLights();
 
@@ -208,29 +340,23 @@ namespace ash {
 
             Renderer3D::SetAmbientLight(Vec3(0.05f));
 
-            // Render based on current scene
             switch (m_CurrentScene) {
-                case 0: RenderBasicMaterialsScene(); break;
-                case 1: RenderMultipleObjectsScene(); break;
-                case 2: RenderLightingDemoScene(); break;
-                case 3: RenderToonScene(); break;           // NOUVEAU
-                case 4: RenderMixedScene(); break;          // NOUVEAU
+                case 0: RenderMaterialShowcaseScene(); break;
+                case 1: RenderPrimitiveMeshesScene(); break;
+                case 2: RenderLightingDemoScene(); break; // Garder l'existante
+                case 3: RenderMotionTransformScene(); break;
+                case 4: RenderToonScene(); break; // Garder l'existante mais renommer
+                case 5: RenderMixedScene(); break; // Garder l'existante
+                case 6: RenderPerformanceTestScene(); break;
+                case 7: RenderShowcaseScene(); break;
             }
 
             // Ground plane
             const Mat4 groundTransform = glm::translate(Mat4(1.0f), Vec3(0, -1, 0))
-                                        * glm::scale(Mat4(1.0f), Vec3(20, 1, 20));
+                                 * glm::scale(Mat4(1.0f), Vec3(30, 1, 30));
             Renderer3D::Submit(m_PlaneMesh, m_GroundMaterial, groundTransform);
 
             Renderer3D::EndScene();
-
-            if (m_ShowStats) {
-                const auto& stats = Renderer3D::GetStats();
-                Logger::Info() << "Scene " << m_CurrentScene + 1
-                              << " | Draw Calls: " << stats.drawCalls
-                              << " | Triangles: " << stats.triangles
-                              << " | Vertices: " << stats.vertices;
-            }
         }
 
         void RenderToonScene() const {
@@ -300,7 +426,7 @@ namespace ash {
             Renderer3D::Submit(m_CustomMesh, m_ToonGreenMaterial, transform);
         }
 
-        void RenderBasicMaterialsScene() {
+        void RenderBasicMaterialsScene() const {
             // Row of cubes with different materials
             float spacing = 3.0f;
 
@@ -396,7 +522,7 @@ namespace ash {
             }
         }
 
-        void Render2DOverlay() {
+        void Render2DOverlay() const {
             Renderer2D::BeginScene(*m_Camera);
 
             // Draw FPS counter

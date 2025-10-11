@@ -8,19 +8,21 @@ namespace ash {
         m_VertexCount = vertexData.vertexCount;
         m_IndexCount = indices.size();
 
-        // Create buffers
+        // 1. Créer le VAO EN PREMIER
+        m_VAO = VertexArray(VertexArrayConfig::Default());
+
+        // 2. Créer les buffers (sans données)
         m_VBO = std::make_shared<VertexBuffer>(BufferConfig::Static());
         m_IBO = std::make_shared<IndexBuffer>(IndexType::UnsignedInt, BufferConfig::Static());
 
-        // Upload data
+        // 3. Configurer le layout et attacher les buffers AU VAO
+        const auto layout = CreateLayout(m_Attributes);
+        m_VAO.AddVertexBuffer(m_VBO, layout);  // Ceci bind le VAO et le VBO
+        m_VAO.SetIndexBuffer(m_IBO);           // Ceci bind l'IBO
+
+        // 4. Uploader les données (maintenant que tout est configuré)
         m_VBO->SetData(std::span(vertexData.data.data(), vertexData.data.size()));
         m_IBO->SetData(std::span(indices.data(), indices.size()));
-
-        // Setup VAO
-        m_VAO = VertexArray(VertexArrayConfig::Default());
-        const auto layout = CreateLayout(m_Attributes);
-        m_VAO.AddVertexBuffer(m_VBO, layout);
-        m_VAO.SetIndexBuffer(m_IBO);
     }
 
     void Mesh::AddSubMesh(const SubMesh& submesh) {
