@@ -89,10 +89,10 @@ namespace ash {
         void OnMouseScroll(const float yoffset) {
             if (!m_isActive) return;
             m_moveSpeed += yoffset * 0.5f;
-            if (m_moveSpeed < 1.0f)
-                m_moveSpeed = 1.0f;
-            if (m_moveSpeed > 50.0f)
-                m_moveSpeed = 50.0f;
+            constexpr float minSpeed = 1.f / 16.f;
+            constexpr float maxSpeed = 16.f;
+            if (m_moveSpeed < minSpeed) m_moveSpeed = minSpeed;
+            if (m_moveSpeed > maxSpeed) m_moveSpeed = maxSpeed;
         }
 
         void SetActive(const bool active) {

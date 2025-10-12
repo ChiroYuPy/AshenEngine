@@ -85,6 +85,11 @@ namespace ash {
         return m_Properties.contains(name);
     }
 
+    void Material::ResetTextureUnits() const {
+        // CORRECTION: Réinitialise les unités de texture à chaque Apply()
+        m_TextureUnits.clear();
+    }
+
     void Material::ApplyProperty(const std::string& name, const MaterialValue& value) const {
         if (!m_Shader) return;
 
@@ -117,10 +122,10 @@ namespace ash {
             }
             else if constexpr (std::is_same_v<T, std::shared_ptr<Texture2D>>) {
                 if (arg) {
-                    if (!m_TextureUnits.contains(name)) {
-                        m_TextureUnits[name] = m_NextTextureUnit++;
-                    }
-                    uint32_t unit = m_TextureUnits[name];
+                    // CORRECTION: Utilise un compteur local à chaque Apply()
+                    uint32_t unit = static_cast<uint32_t>(m_TextureUnits.size());
+                    m_TextureUnits[name] = unit;
+
                     arg->BindToUnit(unit);
                     m_Shader->SetInt(name, static_cast<int>(unit));
                 }
@@ -130,6 +135,9 @@ namespace ash {
 
     void Material::Apply() const {
         if (!m_Shader) return;
+
+        // CORRECTION: Réinitialise les unités de texture avant d'appliquer
+        ResetTextureUnits();
 
         for (const auto& [name, value] : m_Properties) {
             ApplyProperty(name, value);

@@ -50,10 +50,13 @@ namespace ash {
     protected:
         std::shared_ptr<ShaderProgram> m_Shader;
         std::unordered_map<std::string, MaterialValue> m_Properties;
+
+        // CORRECTION: Les unités de texture doivent être gérées par matériau
+        // mais réinitialisées à chaque Apply() pour éviter les conflits
         mutable std::unordered_map<std::string, uint32_t> m_TextureUnits;
-        mutable uint32_t m_NextTextureUnit = 0;
 
         void ApplyProperty(const std::string& name, const MaterialValue& value) const;
+        void ResetTextureUnits() const; // NOUVEAU: Méthode pour réinitialiser les unités
     };
 
     /**
@@ -110,12 +113,12 @@ namespace ash {
         void SetAlbedoTexture(std::shared_ptr<Texture2D> texture);
 
         // Toon properties
-        void SetToonLevels(int levels);              // Number of discrete shading bands (default: 3)
-        void SetOutlineThickness(float thickness);   // Outline width (default: 0.03)
-        void SetOutlineColor(const Vec3& color);     // Outline color (default: black)
-        void SetSpecularGlossiness(float glossiness);// Specular sharpness (default: 32)
-        void SetRimAmount(float amount);             // Rim light intensity (default: 0.716)
-        void SetRimThreshold(float threshold);       // Rim light threshold (default: 0.1)
+        void SetToonLevels(int levels);
+        void SetOutlineThickness(float thickness);
+        void SetOutlineColor(const Vec3& color);
+        void SetSpecularGlossiness(float glossiness);
+        void SetRimAmount(float amount);
+        void SetRimThreshold(float threshold);
 
         // Getters
         [[nodiscard]] Vec4 GetAlbedo() const;
