@@ -105,20 +105,20 @@ namespace ash {
 
         shader->Bind();
 
-        // Setup transformation matrices
+        // Setup transformation matrices (tous les shaders en ont besoin)
         shader->SetMat4("u_Model", transform);
         shader->SetMat4("u_View", s_Data->viewMatrix);
         shader->SetMat4("u_Proj", s_Data->projectionMatrix);
 
-        // Check if shader needs lighting uniforms
+        // CORRECTION: Vérifier si le shader a besoin de lighting
+        // On vérifie la présence d'un uniform clé au lieu de tous les tester
         const bool needsLighting = shader->HasUniform("u_CameraPos");
 
         if (needsLighting) {
-            shader->SetVec3("u_CameraPos", s_Data->cameraPosition);
             SetupLighting(shader);
         }
 
-        // Apply material properties (this will set all material-specific uniforms)
+        // Apply material properties
         material->Apply();
 
         // Draw mesh
@@ -184,37 +184,57 @@ namespace ash {
     }
 
     void Renderer3D::SetupLighting(const std::shared_ptr<ShaderProgram>& shader) {
-        // Camera position
-        shader->SetVec3("u_CameraPos", s_Data->cameraPosition);
+        // CORRECTION: Ne set les uniforms QUE s'ils existent dans le shader
 
-        // Ambient light
-        shader->SetVec3("u_AmbientLight", s_Data->environment.ambientColor);
-
-        // Directional light
-        if (s_Data->hasDirectionalLight) {
-            shader->SetVec3("u_LightDirection", s_Data->directionalLight.direction);
-            shader->SetVec3("u_LightColor", s_Data->directionalLight.color);
-            shader->SetFloat("u_LightEnergy", s_Data->directionalLight.intensity);
-        } else {
-            // Default sun-like light
-            shader->SetVec3("u_LightDirection", Vec3(-0.5f, -1.0f, -0.3f));
-            shader->SetVec3("u_LightColor", Vec3(1.0f));
-            shader->SetFloat("u_LightEnergy", 1.0f);
+        // Camera position (utilisé par PBR et Toon)
+        if (shader->HasUniform("u_CameraPos")) {
+            shader->SetVec3("u_CameraPos", s_Data->cameraPosition);
         }
 
-        // Point lights (max 4)
-        const int pointLightCount = std::min(static_cast<int>(s_Data->pointLights.size()), 4);
-        shader->SetInt("u_PointLightCount", pointLightCount);
+        // Ambient light
+        if (shader->HasUniform("u_AmbientLight")) {
+            shader->SetVec3("u_AmbientLight", s_Data->environment.ambientColor);
+        }
 
-        for (int i = 0; i < pointLightCount; ++i) {
-            const auto& light = s_Data->pointLights[i];
-            shader->SetVec3("u_PointLightPositions[" + std::to_string(i) + "]", light.position);
-            shader->SetVec3("u_PointLightColors[" + std::to_string(i) + "]", light.color);
-            shader->SetFloat("u_PointLightEnergies[" + std::to_string(i) + "]", light.intensity);
+        // Directional light
+        if (shader->HasUniform("u_LightDirection")) {
+            if (s_Data->hasDirectionalLight) {
+                shader->SetVec3("u_LightDirection", s_Data->directionalLight.direction);
+                shader->SetVec3("u_LightColor", s_Data->directionalLight.color);
+                shader->SetFloat("u_LightEnergy", s_Data->directionalLight.intensity);
+            } else {
+                // Default sun-like light
+                shader->SetVec3("u_LightDirection", Vec3(-0.5f, -1.0f, -0.3f));
+                shader->SetVec3("u_LightColor", Vec3(1.0f));
+                shader->SetFloat("u_LightEnergy", 1.0f);
+            }
+        }
 
-            // Calculate range from intensity (simple heuristic: sqrt(intensity) * 10)
-            const float range = std::sqrt(light.intensity) * 10.0f;
-            shader->SetFloat("u_PointLightRanges[" + std::to_string(i) + "]", range);
+        // Point lights (seulement pour les shaders PBR qui les supportent)
+        if (shader->HasUniform("u_PointLightCount")) {
+            const int pointLightCount = std::min(static_cast<int>(s_Data->pointLights.size()), 4);
+            shader->SetInt("u_PointLightCount", pointLightCount);
+
+            for (int i = 0; i < pointLightCount; ++i) {
+                const auto& light = s_Data->pointLights[i];
+
+                // Construire les noms d'uniforms une seule fois
+                const std::string posUniform = "u_PointLightPositions[" + std::to_string(i) + "]";
+                const std::string colorUniform = "u_PointLightColors[" + std::to_string(i) + "]";
+                const std::string energyUniform = "u_PointLightEnergies[" + std::to_string(i) + "]";
+                const std::string rangeUniform = "u_PointLightRanges[" + std::to_string(i) + "]";
+
+                // Set seulement si l'uniform existe
+                if (shader->HasUniform(posUniform)) {
+                    shader->SetVec3(posUniform, light.position);
+                    shader->SetVec3(colorUniform, light.color);
+                    shader->SetFloat(energyUniform, light.intensity);
+
+                    // Calculate range from intensity
+                    const float range = std::sqrt(light.intensity) * 10.0f;
+                    shader->SetFloat(rangeUniform, range);
+                }
+            }
         }
     }
 }

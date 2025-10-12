@@ -93,6 +93,11 @@ namespace ash {
     void Material::ApplyProperty(const std::string& name, const MaterialValue& value) const {
         if (!m_Shader) return;
 
+        // CORRECTION: Vérifier que l'uniform existe avant de le set
+        if (!m_Shader->HasUniform(name)) {
+            return;  // Silencieusement ignorer les uniforms inexistants
+        }
+
         std::visit([this, &name](auto&& arg) {
             using T = std::decay_t<decltype(arg)>;
 
@@ -122,10 +127,16 @@ namespace ash {
             }
             else if constexpr (std::is_same_v<T, std::shared_ptr<Texture2D>>) {
                 if (arg) {
-                    // CORRECTION: Utilise un compteur local à chaque Apply()
+                    // Utilise un compteur local à chaque Apply()
                     uint32_t unit = static_cast<uint32_t>(m_TextureUnits.size());
-                    m_TextureUnits[name] = unit;
 
+                    // Vérifier la limite OpenGL
+                    if (unit >= 16) {
+                        Logger::Error() << "Too many textures in material: " << name;
+                        return;
+                    }
+
+                    m_TextureUnits[name] = unit;
                     arg->BindToUnit(unit);
                     m_Shader->SetInt(name, static_cast<int>(unit));
                 }
@@ -136,7 +147,7 @@ namespace ash {
     void Material::Apply() const {
         if (!m_Shader) return;
 
-        // CORRECTION: Réinitialise les unités de texture avant d'appliquer
+        // Réinitialise les unités de texture avant d'appliquer
         ResetTextureUnits();
 
         for (const auto& [name, value] : m_Properties) {

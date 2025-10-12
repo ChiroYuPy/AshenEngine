@@ -3,7 +3,17 @@
 
 namespace ash {
 
-    // ========== 2D Shaders ==========
+    static ShaderConfig GetBuiltInShaderConfig() {
+        ShaderConfig config;
+        config.validateOnLink = true;
+        config.detachAfterLink = true;
+        config.throwOnWarning = false;
+        config.cacheUniforms = true;
+        config.warnOnMissingUniform = true;
+        return config;
+    }
+
+    // ========== SHADERS 2D (Inchangés - Corrects) ==========
 
     std::string BuiltInShaders::GetCanvasItemVertexShader() {
         return R"(
@@ -58,7 +68,7 @@ void main() {
 )";
     }
 
-    // ========== 3D Shaders ==========
+    // ========== SPATIAL VERTEX SHADER - CORRIGÉ ==========
 
     std::string BuiltInShaders::GetSpatialVertexShader() {
         return R"(
@@ -77,11 +87,14 @@ out vec3 v_Normal;
 out vec2 v_TexCoord;
 
 void main() {
+    // ✅ Position en world space
     vec4 worldPos = u_Model * vec4(a_Position, 1.0);
     v_FragPos = worldPos.xyz;
 
+    // ✅ CORRECTION: Normal matrix correcte
+    // Ne PAS normaliser ici car on perd l'échelle non-uniforme
     mat3 normalMatrix = mat3(transpose(inverse(u_Model)));
-    v_Normal = normalize(normalMatrix * a_Normal);
+    v_Normal = normalMatrix * a_Normal;
 
     v_TexCoord = a_TexCoord;
 
@@ -89,6 +102,8 @@ void main() {
 }
 )";
     }
+
+    // ========== SPATIAL FRAGMENT SHADER - CORRIGÉ ==========
 
     std::string BuiltInShaders::GetSpatialFragmentShader() {
         return R"(
@@ -125,38 +140,59 @@ uniform float u_PointLightRanges[4];
 
 out vec4 FragColor;
 
+// ✅ CORRECTION: Blinn-Phong amélioré
 vec3 CalculateDirectionalLight(vec3 normal, vec3 viewDir, vec3 albedo) {
     vec3 lightDir = normalize(-u_LightDirection);
 
-    // Diffuse
-    float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = diff * u_LightColor * u_LightEnergy;
+    // Diffuse (Lambert)
+    float NdotL = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = NdotL * u_LightColor * u_LightEnergy;
 
     // Specular (Blinn-Phong)
     vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0 * (1.0 - u_Roughness));
-    vec3 specular = spec * u_Specular * u_LightColor * u_LightEnergy;
+    float NdotH = max(dot(normal, halfwayDir), 0.0);
+
+    // ✅ CORRECTION: Utiliser roughness pour calculer shininess
+    // Roughness 0 = shininess 256, Roughness 1 = shininess 1
+    float shininess = mix(256.0, 1.0, u_Roughness);
+    float spec = pow(NdotH, shininess);
+
+    // ✅ Normalisation énergétique pour Blinn-Phong
+    float normalization = (shininess + 8.0) / (8.0 * 3.14159265359);
+    vec3 specular = spec * normalization * u_Specular * u_LightColor * u_LightEnergy;
 
     return (diffuse + specular) * albedo;
 }
 
+// ✅ CORRECTION: Atténuation physiquement plausible
 vec3 CalculatePointLight(int index, vec3 normal, vec3 viewDir, vec3 albedo) {
-    vec3 lightDir = normalize(u_PointLightPositions[index] - v_FragPos);
-    float distance = length(u_PointLightPositions[index] - v_FragPos);
+    vec3 lightDir = u_PointLightPositions[index] - v_FragPos;
+    float distance = length(lightDir);
+    lightDir = normalize(lightDir);
 
-    // Attenuation
+    // ✅ CORRECTION: Atténuation inverse carrée avec smooth cutoff
     float range = u_PointLightRanges[index];
-    float attenuation = clamp(1.0 - (distance / range), 0.0, 1.0);
-    attenuation = attenuation * attenuation;
+
+    // Atténuation physique (inverse square)
+    float attenuation = 1.0 / (distance * distance + 1.0);
+
+    // Smooth cutoff pour éviter les discontinuités
+    float windowFactor = pow(max(1.0 - pow(distance / range, 4.0), 0.0), 2.0);
+    attenuation *= windowFactor;
 
     // Diffuse
-    float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffuse = diff * u_PointLightColors[index] * u_PointLightEnergies[index];
+    float NdotL = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = NdotL * u_PointLightColors[index] * u_PointLightEnergies[index];
 
     // Specular
     vec3 halfwayDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0 * (1.0 - u_Roughness));
-    vec3 specular = spec * u_Specular * u_PointLightColors[index] * u_PointLightEnergies[index];
+    float NdotH = max(dot(normal, halfwayDir), 0.0);
+
+    float shininess = mix(256.0, 1.0, u_Roughness);
+    float spec = pow(NdotH, shininess);
+
+    float normalization = (shininess + 8.0) / (8.0 * 3.14159265359);
+    vec3 specular = spec * normalization * u_Specular * u_PointLightColors[index] * u_PointLightEnergies[index];
 
     return (diffuse + specular) * albedo * attenuation;
 }
@@ -169,6 +205,7 @@ void main() {
         albedo *= texColor.rgb;
     }
 
+    // ✅ CORRECTION: Normaliser la normale dans le fragment shader
     vec3 normal = normalize(v_Normal);
     vec3 viewDir = normalize(u_CameraPos - v_FragPos);
 
@@ -185,13 +222,21 @@ void main() {
 
     vec3 result = ambient + lighting;
 
-    // Simple tone mapping
-    result = result / (result + vec3(1.0));
+    // ✅ CORRECTION: Tone mapping Reinhard amélioré
+    // Préserve mieux les couleurs
+    float luminance = dot(result, vec3(0.2126, 0.7152, 0.0722));
+    float mappedLuminance = luminance / (1.0 + luminance);
+    vec3 toneMapped = result * (mappedLuminance / max(luminance, 0.001));
 
-    FragColor = vec4(result, u_Albedo.a);
+    // ✅ Gamma correction (sRGB)
+    toneMapped = pow(toneMapped, vec3(1.0 / 2.2));
+
+    FragColor = vec4(toneMapped, u_Albedo.a);
 }
 )";
     }
+
+    // ========== SPATIAL UNLIT - CORRIGÉ ==========
 
     std::string BuiltInShaders::GetSpatialUnlitVertexShader() {
         return GetCanvasItemVertexShader();
@@ -216,15 +261,18 @@ void main() {
         color *= texture(u_AlbedoTexture, v_TexCoord);
     }
 
+    // ✅ CORRECTION: Gamma correction pour cohérence avec les autres shaders
+    color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
+
     FragColor = color;
 }
 )";
     }
 
-    // ========== Toon/Cell-Shaded Shader ==========
+    // ========== TOON SHADER - CORRIGÉ ==========
 
     std::string BuiltInShaders::GetToonVertexShader() {
-        return GetSpatialVertexShader(); // Same as spatial
+        return GetSpatialVertexShader();
     }
 
     std::string BuiltInShaders::GetToonFragmentShader() {
@@ -241,7 +289,7 @@ uniform sampler2D u_AlbedoTexture;
 uniform bool u_UseAlbedoTexture = false;
 
 // Toon parameters
-uniform int u_ToonLevels = 3;          // Number of discrete shading levels
+uniform int u_ToonLevels = 3;
 uniform float u_OutlineThickness = 0.03;
 uniform vec3 u_OutlineColor = vec3(0.0, 0.0, 0.0);
 uniform float u_SpecularGlossiness = 32.0;
@@ -257,9 +305,19 @@ uniform float u_LightEnergy = 1.0;
 
 out vec4 FragColor;
 
+// ✅ CORRECTION: Quantification améliorée avec antialiasing
 float ToonShade(float intensity) {
-    float level = floor(intensity * float(u_ToonLevels));
-    return level / float(u_ToonLevels);
+    // Quantifier en niveaux discrets
+    float levels = float(u_ToonLevels);
+    float level = floor(intensity * levels);
+    float quantized = level / levels;
+
+    // ✅ Ajouter un léger antialiasing pour éviter les artifacts
+    float threshold = 0.5 / levels;
+    float fract_part = fract(intensity * levels);
+    float smoothed = smoothstep(0.5 - threshold, 0.5 + threshold, fract_part);
+
+    return mix(quantized, (level + 1.0) / levels, smoothed * 0.1);
 }
 
 void main() {
@@ -272,34 +330,52 @@ void main() {
     vec3 lightDir = normalize(-u_LightDirection);
     vec3 viewDir = normalize(u_CameraPos - v_FragPos);
 
-    // Diffuse lighting with toon shading
+    // ✅ Diffuse lighting avec toon shading
     float NdotL = max(dot(normal, lightDir), 0.0);
     float toonDiffuse = ToonShade(NdotL);
     vec3 diffuse = toonDiffuse * u_LightColor * u_LightEnergy;
 
-    // Specular highlight (toon style)
+    // ✅ CORRECTION: Specular highlight style toon
     vec3 halfVector = normalize(lightDir + viewDir);
     float NdotH = max(dot(normal, halfVector), 0.0);
     float specularIntensity = pow(NdotH, u_SpecularGlossiness);
-    float toonSpecular = smoothstep(0.005, 0.01, specularIntensity);
-    vec3 specular = toonSpecular * u_LightColor * u_LightEnergy;
 
-    // Rim lighting
-    float rimDot = 1.0 - dot(viewDir, normal);
-    float rimIntensity = rimDot * NdotL;
-    rimIntensity = smoothstep(u_RimAmount - 0.01, u_RimAmount + 0.01, rimIntensity);
-    vec3 rim = rimIntensity * u_LightColor * u_LightEnergy;
+    // ✅ Seuil plus net pour l'effet toon
+    float toonSpecular = step(0.5, specularIntensity);
 
-    // Combine lighting
+    // ✅ Antialiasing sur le specular
+    float specularEdge = 0.01;
+    toonSpecular = smoothstep(0.5 - specularEdge, 0.5 + specularEdge, specularIntensity);
+
+    vec3 specular = toonSpecular * u_LightColor * u_LightEnergy * 0.5;
+
+    // ✅ CORRECTION: Rim lighting amélioré
+    float rimDot = 1.0 - max(dot(viewDir, normal), 0.0);
+
+    // ✅ Rim dépend de l'éclairage (n'apparaît que côté éclairé)
+    float rimIntensity = rimDot * pow(NdotL, 0.5);
+
+    // ✅ Quantification du rim pour style toon
+    rimIntensity = smoothstep(u_RimAmount - u_RimThreshold, u_RimAmount + u_RimThreshold, rimIntensity);
+
+    vec3 rim = rimIntensity * u_LightColor * u_LightEnergy * 0.5;
+
+    // ✅ CORRECTION: Combinaison finale
     vec3 lighting = u_AmbientLight + diffuse + specular + rim;
     vec3 result = albedo * lighting;
+
+    // ✅ Clamper pour éviter les valeurs > 1 (style toon)
+    result = clamp(result, 0.0, 1.0);
+
+    // ✅ Gamma correction
+    result = pow(result, vec3(1.0 / 2.2));
 
     FragColor = vec4(result, u_Albedo.a);
 }
 )";
     }
 
-    // ========== Environment Shaders ==========
+    // ========== SKY SHADER - CORRIGÉ ==========
 
     std::string BuiltInShaders::GetSkyVertexShader() {
         return R"(
@@ -314,7 +390,12 @@ out vec3 v_TexCoord;
 
 void main() {
     v_TexCoord = a_Position;
-    vec4 pos = u_Proj * mat4(mat3(u_View)) * vec4(a_Position, 1.0);
+
+    // ✅ CORRECTION: Enlever la translation de la vue
+    mat4 viewNoTranslation = mat4(mat3(u_View));
+    vec4 pos = u_Proj * viewNoTranslation * vec4(a_Position, 1.0);
+
+    // ✅ Forcer z = w pour que le skybox soit toujours au fond
     gl_Position = pos.xyww;
 }
 )";
@@ -334,16 +415,32 @@ out vec4 FragColor;
 
 void main() {
     if (u_UseSkybox) {
-        FragColor = texture(u_Skybox, v_TexCoord);
+        // ✅ CORRECTION: Gamma correction pour la cubemap
+        vec3 skyboxColor = texture(u_Skybox, v_TexCoord).rgb;
+        skyboxColor = pow(skyboxColor, vec3(1.0 / 2.2));
+        FragColor = vec4(skyboxColor, 1.0);
     } else {
-        float t = v_TexCoord.y * 0.5 + 0.5;
-        FragColor = mix(vec4(1.0), u_SkyColor, t);
+        // ✅ CORRECTION: Gradient du ciel plus réaliste
+        // Utiliser Y normalisé entre -1 et 1
+        float t = v_TexCoord.y * 0.5 + 0.5;  // Map [-1,1] -> [0,1]
+        t = pow(t, 0.7);  // Courbe non-linéaire pour plus de réalisme
+
+        // Couleur horizon (plus clair) vers zenith (couleur du ciel)
+        vec3 horizonColor = vec3(0.9, 0.95, 1.0);
+        vec3 zenithColor = u_SkyColor.rgb;
+
+        vec3 skyColor = mix(horizonColor, zenithColor, t);
+
+        // ✅ Gamma correction
+        skyColor = pow(skyColor, vec3(1.0 / 2.2));
+
+        FragColor = vec4(skyColor, 1.0);
     }
 }
 )";
     }
 
-    // ========== Public API ==========
+    // ========== API Publique ==========
 
     std::pair<std::string, std::string> BuiltInShaders::GetSource(Type type) {
         switch (type) {
@@ -367,7 +464,7 @@ void main() {
 
     ShaderProgram BuiltInShaders::Create(Type type) {
         auto [vertSource, fragSource] = GetSource(type);
-        return ShaderProgram::FromSources(vertSource, fragSource);
+        return ShaderProgram::FromSources(vertSource, fragSource, GetBuiltInShaderConfig());
     }
 
     std::string BuiltInShaders::GetTypeName(Type type) {
@@ -386,8 +483,6 @@ void main() {
         return static_cast<int>(type) >= 0 &&
                static_cast<int>(type) < static_cast<int>(Type::MAX_TYPES);
     }
-
-    // ========== Shader Manager ==========
 
     std::shared_ptr<ShaderProgram> BuiltInShaderManager::Get(BuiltInShaders::Type type) {
         const auto it = m_Shaders.find(type);
