@@ -38,7 +38,6 @@ set(CORE_SOURCES
 # ===========================
 set(TINYOBJ_SOURCES
         vendor/tinyobjloader/tiny_obj_loader.cc
-        include/Ashen/Graphics/Objects/Light.h
 )
 
 # ===========================
