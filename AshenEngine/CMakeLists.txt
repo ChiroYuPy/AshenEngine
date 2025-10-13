@@ -19,7 +19,6 @@ set(CORE_SOURCES
         src/Graphics/Rendering/Renderer.cpp
         src/Graphics/Rendering/Renderer2D.cpp
         src/Graphics/Rendering/Renderer3D.cpp
-        src/Graphics/Rendering/DebugRenderer.cpp
         src/Graphics/Objects/Material.cpp
         src/Graphics/Objects/Mesh.cpp
 
@@ -39,6 +38,7 @@ set(CORE_SOURCES
 # ===========================
 set(TINYOBJ_SOURCES
         vendor/tinyobjloader/tiny_obj_loader.cc
+        include/Ashen/Graphics/Objects/Light.h
 )
 
 # ===========================

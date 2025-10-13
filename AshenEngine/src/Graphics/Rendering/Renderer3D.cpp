@@ -4,7 +4,6 @@
 #include "Ashen/Graphics/Camera/Camera.h"
 #include "Ashen/Graphics/Objects/Mesh.h"
 #include "Ashen/Graphics/Objects/Material.h"
-#include "Ashen/Graphics/Rendering/DebugRenderer.h"
 #include "Ashen/GraphicsAPI/RenderContext.h"
 
 namespace ash {
@@ -44,12 +43,10 @@ namespace ash {
 
     void Renderer3D::Init() {
         s_Data = std::make_unique<SceneData>();
-        DebugRenderer::Init();
         Logger::Info("Renderer3D initialized");
     }
 
     void Renderer3D::Shutdown() {
-        DebugRenderer::Shutdown();
         if (s_Data)
             s_Data.reset();
 

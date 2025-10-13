@@ -221,19 +221,19 @@ namespace ash {
         SetBool("u_UseAlbedoTexture", true);
     }
 
-    void SpatialMaterial::SetMetallic(float value) {
+    void SpatialMaterial::SetMetallic(const float value) {
         SetFloat("u_Metallic", value);
     }
 
-    void SpatialMaterial::SetRoughness(float value) {
+    void SpatialMaterial::SetRoughness(const float value) {
         SetFloat("u_Roughness", value);
     }
 
-    void SpatialMaterial::SetSpecular(float value) {
+    void SpatialMaterial::SetSpecular(const float value) {
         SetFloat("u_Specular", value);
     }
 
-    void SpatialMaterial::SetUnshaded(bool unshaded) {
+    void SpatialMaterial::SetUnshaded(const bool unshaded) {
         if (unshaded) {
             SetShader(BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::SpatialUnlit));
         } else {
@@ -287,11 +287,11 @@ namespace ash {
         SetBool("u_UseAlbedoTexture", true);
     }
 
-    void ToonMaterial::SetToonLevels(int levels) {
+    void ToonMaterial::SetToonLevels(const int levels) {
         SetInt("u_ToonLevels", levels);
     }
 
-    void ToonMaterial::SetOutlineThickness(float thickness) {
+    void ToonMaterial::SetOutlineThickness(const float thickness) {
         SetFloat("u_OutlineThickness", thickness);
     }
 
@@ -299,15 +299,15 @@ namespace ash {
         SetVec3("u_OutlineColor", color);
     }
 
-    void ToonMaterial::SetSpecularGlossiness(float glossiness) {
+    void ToonMaterial::SetSpecularGlossiness(const float glossiness) {
         SetFloat("u_SpecularGlossiness", glossiness);
     }
 
-    void ToonMaterial::SetRimAmount(float amount) {
+    void ToonMaterial::SetRimAmount(const float amount) {
         SetFloat("u_RimAmount", amount);
     }
 
-    void ToonMaterial::SetRimThreshold(float threshold) {
+    void ToonMaterial::SetRimThreshold(const float threshold) {
         SetFloat("u_RimThreshold", threshold);
     }
 
@@ -366,9 +366,9 @@ namespace ash {
 
     std::shared_ptr<SpatialMaterial> MaterialFactory::CreateSpatial(
         const Vec4& albedo,
-        float metallic,
-        float roughness,
-        float specular
+        const float metallic,
+        const float roughness,
+        const float specular
     ) {
         auto material = std::make_shared<SpatialMaterial>();
         material->SetAlbedo(albedo);
@@ -388,8 +388,8 @@ namespace ash {
 
     std::shared_ptr<ToonMaterial> MaterialFactory::CreateToon(
         const Vec4& albedo,
-        int toonLevels,
-        float rimAmount
+        const int toonLevels,
+        const float rimAmount
     ) {
         auto material = std::make_shared<ToonMaterial>();
         material->SetAlbedo(albedo);

@@ -1,6 +1,7 @@
 #ifndef ASHEN_MESH_H
 #define ASHEN_MESH_H
 
+#include <functional>
 #include <vector>
 #include <string>
 #include <memory>
@@ -194,14 +195,46 @@ namespace ash {
     /**
      * @brief Predefined mesh generators
      */
-    namespace MeshPrimitives {
+namespace MeshPrimitives {
+        // Basic primitives
         Mesh CreateCube(float size = 1.0f);
+        Mesh CreateSphere(float radius = 1.0f, uint32_t rings = 32, uint32_t segments = 64);
+        Mesh CreatePlane(float width = 1.0f, float height = 1.0f, uint32_t subdivisionsX = 1, uint32_t subdivisionsZ = 1);
+        Mesh CreateQuad(float width = 1.0f, float height = 1.0f);
 
-        Mesh CreateSphere(float radius = 1.0f, uint32_t segments = 32, uint32_t rings = 16);
+        // Cylinder and capsule
+        Mesh CreateCylinder(float radius = 0.5f, float height = 2.0f, uint32_t sides = 32, uint32_t heightSegments = 1);
+        Mesh CreateCone(float radius = 0.5f, float height = 1.0f, uint32_t sides = 32);
+        Mesh CreateCapsule(float radius = 0.5f, float height = 2.0f, uint32_t radialSegments = 32, uint32_t rings = 8);
 
-        Mesh CreatePlane(float width = 1.0f, float height = 1.0f, uint32_t subdivisions = 1);
+        // Torus
+        Mesh CreateTorus(float innerRadius = 0.5f, float outerRadius = 1.0f, uint32_t rings = 32, uint32_t sides = 32);
 
-        Mesh CreateQuad();
+        // Prisms
+        Mesh CreatePrism(uint32_t sides = 3, float radius = 1.0f, float height = 2.0f);
+
+        // Advanced primitives
+        Mesh CreateIcosphere(float radius = 1.0f, uint32_t subdivisions = 2);
+        Mesh CreateTetrahedron(float size = 1.0f);
+        Mesh CreateOctahedron(float size = 1.0f);
+        Mesh CreateDodecahedron(float size = 1.0f);
+        Mesh CreateIcosahedron(float size = 1.0f);
+
+        // Procedural
+        Mesh CreateHeightmap(const std::vector<float>& heights, uint32_t width, uint32_t depth, float heightScale = 1.0f);
+        Mesh CreateParametric(
+            std::function<Vec3(float, float)> func,
+            uint32_t uSegments = 32,
+            uint32_t vSegments = 32,
+            float uMin = 0.0f, float uMax = 1.0f,
+            float vMin = 0.0f, float vMax = 1.0f
+        );
+
+        // Text/Debug
+        Mesh CreateArrow(float length = 1.0f, float headSize = 0.2f);
+        Mesh CreateGrid(uint32_t size = 10, float spacing = 1.0f);
+        Mesh CreateWireCube(float size = 1.0f);
+        Mesh CreateWireSphere(float radius = 1.0f, uint32_t segments = 16);
     }
 }
 

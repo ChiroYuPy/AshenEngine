@@ -3,7 +3,7 @@
 namespace ash {
     // ========== Mesh ==========
 
-    void Mesh::SetData(const VertexData& vertexData, const std::vector<uint32_t>& indices) {
+    void Mesh::SetData(const VertexData &vertexData, const std::vector<uint32_t> &indices) {
         m_Attributes = vertexData.attributes;
         m_VertexCount = vertexData.vertexCount;
         m_IndexCount = indices.size();
@@ -17,15 +17,15 @@ namespace ash {
 
         // 3. Configurer le layout et attacher les buffers AU VAO
         const auto layout = CreateLayout(m_Attributes);
-        m_VAO.AddVertexBuffer(m_VBO, layout);  // Ceci bind le VAO et le VBO
-        m_VAO.SetIndexBuffer(m_IBO);           // Ceci bind l'IBO
+        m_VAO.AddVertexBuffer(m_VBO, layout); // Ceci bind le VAO et le VBO
+        m_VAO.SetIndexBuffer(m_IBO); // Ceci bind l'IBO
 
         // 4. Uploader les données (maintenant que tout est configuré)
         m_VBO->SetData(std::span(vertexData.data.data(), vertexData.data.size()));
         m_IBO->SetData(std::span(indices.data(), indices.size()));
     }
 
-    void Mesh::AddSubMesh(const SubMesh& submesh) {
+    void Mesh::AddSubMesh(const SubMesh &submesh) {
         m_SubMeshes.push_back(submesh);
     }
 
@@ -36,7 +36,7 @@ namespace ash {
     void Mesh::DrawSubMesh(const size_t index) const {
         if (index >= m_SubMeshes.size()) return;
 
-        const auto& submesh = m_SubMeshes[index];
+        const auto &submesh = m_SubMeshes[index];
         m_VAO.Draw(submesh.indexCount, submesh.indexOffset);
     }
 
@@ -81,18 +81,18 @@ namespace ash {
 
     // ========== MeshBuilder ==========
 
-    MeshBuilder& MeshBuilder::WithAttributes(const VertexAttribute attrs) {
+    MeshBuilder &MeshBuilder::WithAttributes(const VertexAttribute attrs) {
         m_Attributes = attrs;
         return *this;
     }
 
-    MeshBuilder& MeshBuilder::AddVertex(
-        const Vec3& position,
-        const std::optional<Vec3>& normal,
-        const std::optional<Vec2>& texCoord,
-        const std::optional<Vec4>& color,
-        const std::optional<Vec3>& tangent,
-        const std::optional<Vec3>& bitangent
+    MeshBuilder &MeshBuilder::AddVertex(
+        const Vec3 &position,
+        const std::optional<Vec3> &normal,
+        const std::optional<Vec2> &texCoord,
+        const std::optional<Vec4> &color,
+        const std::optional<Vec3> &tangent,
+        const std::optional<Vec3> &bitangent
     ) {
         m_Positions.push_back(position);
 
@@ -119,7 +119,7 @@ namespace ash {
         return *this;
     }
 
-    MeshBuilder& MeshBuilder::AddTriangle(const uint32_t i0, const uint32_t i1, const uint32_t i2) {
+    MeshBuilder &MeshBuilder::AddTriangle(const uint32_t i0, const uint32_t i1, const uint32_t i2) {
         m_Indices.push_back(i0);
         m_Indices.push_back(i1);
         m_Indices.push_back(i2);
@@ -213,8 +213,21 @@ namespace ash {
     }
 
     // ========== MeshPrimitives ==========
+}
 
-    Mesh MeshPrimitives::CreateCube(const float size) {
+
+namespace ash::MeshPrimitives {
+    // Helper functions
+    namespace {
+        constexpr float PI = 3.14159265359f;
+        constexpr float TWO_PI = 6.28318530718f;
+
+        Vec3 CalculateNormal(const Vec3 &v0, const Vec3 &v1, const Vec3 &v2) {
+            return glm::normalize(glm::cross(v1 - v0, v2 - v0));
+        }
+    }
+
+    Mesh CreateCube(const float size) {
         const float s = size * 0.5f;
 
         MeshBuilder builder;
@@ -225,40 +238,40 @@ namespace ash {
         );
 
         // Face avant (z+)
-        builder.AddVertex(Vec3(-s, -s,  s), Vec3(0, 0, 1), Vec2(0, 0));
-        builder.AddVertex(Vec3( s, -s,  s), Vec3(0, 0, 1), Vec2(1, 0));
-        builder.AddVertex(Vec3( s,  s,  s), Vec3(0, 0, 1), Vec2(1, 1));
-        builder.AddVertex(Vec3(-s,  s,  s), Vec3(0, 0, 1), Vec2(0, 1));
+        builder.AddVertex(Vec3(-s, -s, s), Vec3(0, 0, 1), Vec2(0, 0));
+        builder.AddVertex(Vec3(s, -s, s), Vec3(0, 0, 1), Vec2(1, 0));
+        builder.AddVertex(Vec3(s, s, s), Vec3(0, 0, 1), Vec2(1, 1));
+        builder.AddVertex(Vec3(-s, s, s), Vec3(0, 0, 1), Vec2(0, 1));
 
         // Face arrière (z-)
-        builder.AddVertex(Vec3( s, -s, -s), Vec3(0, 0, -1), Vec2(0, 0));
+        builder.AddVertex(Vec3(s, -s, -s), Vec3(0, 0, -1), Vec2(0, 0));
         builder.AddVertex(Vec3(-s, -s, -s), Vec3(0, 0, -1), Vec2(1, 0));
-        builder.AddVertex(Vec3(-s,  s, -s), Vec3(0, 0, -1), Vec2(1, 1));
-        builder.AddVertex(Vec3( s,  s, -s), Vec3(0, 0, -1), Vec2(0, 1));
+        builder.AddVertex(Vec3(-s, s, -s), Vec3(0, 0, -1), Vec2(1, 1));
+        builder.AddVertex(Vec3(s, s, -s), Vec3(0, 0, -1), Vec2(0, 1));
 
         // Face droite (x+)
-        builder.AddVertex(Vec3( s, -s,  s), Vec3(1, 0, 0), Vec2(0, 0));
-        builder.AddVertex(Vec3( s, -s, -s), Vec3(1, 0, 0), Vec2(1, 0));
-        builder.AddVertex(Vec3( s,  s, -s), Vec3(1, 0, 0), Vec2(1, 1));
-        builder.AddVertex(Vec3( s,  s,  s), Vec3(1, 0, 0), Vec2(0, 1));
+        builder.AddVertex(Vec3(s, -s, s), Vec3(1, 0, 0), Vec2(0, 0));
+        builder.AddVertex(Vec3(s, -s, -s), Vec3(1, 0, 0), Vec2(1, 0));
+        builder.AddVertex(Vec3(s, s, -s), Vec3(1, 0, 0), Vec2(1, 1));
+        builder.AddVertex(Vec3(s, s, s), Vec3(1, 0, 0), Vec2(0, 1));
 
         // Face gauche (x-)
         builder.AddVertex(Vec3(-s, -s, -s), Vec3(-1, 0, 0), Vec2(0, 0));
-        builder.AddVertex(Vec3(-s, -s,  s), Vec3(-1, 0, 0), Vec2(1, 0));
-        builder.AddVertex(Vec3(-s,  s,  s), Vec3(-1, 0, 0), Vec2(1, 1));
-        builder.AddVertex(Vec3(-s,  s, -s), Vec3(-1, 0, 0), Vec2(0, 1));
+        builder.AddVertex(Vec3(-s, -s, s), Vec3(-1, 0, 0), Vec2(1, 0));
+        builder.AddVertex(Vec3(-s, s, s), Vec3(-1, 0, 0), Vec2(1, 1));
+        builder.AddVertex(Vec3(-s, s, -s), Vec3(-1, 0, 0), Vec2(0, 1));
 
         // Face supérieure (y+)
-        builder.AddVertex(Vec3(-s,  s,  s), Vec3(0, 1, 0), Vec2(0, 0));
-        builder.AddVertex(Vec3( s,  s,  s), Vec3(0, 1, 0), Vec2(1, 0));
-        builder.AddVertex(Vec3( s,  s, -s), Vec3(0, 1, 0), Vec2(1, 1));
-        builder.AddVertex(Vec3(-s,  s, -s), Vec3(0, 1, 0), Vec2(0, 1));
+        builder.AddVertex(Vec3(-s, s, s), Vec3(0, 1, 0), Vec2(0, 0));
+        builder.AddVertex(Vec3(s, s, s), Vec3(0, 1, 0), Vec2(1, 0));
+        builder.AddVertex(Vec3(s, s, -s), Vec3(0, 1, 0), Vec2(1, 1));
+        builder.AddVertex(Vec3(-s, s, -s), Vec3(0, 1, 0), Vec2(0, 1));
 
         // Face inférieure (y-)
         builder.AddVertex(Vec3(-s, -s, -s), Vec3(0, -1, 0), Vec2(0, 0));
-        builder.AddVertex(Vec3( s, -s, -s), Vec3(0, -1, 0), Vec2(1, 0));
-        builder.AddVertex(Vec3( s, -s,  s), Vec3(0, -1, 0), Vec2(1, 1));
-        builder.AddVertex(Vec3(-s, -s,  s), Vec3(0, -1, 0), Vec2(0, 1));
+        builder.AddVertex(Vec3(s, -s, -s), Vec3(0, -1, 0), Vec2(1, 0));
+        builder.AddVertex(Vec3(s, -s, s), Vec3(0, -1, 0), Vec2(1, 1));
+        builder.AddVertex(Vec3(-s, -s, s), Vec3(0, -1, 0), Vec2(0, 1));
 
         // Indices : 2 triangles par face
         for (uint32_t i = 0; i < 6; ++i) {
@@ -272,7 +285,7 @@ namespace ash {
         return mesh;
     }
 
-    Mesh MeshPrimitives::CreateSphere(float radius, uint32_t segments, uint32_t rings) {
+    Mesh CreateSphere(float radius, uint32_t rings, uint32_t segments) {
         MeshBuilder builder;
         builder.WithAttributes(
             VertexAttribute::Position |
@@ -317,7 +330,8 @@ namespace ash {
         return mesh;
     }
 
-    Mesh MeshPrimitives::CreatePlane(const float width, const float height, const uint32_t subdivisions) {
+    Mesh CreatePlane(const float width, const float height, const uint32_t subdivisionsX,
+                     const uint32_t subdivisionsZ) {
         MeshBuilder builder;
         builder.WithAttributes(
             VertexAttribute::Position |
@@ -328,10 +342,10 @@ namespace ash {
         const float halfW = width * 0.5f;
         const float halfH = height * 0.5f;
 
-        for (uint32_t y = 0; y <= subdivisions; ++y) {
-            for (uint32_t x = 0; x <= subdivisions; ++x) {
-                const float u = static_cast<float>(x) / static_cast<float>(subdivisions);
-                const float v = static_cast<float>(y) / static_cast<float>(subdivisions);
+        for (uint32_t y = 0; y <= subdivisionsZ; ++y) {
+            for (uint32_t x = 0; x <= subdivisionsX; ++x) {
+                const float u = static_cast<float>(x) / static_cast<float>(subdivisionsZ);
+                const float v = static_cast<float>(y) / static_cast<float>(subdivisionsX);
 
                 const float px = -halfW + u * width;
                 const float pz = -halfH + v * height;
@@ -344,10 +358,10 @@ namespace ash {
             }
         }
 
-        for (uint32_t y = 0; y < subdivisions; ++y) {
-            for (uint32_t x = 0; x < subdivisions; ++x) {
-                const uint32_t a = y * (subdivisions + 1) + x;
-                const uint32_t b = a + subdivisions + 1;
+        for (uint32_t y = 0; y < subdivisionsZ; ++y) {
+            for (uint32_t x = 0; x < subdivisionsX; ++x) {
+                const uint32_t a = y * (subdivisionsZ + 1) + x;
+                const uint32_t b = a + subdivisionsX + 1;
 
                 builder.AddTriangle(a, b, a + 1);
                 builder.AddTriangle(b, b + 1, a + 1);
@@ -359,7 +373,7 @@ namespace ash {
         return mesh;
     }
 
-    Mesh MeshPrimitives::CreateQuad() {
+    Mesh CreateQuad(float width, float height) {
         MeshBuilder builder;
         builder.WithAttributes(
             VertexAttribute::Position |
@@ -367,13 +381,407 @@ namespace ash {
             VertexAttribute::TexCoord
         );
 
-        builder.AddVertex(Vec3(-1.0f, -1.0f, 0.0f), Vec3(0, 0, 1), Vec2(0, 0));
-        builder.AddVertex(Vec3(1.0f, -1.0f, 0.0f), Vec3(0, 0, 1), Vec2(1, 0));
-        builder.AddVertex(Vec3(1.0f, 1.0f, 0.0f), Vec3(0, 0, 1), Vec2(1, 1));
-        builder.AddVertex(Vec3(-1.0f, 1.0f, 0.0f), Vec3(0, 0, 1), Vec2(0, 1));
+        const float hw = width * 0.5f;
+        const float hh = height * 0.5f;
 
+        // Vertices avec largeur et hauteur correctes
+        builder.AddVertex(Vec3(-hw, -hh, 0.0f), Vec3(0, 0, 1), Vec2(0, 0));
+        builder.AddVertex(Vec3(hw, -hh, 0.0f), Vec3(0, 0, 1), Vec2(1, 0));
+        builder.AddVertex(Vec3(hw, hh, 0.0f), Vec3(0, 0, 1), Vec2(1, 1));
+        builder.AddVertex(Vec3(-hw, hh, 0.0f), Vec3(0, 0, 1), Vec2(0, 1));
+
+        // Triangles
         builder.AddTriangle(0, 1, 2);
         builder.AddTriangle(0, 2, 3);
+
+        Mesh mesh;
+        mesh.SetData(builder.BuildVertexData(), builder.GetIndices());
+        return mesh;
+    }
+
+    // === CYLINDER ===
+    Mesh CreateCylinder(float radius, float height, uint32_t sides, uint32_t heightSegments) {
+        MeshBuilder builder;
+        builder.WithAttributes(
+            VertexAttribute::Position |
+            VertexAttribute::Normal |
+            VertexAttribute::TexCoord
+        );
+
+        const float halfHeight = height * 0.5f;
+        const float angleStep = TWO_PI / sides;
+
+        // Generate vertices
+        for (uint32_t h = 0; h <= heightSegments; ++h) {
+            const float y = -halfHeight + (h * height / heightSegments);
+            const float v = static_cast<float>(h) / heightSegments;
+
+            for (uint32_t s = 0; s <= sides; ++s) {
+                const float angle = s * angleStep;
+                const float x = std::cos(angle) * radius;
+                const float z = std::sin(angle) * radius;
+                const float u = static_cast<float>(s) / sides;
+
+                Vec3 pos(x, y, z);
+                Vec3 normal = glm::normalize(Vec3(x, 0, z));
+                Vec2 uv(u, v);
+
+                builder.AddVertex(pos, normal, uv);
+            }
+        }
+
+        // Generate indices for sides
+        for (uint32_t h = 0; h < heightSegments; ++h) {
+            for (uint32_t s = 0; s < sides; ++s) {
+                const uint32_t i0 = h * (sides + 1) + s;
+                const uint32_t i1 = i0 + 1;
+                const uint32_t i2 = i0 + (sides + 1);
+                const uint32_t i3 = i2 + 1;
+
+                builder.AddTriangle(i0, i2, i1);
+                builder.AddTriangle(i1, i2, i3);
+            }
+        }
+
+        // Top and bottom caps
+        const uint32_t baseVertexTop = builder.GetIndices().size();
+        const uint32_t centerTop = baseVertexTop;
+        builder.AddVertex(Vec3(0, halfHeight, 0), Vec3(0, 1, 0), Vec2(0.5f, 0.5f));
+
+        for (uint32_t s = 0; s <= sides; ++s) {
+            const float angle = s * angleStep;
+            const float x = std::cos(angle) * radius;
+            const float z = std::sin(angle) * radius;
+            builder.AddVertex(Vec3(x, halfHeight, z), Vec3(0, 1, 0),
+                              Vec2(0.5f + x / (2 * radius), 0.5f + z / (2 * radius)));
+        }
+
+        for (uint32_t s = 0; s < sides; ++s) {
+            builder.AddTriangle(centerTop, centerTop + s + 1, centerTop + s + 2);
+        }
+
+        // Bottom cap
+        const uint32_t baseVertexBottom = builder.GetIndices().size();
+        const uint32_t centerBottom = baseVertexBottom;
+        builder.AddVertex(Vec3(0, -halfHeight, 0), Vec3(0, -1, 0), Vec2(0.5f, 0.5f));
+
+        for (uint32_t s = 0; s <= sides; ++s) {
+            const float angle = s * angleStep;
+            const float x = std::cos(angle) * radius;
+            const float z = std::sin(angle) * radius;
+            builder.AddVertex(Vec3(x, -halfHeight, z), Vec3(0, -1, 0),
+                              Vec2(0.5f + x / (2 * radius), 0.5f + z / (2 * radius)));
+        }
+
+        for (uint32_t s = 0; s < sides; ++s) {
+            builder.AddTriangle(centerBottom, centerBottom + s + 2, centerBottom + s + 1);
+        }
+
+        Mesh mesh;
+        mesh.SetData(builder.BuildVertexData(), builder.GetIndices());
+        return mesh;
+    }
+
+    // === CONE ===
+    Mesh CreateCone(float radius, float height, uint32_t sides) {
+        MeshBuilder builder;
+        builder.WithAttributes(
+            VertexAttribute::Position |
+            VertexAttribute::Normal |
+            VertexAttribute::TexCoord
+        );
+
+        const float angleStep = TWO_PI / sides;
+        const Vec3 apex(0, height, 0);
+
+        // Apex vertex
+        builder.AddVertex(apex, Vec3(0, 1, 0), Vec2(0.5f, 1.0f));
+
+        // Side vertices
+        for (uint32_t s = 0; s <= sides; ++s) {
+            const float angle = s * angleStep;
+            const float x = std::cos(angle) * radius;
+            const float z = std::sin(angle) * radius;
+
+            Vec3 pos(x, 0, z);
+            Vec3 toApex = glm::normalize(apex - pos);
+            Vec3 outward = glm::normalize(Vec3(x, 0, z));
+            Vec3 normal = glm::normalize(toApex + outward);
+
+            builder.AddVertex(pos, normal, Vec2(static_cast<float>(s) / sides, 0));
+        }
+
+        // Side triangles
+        for (uint32_t s = 0; s < sides; ++s) {
+            builder.AddTriangle(0, s + 1, s + 2);
+        }
+
+        // Base cap
+        const uint32_t centerBase = builder.GetIndices().size();
+        builder.AddVertex(Vec3(0, 0, 0), Vec3(0, -1, 0), Vec2(0.5f, 0.5f));
+
+        for (uint32_t s = 0; s <= sides; ++s) {
+            const float angle = s * angleStep;
+            const float x = std::cos(angle) * radius;
+            const float z = std::sin(angle) * radius;
+            builder.AddVertex(Vec3(x, 0, z), Vec3(0, -1, 0),
+                              Vec2(0.5f + x / (2 * radius), 0.5f + z / (2 * radius)));
+        }
+
+        for (uint32_t s = 0; s < sides; ++s) {
+            builder.AddTriangle(centerBase, centerBase + s + 2, centerBase + s + 1);
+        }
+
+        Mesh mesh;
+        mesh.SetData(builder.BuildVertexData(), builder.GetIndices());
+        return mesh;
+    }
+
+    // === CAPSULE ===
+    Mesh CreateCapsule(float radius, float height, uint32_t radialSegments, uint32_t rings) {
+        MeshBuilder builder;
+        builder.WithAttributes(
+            VertexAttribute::Position |
+            VertexAttribute::Normal |
+            VertexAttribute::TexCoord
+        );
+
+        const float cylinderHeight = height - 2 * radius;
+        const float halfCylinder = cylinderHeight * 0.5f;
+
+        // Top hemisphere
+        for (uint32_t ring = 0; ring <= rings; ++ring) {
+            const float phi = (PI / 2.0f) * (static_cast<float>(ring) / rings);
+            const float y = radius * std::sin(phi) + halfCylinder;
+            const float ringRadius = radius * std::cos(phi);
+
+            for (uint32_t seg = 0; seg <= radialSegments; ++seg) {
+                const float theta = TWO_PI * (static_cast<float>(seg) / radialSegments);
+                const float x = ringRadius * std::cos(theta);
+                const float z = ringRadius * std::sin(theta);
+
+                Vec3 pos(x, y, z);
+                Vec3 normal = glm::normalize(pos - Vec3(0, halfCylinder, 0));
+                Vec2 uv(static_cast<float>(seg) / radialSegments,
+                        static_cast<float>(ring) / rings * 0.5f + 0.5f);
+
+                builder.AddVertex(pos, normal, uv);
+            }
+        }
+
+        // Cylinder middle
+        const uint32_t cylinderStart = (rings + 1) * (radialSegments + 1);
+        for (uint32_t h = 0; h <= 1; ++h) {
+            const float y = h == 0 ? halfCylinder : -halfCylinder;
+
+            for (uint32_t seg = 0; seg <= radialSegments; ++seg) {
+                const float theta = TWO_PI * (static_cast<float>(seg) / radialSegments);
+                const float x = radius * std::cos(theta);
+                const float z = radius * std::sin(theta);
+
+                Vec3 pos(x, y, z);
+                Vec3 normal = glm::normalize(Vec3(x, 0, z));
+                Vec2 uv(static_cast<float>(seg) / radialSegments, 0.5f);
+
+                builder.AddVertex(pos, normal, uv);
+            }
+        }
+
+        // Bottom hemisphere
+        const uint32_t bottomStart = cylinderStart + 2 * (radialSegments + 1);
+        for (uint32_t ring = 0; ring <= rings; ++ring) {
+            const float phi = (PI / 2.0f) * (static_cast<float>(ring) / rings);
+            const float y = -radius * std::sin(phi) - halfCylinder;
+            const float ringRadius = radius * std::cos(phi);
+
+            for (uint32_t seg = 0; seg <= radialSegments; ++seg) {
+                const float theta = TWO_PI * (static_cast<float>(seg) / radialSegments);
+                const float x = ringRadius * std::cos(theta);
+                const float z = ringRadius * std::sin(theta);
+
+                Vec3 pos(x, y, z);
+                Vec3 normal = glm::normalize(pos - Vec3(0, -halfCylinder, 0));
+                Vec2 uv(static_cast<float>(seg) / radialSegments,
+                        static_cast<float>(ring) / rings * 0.5f);
+
+                builder.AddVertex(pos, normal, uv);
+            }
+        }
+
+        // Generate indices (top hemisphere + cylinder + bottom hemisphere)
+        auto addRingIndices = [&](const uint32_t start, const uint32_t ringCount) {
+            for (uint32_t ring = 0; ring < ringCount; ++ring) {
+                for (uint32_t seg = 0; seg < radialSegments; ++seg) {
+                    const uint32_t i0 = start + ring * (radialSegments + 1) + seg;
+                    const uint32_t i1 = i0 + 1;
+                    const uint32_t i2 = i0 + (radialSegments + 1);
+                    const uint32_t i3 = i2 + 1;
+
+                    builder.AddTriangle(i0, i2, i1);
+                    builder.AddTriangle(i1, i2, i3);
+                }
+            }
+        };
+
+        addRingIndices(0, rings);
+        addRingIndices(cylinderStart, 1);
+        addRingIndices(bottomStart, rings);
+
+        Mesh mesh;
+        mesh.SetData(builder.BuildVertexData(), builder.GetIndices());
+        return mesh;
+    }
+
+    // === TORUS ===
+    Mesh CreateTorus(float innerRadius, float outerRadius, uint32_t rings, uint32_t sides) {
+        MeshBuilder builder;
+        builder.WithAttributes(
+            VertexAttribute::Position |
+            VertexAttribute::Normal |
+            VertexAttribute::TexCoord
+        );
+
+        const float tubeRadius = (outerRadius - innerRadius) * 0.5f;
+        const float centerRadius = innerRadius + tubeRadius;
+
+        for (uint32_t ring = 0; ring <= rings; ++ring) {
+            const float u = static_cast<float>(ring) / rings;
+            const float theta = u * TWO_PI;
+
+            const float cosTheta = std::cos(theta);
+            const float sinTheta = std::sin(theta);
+
+            for (uint32_t side = 0; side <= sides; ++side) {
+                const float v = static_cast<float>(side) / sides;
+                const float phi = v * TWO_PI;
+
+                const float cosPhi = std::cos(phi);
+                const float sinPhi = std::sin(phi);
+
+                const float x = (centerRadius + tubeRadius * cosPhi) * cosTheta;
+                const float y = tubeRadius * sinPhi;
+                const float z = (centerRadius + tubeRadius * cosPhi) * sinTheta;
+
+                Vec3 pos(x, y, z);
+                Vec3 center(centerRadius * cosTheta, 0, centerRadius * sinTheta);
+                Vec3 normal = glm::normalize(pos - center);
+
+                builder.AddVertex(pos, normal, Vec2(u, v));
+            }
+        }
+
+        // Generate indices
+        for (uint32_t ring = 0; ring < rings; ++ring) {
+            for (uint32_t side = 0; side < sides; ++side) {
+                const uint32_t i0 = ring * (sides + 1) + side;
+                const uint32_t i1 = i0 + 1;
+                const uint32_t i2 = i0 + (sides + 1);
+                const uint32_t i3 = i2 + 1;
+
+                builder.AddTriangle(i0, i2, i1);
+                builder.AddTriangle(i1, i2, i3);
+            }
+        }
+
+        Mesh mesh;
+        mesh.SetData(builder.BuildVertexData(), builder.GetIndices());
+        return mesh;
+    }
+
+    // === PRISM ===
+    Mesh CreatePrism(const uint32_t sides, const float radius, const float height) {
+        MeshBuilder builder;
+        builder.WithAttributes(
+            VertexAttribute::Position |
+            VertexAttribute::Normal |
+            VertexAttribute::TexCoord
+        );
+
+        const float halfHeight = height * 0.5f;
+        const float angleStep = TWO_PI / sides;
+
+        // Top and bottom vertices
+        for (uint32_t h = 0; h < 2; ++h) {
+            const float y = h == 0 ? halfHeight : -halfHeight;
+
+            for (uint32_t s = 0; s < sides; ++s) {
+                const float angle = s * angleStep;
+                const float x = std::cos(angle) * radius;
+                const float z = std::sin(angle) * radius;
+
+                builder.AddVertex(Vec3(x, y, z), Vec3(0, h == 0 ? 1 : -1, 0),
+                                  Vec2(static_cast<float>(s) / sides, h));
+            }
+        }
+
+        // Side faces
+        for (uint32_t s = 0; s < sides; ++s) {
+            const uint32_t i0 = s;
+            const uint32_t i1 = (s + 1) % sides;
+            const uint32_t i2 = s + sides;
+            const uint32_t i3 = ((s + 1) % sides) + sides;
+
+            builder.AddTriangle(i0, i2, i1);
+            builder.AddTriangle(i1, i2, i3);
+        }
+
+        // Top cap
+        for (uint32_t s = 1; s < sides - 1; ++s) {
+            builder.AddTriangle(0, s, s + 1);
+        }
+
+        // Bottom cap
+        for (uint32_t s = 1; s < sides - 1; ++s) {
+            builder.AddTriangle(sides, sides + s + 1, sides + s);
+        }
+
+        Mesh mesh;
+        mesh.SetData(builder.BuildVertexData(), builder.GetIndices());
+        return mesh;
+    }
+
+    // === ICOSPHERE ===
+    Mesh CreateIcosphere(float radius, uint32_t subdivisions) {
+        // Golden ratio
+        const float t = (1.0f + std::sqrt(5.0f)) / 2.0f;
+
+        MeshBuilder builder;
+        builder.WithAttributes(
+            VertexAttribute::Position |
+            VertexAttribute::Normal |
+            VertexAttribute::TexCoord
+        );
+
+        // Initial 12 vertices of icosahedron
+        std::vector<Vec3> vertices = {
+            {-1, t, 0}, {1, t, 0}, {-1, -t, 0}, {1, -t, 0},
+            {0, -1, t}, {0, 1, t}, {0, -1, -t}, {0, 1, -t},
+            {t, 0, -1}, {t, 0, 1}, {-t, 0, -1}, {-t, 0, 1}
+        };
+
+        // Normalize to unit sphere
+        for (auto &v: vertices) {
+            v = glm::normalize(v) * radius;
+        }
+
+        // Initial 20 triangular faces
+        std::vector<uint32_t> indices = {
+            0, 11, 5, 0, 5, 1, 0, 1, 7, 0, 7, 10, 0, 10, 11,
+            1, 5, 9, 5, 11, 4, 11, 10, 2, 10, 7, 6, 7, 1, 8,
+            3, 9, 4, 3, 4, 2, 3, 2, 6, 3, 6, 8, 3, 8, 9,
+            4, 9, 5, 2, 4, 11, 6, 2, 10, 8, 6, 7, 9, 8, 1
+        };
+
+        for (const auto &v: vertices) {
+            Vec3 normal = glm::normalize(v);
+            float u = 0.5f + std::atan2(normal.z, normal.x) / TWO_PI;
+            float v_coord = 0.5f - std::asin(normal.y) / PI;
+            builder.AddVertex(v, normal, Vec2(u, v_coord));
+        }
+
+        for (size_t i = 0; i < indices.size(); i += 3) {
+            builder.AddTriangle(indices[i], indices[i + 1], indices[i + 2]);
+        }
 
         Mesh mesh;
         mesh.SetData(builder.BuildVertexData(), builder.GetIndices());
