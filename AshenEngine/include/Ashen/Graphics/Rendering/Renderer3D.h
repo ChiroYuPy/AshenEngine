@@ -1,8 +1,7 @@
 #ifndef ASHEN_RENDERER3D_H
 #define ASHEN_RENDERER3D_H
 
-#include <memory>
-#include <vector>
+#include "Ashen/Core/Types.h"
 #include "Ashen/Math/Math.h"
 
 namespace ash {
@@ -16,8 +15,8 @@ namespace ash {
      * @brief Simple 3D object to render
      */
     struct RenderObject {
-        std::shared_ptr<Mesh> mesh;
-        std::shared_ptr<Material> material;
+        Ref<Mesh> mesh;
+        Ref<Material> material;
         Mat4 transform;
     };
 
@@ -43,7 +42,7 @@ namespace ash {
      * @brief Scene environment
      */
     struct SceneEnvironment {
-        std::shared_ptr<TextureCubeMap> skybox;
+        Ref<TextureCubeMap> skybox;
         Vec3 ambientColor = Vec3(0.03f);
     };
 
@@ -77,15 +76,15 @@ namespace ash {
         // Submit objects for rendering
         static void Submit(const RenderObject& object);
         static void Submit(
-            const std::shared_ptr<Mesh>& mesh,
-            const std::shared_ptr<Material>& material,
+            const Ref<Mesh>& mesh,
+            const Ref<Material>& material,
             const Mat4& transform = Mat4(1.0f)
         );
 
         // Draw immediately without queuing
         static void DrawImmediate(
-            const std::shared_ptr<Mesh>& mesh,
-            const std::shared_ptr<Material>& material,
+            const Ref<Mesh>& mesh,
+            const Ref<Material>& material,
             const Mat4& transform = Mat4(1.0f)
         );
 
@@ -96,7 +95,7 @@ namespace ash {
 
         // Environment
         static void SetEnvironment(const SceneEnvironment& env);
-        static void SetSkybox(const std::shared_ptr<TextureCubeMap>& skybox);
+        static void SetSkybox(const Ref<TextureCubeMap>& skybox);
         static void SetAmbientLight(const Vec3& color);
 
         // Utilities
@@ -108,7 +107,7 @@ namespace ash {
         struct SceneData;
         static std::unique_ptr<SceneData> s_Data;
 
-        static void SetupLighting(const std::shared_ptr<ShaderProgram>& shader);
+        static void SetupLighting(const Ref<ShaderProgram>& shader);
         static void FlushRenderQueue();
     };
 }

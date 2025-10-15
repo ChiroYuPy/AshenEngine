@@ -21,7 +21,7 @@ namespace ash {
         return m_Root / filename;
     }
 
-    std::vector<fs::path> ResourcePaths::Scan(const std::vector<std::string>& extensions) const {
+    Vector<fs::path> ResourcePaths::Scan(const Vector<std::string>& extensions) const {
         std::lock_guard<std::mutex> lock(m_Mutex);
         return FileSystem::ScanDirectory(m_Root, extensions, true);
     }
@@ -82,7 +82,7 @@ namespace ash {
         return shader;
     }
 
-    std::vector<std::string> ShaderManager::GetAvailableShaders() {
+    Vector<std::string> ShaderManager::GetAvailableShaders() {
         return ShaderLoader::ScanForShaders(ResourcePaths::Instance().Root());
     }
 
@@ -134,7 +134,7 @@ namespace ash {
         return texture;
     }
 
-    std::vector<std::string> TextureManager::GetAvailableTextures() {
+    Vector<std::string> TextureManager::GetAvailableTextures() {
         return TextureLoader::ScanForTextures(ResourcePaths::Instance().Root());
     }
 
@@ -240,7 +240,7 @@ namespace ash {
         return mesh;
     }
 
-    std::vector<std::string> MeshManager::GetAvailableMeshes() {
+    Vector<std::string> MeshManager::GetAvailableMeshes() {
         return MeshLoader::ScanForMeshes(ResourcePaths::Instance().Root());
     }
 
@@ -298,9 +298,9 @@ namespace ash {
     std::shared_ptr<SpatialMaterial> MaterialManager::CreateSpatial(
         const std::string& id,
         const Vec4& albedo,
-        float metallic,
-        float roughness,
-        float specular
+        const float metallic,
+        const float roughness,
+        const float specular
     ) {
         {
             std::lock_guard<std::mutex> lock(m_Mutex);
@@ -349,8 +349,8 @@ namespace ash {
     std::shared_ptr<ToonMaterial> MaterialManager::CreateToon(
         const std::string& id,
         const Vec4& albedo,
-        int toonLevels,
-        float rimAmount
+        const int toonLevels,
+        const float rimAmount
     ) {
         {
             std::lock_guard<std::mutex> lock(m_Mutex);

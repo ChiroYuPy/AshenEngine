@@ -2,11 +2,9 @@
 #define ASHEN_RESOURCEMANAGER_H
 
 #include <filesystem>
-#include <memory>
 #include <mutex>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 #include "Ashen/BuiltIn/BuiltInShader.h"
 #include "Ashen/Graphics/Objects/Material.h"
@@ -30,7 +28,7 @@ namespace ash {
         void SetWorkingDirectory(const fs::path& dir);
         [[nodiscard]] fs::path GetPath(const std::string& filename) const;
         [[nodiscard]] const fs::path& Root() const { return m_Root; }
-        [[nodiscard]] std::vector<fs::path> Scan(const std::vector<std::string>& extensions) const;
+        [[nodiscard]] Vector<fs::path> Scan(const Vector<std::string>& extensions) const;
 
     private:
         ResourcePaths() = default;
@@ -95,7 +93,7 @@ namespace ash {
             const fs::path& fragPath
         );
 
-        static std::vector<std::string> GetAvailableShaders();
+        static Vector<std::string> GetAvailableShaders();
 
     private:
         ShaderManager() = default;
@@ -122,7 +120,7 @@ namespace ash {
             const TextureConfig& config = TextureConfig::Default()
         );
 
-        static std::vector<std::string> GetAvailableTextures();
+        static Vector<std::string> GetAvailableTextures();
 
     private:
         TextureManager() = default;
@@ -151,7 +149,7 @@ namespace ash {
         std::shared_ptr<Mesh> GetPlane();
         std::shared_ptr<Mesh> GetQuad();
 
-        static std::vector<std::string> GetAvailableMeshes();
+        static Vector<std::string> GetAvailableMeshes();
 
     private:
         MeshManager() = default;

@@ -22,7 +22,7 @@ namespace voxelity {
 
     private:
         VoxelType m_blockType;
-        ash::Scope<PhysicsSystem> m_physics;
+        ash::Own<PhysicsSystem> m_physics;
 
         float m_lifetime = 5.0f;
         float m_age = 0.0f;

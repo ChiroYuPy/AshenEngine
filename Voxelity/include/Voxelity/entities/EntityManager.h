@@ -1,8 +1,6 @@
 #ifndef VOXELITY_ENTITYMANAGER_H
 #define VOXELITY_ENTITYMANAGER_H
 
-#include <vector>
-#include <memory>
 #include <algorithm>
 
 #include "Ashen/Core/Types.h"
@@ -41,7 +39,7 @@ namespace voxelity {
             }
         }
 
-        const std::vector<ash::Scope<Entity> > &getEntities() const { return m_entities; }
+        const ash::Vector<ash::Own<Entity> > &getEntities() const { return m_entities; }
         size_t getEntityCount() const { return m_entities.size(); }
 
         template<typename T>
@@ -56,9 +54,9 @@ namespace voxelity {
         }
 
         template<typename T>
-        std::vector<T *> findAllEntities() {
+        ash::Vector<T *> findAllEntities() {
             static_assert(std::is_base_of_v<Entity, T>, "T must derive from Entity");
-            std::vector<T *> result;
+            ash::Vector<T *> result;
             for (auto &entity: m_entities) {
                 if (T *typed = dynamic_cast<T *>(entity.get())) {
                     result.push_back(typed);
@@ -72,7 +70,7 @@ namespace voxelity {
         }
 
     private:
-        std::vector<ash::Scope<Entity> > m_entities;
+        ash::Vector<ash::Own<Entity> > m_entities;
     };
 }
 

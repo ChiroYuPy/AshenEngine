@@ -42,19 +42,19 @@ public:
         return defaultValue;
     }
 
-    std::vector<std::string> GetStringArray(const std::string& key) const override {
+    Vector<std::string> GetStringArray(const std::string& key) const override {
         return GetArray<std::string>(key);
     }
 
-    std::vector<int> GetIntArray(const std::string& key) const override {
+    Vector<int> GetIntArray(const std::string& key) const override {
         return GetArray<int>(key);
     }
 
-    std::vector<float> GetFloatArray(const std::string& key) const override {
+    Vector<float> GetFloatArray(const std::string& key) const override {
         return GetArray<float>(key);
     }
 
-    std::vector<bool> GetBoolArray(const std::string& key) const override {
+    Vector<bool> GetBoolArray(const std::string& key) const override {
         return GetArray<bool>(key);
     }
 
@@ -100,8 +100,8 @@ private:
     }
 
     template<typename T>
-    std::vector<T> GetArray(const std::string& key) const {
-        std::vector<T> result;
+    Vector<T> GetArray(const std::string& key) const {
+        Vector<T> result;
         if (const auto node = GetJsonNode(key, false))
             if (node->is_array())
                 for (auto& v : *node) result.push_back(v.get<T>());

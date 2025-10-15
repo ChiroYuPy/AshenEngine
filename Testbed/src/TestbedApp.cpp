@@ -18,7 +18,7 @@ namespace ash {
             SetupLights();
         }
 
-        void OnUpdate(float deltaTime) override {
+        void OnUpdate(const float deltaTime) override {
             m_CameraController->OnUpdate(deltaTime);
             m_Time += deltaTime;
         }
@@ -124,8 +124,9 @@ namespace ash {
             Renderer3D::Submit(m_CubeMesh, m_BlueMaterial, transform);
 
             // Sphères en orbite (3 sphères)
-            for (int i = 0; i < 3; ++i) {
-                const float angle = m_Time * 0.5f + (i * glm::two_pi<float>() / 3.0f);
+            constexpr int nbSphere = 32;
+            for (int i = 0; i < nbSphere; ++i) {
+                const float angle = m_Time * 0.5f + (i * glm::two_pi<float>() / static_cast<float>(nbSphere));
                 const float radius = 6.0f;
                 Vec3 pos(
                     zoneX + std::cos(angle) * radius,
@@ -133,11 +134,16 @@ namespace ash {
                     std::sin(angle) * radius
                 );
 
-                transform = glm::translate(Mat4(1.0f), pos)
-                          * glm::scale(Mat4(1.0f), Vec3(0.6f));
+                Mat4 transform = glm::translate(Mat4(1.0f), pos)
+                                * glm::scale(Mat4(1.0f), Vec3(0.6f));
 
-                Ref<Material> mat = (i == 0) ? m_SpatialMaterial :
-                                    (i == 1) ? m_MetallicMaterial : m_RoughMaterial;
+                Ref<Material> mat;
+                switch (i % 3) {
+                    case 0: mat = m_SpatialMaterial; break;
+                    case 1: mat = m_MetallicMaterial; break;
+                    case 2: mat = m_RoughMaterial; break;
+                }
+
                 Renderer3D::Submit(m_SphereMesh, mat, transform);
             }
         }
@@ -437,7 +443,7 @@ namespace ash {
 
         // Lighting
         DirectionalLight m_DirectionalLight;
-        std::vector<PointLight> m_PointLights;
+        Vector<PointLight> m_PointLights;
 
         // State
         float m_Time = 0.0f;

@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <stdexcept>
-#include <vector>
 #include <optional>
 
 #include <glad/glad.h>
@@ -40,7 +39,7 @@ namespace ash {
         uint32_t width = 1280;
         uint32_t height = 720;
         uint32_t samples = 1;
-        std::vector<FramebufferAttachmentSpec> colorAttachments;
+        Vector<FramebufferAttachmentSpec> colorAttachments;
         std::optional<FramebufferAttachmentSpec> depthAttachment;
         bool swapChainTarget = false;
 
@@ -231,7 +230,7 @@ namespace ash {
             for (size_t i = 0; i < m_Config.colorAttachments.size(); ++i) {
                 const auto &spec = m_Config.colorAttachments[i];
 
-                auto colorTex = MakeScope<Texture2D>();
+                auto colorTex = MakeOwn<Texture2D>();
                 colorTex->SetData(
                     spec.format,
                     static_cast<GLsizei>(m_Config.width),
@@ -260,7 +259,7 @@ namespace ash {
             }
 
             if (!m_ColorTextures.empty()) {
-                std::vector<GLenum> attachments;
+                Vector<GLenum> attachments;
                 for (size_t i = 0; i < m_ColorTextures.size(); ++i) {
                     attachments.push_back(GL_COLOR_ATTACHMENT0 + static_cast<GLenum>(i));
                 }
@@ -290,7 +289,7 @@ namespace ash {
                         m_DepthRenderbuffer
                     );
                 } else {
-                    m_DepthTexture = MakeScope<Texture2D>();
+                    m_DepthTexture = MakeOwn<Texture2D>();
                     m_DepthTexture->SetData(
                         spec.format,
                         static_cast<GLsizei>(m_Config.width),
@@ -323,8 +322,8 @@ namespace ash {
             Unbind();
         }
 
-        std::vector<Scope<Texture2D> > m_ColorTextures;
-        Scope<Texture2D> m_DepthTexture;
+        Vector<Own<Texture2D> > m_ColorTextures;
+        Own<Texture2D> m_DepthTexture;
         GLuint m_DepthRenderbuffer = 0;
         FramebufferConfig m_Config;
     };

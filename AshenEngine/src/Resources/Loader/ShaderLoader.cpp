@@ -66,8 +66,8 @@ namespace ash {
         return FileSystem::Exists(vertPath) && FileSystem::Exists(fragPath);
     }
 
-    std::vector<std::string> ShaderLoader::ScanForShaders(const fs::path& directory) {
-        std::vector<std::string> shaders;
+    Vector<std::string> ShaderLoader::ScanForShaders(const fs::path& directory) {
+        Vector<std::string> shaders;
         const auto files = FileSystem::ScanDirectory(directory, {".vert"}, true);
 
         for (const auto& file : files) {

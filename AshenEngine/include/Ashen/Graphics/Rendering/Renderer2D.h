@@ -2,7 +2,6 @@
 #define ASHEN_RENDERER2D_H
 
 #include <array>
-#include <vector>
 
 #include <glm/glm.hpp>
 
@@ -105,13 +104,13 @@ namespace ash {
 
         static void DrawFilledCircle(const Vec3 &center, float radius, const Vec4 &color);
 
-        static void DrawPolygon(const std::vector<Vec2> &points, const Vec4 &color);
+        static void DrawPolygon(const Vector<Vec2> &points, const Vec4 &color);
 
-        static void DrawPolygon(const std::vector<Vec3> &points, const Vec4 &color);
+        static void DrawPolygon(const Vector<Vec3> &points, const Vec4 &color);
 
-        static void DrawPolygonOutline(const std::vector<Vec2> &points, const Vec4 &color);
+        static void DrawPolygonOutline(const Vector<Vec2> &points, const Vec4 &color);
 
-        static void DrawPolygonOutline(const std::vector<Vec3> &points, const Vec4 &color);
+        static void DrawPolygonOutline(const Vector<Vec3> &points, const Vec4 &color);
 
         static void SetLineWidth(float width);
 

@@ -1,8 +1,9 @@
 #ifndef VOXELITY_PHYSICSSYSTEM_H
 #define VOXELITY_PHYSICSSYSTEM_H
 
-#include <vector>
 #include <glm/glm.hpp>
+
+#include "Ashen/Core/Types.h"
 #include "Voxelity/entities/Entity.h"
 #include "Voxelity/voxelWorld/voxel/VoxelType.h"
 
@@ -23,7 +24,7 @@ namespace voxelity {
 
     struct CollisionResult {
         bool hasCollision = false;
-        std::vector<CollisionInfo> collisions;
+        ash::Vector<CollisionInfo> collisions;
         glm::vec3 totalPenetration{0.0f};
 
         void addCollision(const CollisionInfo &info) {
@@ -37,8 +38,8 @@ namespace voxelity {
             hasCollision = false;
         }
 
-        std::vector<CollisionInfo> getCollisionsOnAxis(const int axis) const {
-            std::vector<CollisionInfo> result;
+        ash::Vector<CollisionInfo> getCollisionsOnAxis(const int axis) const {
+            ash::Vector<CollisionInfo> result;
             for (const auto &col: collisions) {
                 if (col.axis == axis) {
                     result.push_back(col);
@@ -75,11 +76,11 @@ namespace voxelity {
 
         glm::vec3 moveAndCollide(Entity &entity, const glm::vec3 &motion, const World &world) const;
 
-        float sweepAxis(const ash::BoundingBox3D &aabb, float motion, int axis,
+        float sweepAxis(const ash::BBox3 &aabb, float motion, int axis,
                         const World &world, CollisionResult &result) const;
 
-        static void getBroadPhaseBlocks(const ash::BoundingBox3D &aabb,
-                                        std::vector<glm::ivec3> &blocks,
+        static void getBroadPhaseBlocks(const ash::BBox3 &aabb,
+                                        ash::Vector<glm::ivec3> &blocks,
                                         const World &world);
 
         void applyFriction(Entity &entity, float deltaTime, const World &world) const;

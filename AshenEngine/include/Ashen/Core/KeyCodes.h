@@ -79,11 +79,13 @@ namespace ash {
             PageDown = 267,
             Home = 268,
             End = 269,
+
             CapsLock = 280,
             ScrollLock = 281,
             NumLock = 282,
             PrintScreen = 283,
             Pause = 284,
+
             F1 = 290,
             F2 = 291,
             F3 = 292,

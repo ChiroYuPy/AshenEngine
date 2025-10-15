@@ -43,7 +43,7 @@ namespace ash {
         m_Handle = glfwCreateWindow(m_Data.Size.x, m_Data.Size.y, m_Data.Title.c_str(), nullptr, nullptr);
         ++s_GLFWWindowCount;
 
-        m_Context = MakeScope<GraphicsContext>(m_Handle);
+        m_Context = MakeOwn<GraphicsContext>(m_Handle);
         m_Context->Init();
 
         glfwSetWindowUserPointer(m_Handle, &m_Data);

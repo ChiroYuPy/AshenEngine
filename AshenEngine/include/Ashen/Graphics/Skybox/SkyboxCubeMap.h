@@ -2,7 +2,6 @@
 #define ASHEN_SKYBOXCUBEMAP_H
 
 #include <array>
-#include <memory>
 
 #include "Ashen/Graphics/Skybox/ISkybox.h"
 #include "Ashen/Graphics/Rendering/Renderer.h"

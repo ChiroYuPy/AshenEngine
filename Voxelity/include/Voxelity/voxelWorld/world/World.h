@@ -10,7 +10,7 @@
 namespace voxelity {
     class World {
     public:
-        explicit World(ash::Scope<ITerrainGenerator> generator);
+        explicit World(ash::Own<ITerrainGenerator> generator);
 
         ~World() = default;
 
@@ -63,7 +63,7 @@ namespace voxelity {
         void clear() const;
 
     private:
-        ash::Scope<ChunkManager> m_chunkManager;
+        ash::Own<ChunkManager> m_chunkManager;
 
         void markNeighborChunksDirty(const ChunkCoord &chunkCoord, const glm::ivec3 &localPos) const;
     };

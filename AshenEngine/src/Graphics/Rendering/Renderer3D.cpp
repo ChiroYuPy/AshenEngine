@@ -17,11 +17,11 @@ namespace ash {
         Vec3 cameraPosition{};
 
         // Render queue
-        std::vector<RenderObject> renderQueue;
+        Vector<RenderObject> renderQueue;
 
         // Lighting
         DirectionalLight directionalLight;
-        std::vector<PointLight> pointLights;
+        Vector<PointLight> pointLights;
         bool hasDirectionalLight = false;
 
         // Environment

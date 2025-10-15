@@ -56,12 +56,12 @@ namespace voxelity {
         float m_tickAccumulator = 0.0f;
 
         // Systèmes principaux
-        ash::Scope<World> m_world;
-        ash::Scope<WorldRenderer> m_worldRenderer;
-        ash::Scope<WorldInteractor> m_worldInteractor;
-        ash::Scope<EntityManager> m_entityManager;
+        ash::Own<World> m_world;
+        ash::Own<WorldRenderer> m_worldRenderer;
+        ash::Own<WorldInteractor> m_worldInteractor;
+        ash::Own<EntityManager> m_entityManager;
         Player *m_player; // Géré par EntityManager
-        ash::Scope<InputHandler> m_inputHandler;
+        ash::Own<InputHandler> m_inputHandler;
 
         // Caméra et shaders
         ash::Ref<ash::PerspectiveCamera> m_camera;

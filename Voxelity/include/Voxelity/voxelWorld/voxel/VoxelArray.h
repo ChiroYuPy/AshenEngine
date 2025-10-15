@@ -3,7 +3,7 @@
 
 #include <array>
 
-#include "Voxelity/voxelWorld/voxel/VoxelType.h"
+#include "VoxelType.h"
 
 namespace voxelity {
     class VoxelArray {

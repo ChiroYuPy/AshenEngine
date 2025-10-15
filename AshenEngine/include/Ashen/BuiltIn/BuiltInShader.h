@@ -3,7 +3,6 @@
 
 #include <string>
 #include <unordered_map>
-#include <memory>
 #include "Ashen/GraphicsAPI/Shader.h"
 
 namespace ash {

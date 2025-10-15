@@ -1,9 +1,11 @@
 #include "Ashen/Graphics/Objects/Mesh.h"
 
+#include "Ashen/Core/Types.h"
+
 namespace ash {
     // ========== Mesh ==========
 
-    void Mesh::SetData(const VertexData &vertexData, const std::vector<uint32_t> &indices) {
+    void Mesh::SetData(const VertexData &vertexData, const Vector<uint32_t> &indices) {
         m_Attributes = vertexData.attributes;
         m_VertexCount = vertexData.vertexCount;
         m_IndexCount = indices.size();
@@ -373,7 +375,7 @@ namespace ash::MeshPrimitives {
         return mesh;
     }
 
-    Mesh CreateQuad(float width, float height) {
+    Mesh CreateQuad(const float width, const float height) {
         MeshBuilder builder;
         builder.WithAttributes(
             VertexAttribute::Position |
@@ -753,7 +755,7 @@ namespace ash::MeshPrimitives {
         );
 
         // Initial 12 vertices of icosahedron
-        std::vector<Vec3> vertices = {
+        Vector<Vec3> vertices = {
             {-1, t, 0}, {1, t, 0}, {-1, -t, 0}, {1, -t, 0},
             {0, -1, t}, {0, 1, t}, {0, -1, -t}, {0, 1, -t},
             {t, 0, -1}, {t, 0, 1}, {-t, 0, -1}, {-t, 0, 1}
@@ -765,7 +767,7 @@ namespace ash::MeshPrimitives {
         }
 
         // Initial 20 triangular faces
-        std::vector<uint32_t> indices = {
+        Vector<uint32_t> indices = {
             0, 11, 5, 0, 5, 1, 0, 1, 7, 0, 7, 10, 0, 10, 11,
             1, 5, 9, 5, 11, 4, 11, 10, 2, 10, 7, 6, 7, 1, 8,
             3, 9, 4, 3, 4, 2, 3, 2, 6, 3, 6, 8, 3, 8, 9,

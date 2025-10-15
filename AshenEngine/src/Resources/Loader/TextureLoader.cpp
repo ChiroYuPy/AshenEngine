@@ -86,8 +86,8 @@ namespace ash {
         return {};
     }
 
-    std::vector<std::string> TextureLoader::ScanForTextures(const fs::path& directory) {
-        std::vector<std::string> textures;
+    Vector<std::string> TextureLoader::ScanForTextures(const fs::path& directory) {
+        Vector<std::string> textures;
         const auto files = FileSystem::ScanDirectory(
             directory,
             ImageLoader::GetSupportedExtensions(),

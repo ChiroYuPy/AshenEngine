@@ -2,7 +2,6 @@
 #define ASHEN_VERTEXARRAY_H
 
 #include <bitset>
-#include <vector>
 #include <initializer_list>
 
 #include <glad/glad.h>
@@ -107,7 +106,7 @@ namespace ash {
 
         void SetStride(const size_t stride) { m_Stride = stride; }
 
-        [[nodiscard]] const std::vector<VertexAttributeDescription> &GetAttributes() const {
+        [[nodiscard]] const Vector<VertexAttributeDescription> &GetAttributes() const {
             return m_Attributes;
         }
 
@@ -154,7 +153,7 @@ namespace ash {
             }
         }
 
-        std::vector<VertexAttributeDescription> m_Attributes;
+        Vector<VertexAttributeDescription> m_Attributes;
         size_t m_Stride = 0;
     };
 
@@ -288,7 +287,7 @@ namespace ash {
             m_IndexBuffer = ibo;
         }
 
-        [[nodiscard]] const std::vector<std::shared_ptr<VertexBuffer> > &GetVertexBuffers() const {
+        [[nodiscard]] const Vector<std::shared_ptr<VertexBuffer> > &GetVertexBuffers() const {
             return m_VertexBuffers;
         }
 
@@ -373,7 +372,7 @@ namespace ash {
 
     private:
         mutable std::bitset<32> m_EnabledAttribs{};
-        std::vector<std::shared_ptr<VertexBuffer> > m_VertexBuffers;
+        Vector<std::shared_ptr<VertexBuffer> > m_VertexBuffers;
         std::shared_ptr<IndexBuffer> m_IndexBuffer;
         VertexArrayConfig m_Config;
 

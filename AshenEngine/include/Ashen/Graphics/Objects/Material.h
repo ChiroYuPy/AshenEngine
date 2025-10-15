@@ -1,7 +1,6 @@
 #ifndef ASHEN_MATERIAL_H
 #define ASHEN_MATERIAL_H
 
-#include <memory>
 #include <string>
 #include <unordered_map>
 #include <variant>

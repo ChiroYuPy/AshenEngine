@@ -40,8 +40,8 @@ namespace ash {
 
     ModelData MeshLoader::Load(const fs::path& path, bool flipUVs) {
         tinyobj::attrib_t attrib;
-        std::vector<tinyobj::shape_t> shapes;
-        std::vector<tinyobj::material_t> materials;
+        Vector<tinyobj::shape_t> shapes;
+        Vector<tinyobj::material_t> materials;
         std::string warn, err;
 
         std::string mtl_basedir = path.parent_path().string();
@@ -81,7 +81,7 @@ namespace ash {
             }
             builder.WithAttributes(attributes);
 
-            std::vector<uint32_t> indices;
+            Vector<uint32_t> indices;
             std::unordered_map<VertexKey, uint32_t> vertexMap;
             uint32_t vertexCount = 0;
 
@@ -161,7 +161,7 @@ namespace ash {
         return modelData;
     }
 
-    Mesh MeshLoader::LoadSingle(const fs::path& path, bool flipUVs) {
+    Mesh MeshLoader::LoadSingle(const fs::path& path, const bool flipUVs) {
         ModelData data = Load(path, flipUVs);
 
         if (data.meshes.empty()) {
@@ -177,16 +177,16 @@ namespace ash {
     }
 
     bool MeshLoader::IsSupported(const std::string& extension) {
-        static const std::vector<std::string> supported = {".obj", ".OBJ"};
+        static const Vector<std::string> supported = {".obj", ".OBJ"};
         return std::ranges::find(supported, extension) != supported.end();
     }
 
-    std::vector<std::string> MeshLoader::GetSupportedFormats() {
+    Vector<std::string> MeshLoader::GetSupportedFormats() {
         return {".obj"};
     }
 
-    std::vector<std::string> MeshLoader::ScanForMeshes(const fs::path& directory) {
-        std::vector<std::string> meshes;
+    Vector<std::string> MeshLoader::ScanForMeshes(const fs::path& directory) {
+        Vector<std::string> meshes;
         const auto files = FileSystem::ScanDirectory(directory, GetSupportedFormats(), true);
 
         for (const auto& file : files) {

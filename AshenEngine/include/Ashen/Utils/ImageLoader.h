@@ -2,8 +2,9 @@
 #define ASHEN_IMAGELOADER_H
 
 #include <filesystem>
-#include <vector>
 #include <string>
+
+#include "Ashen/Core/Types.h"
 
 namespace ash {
     namespace fs = std::filesystem;
@@ -12,7 +13,7 @@ namespace ash {
      * @brief Image data structure
      */
     struct ImageData {
-        std::vector<unsigned char> pixels;
+        Vector<unsigned char> pixels;
         int width = 0;
         int height = 0;
         int channels = 0;
@@ -42,7 +43,7 @@ namespace ash {
         /**
          * @brief Get list of supported image extensions
          */
-        static std::vector<std::string> GetSupportedExtensions();
+        static Vector<std::string> GetSupportedExtensions();
     };
 }
 

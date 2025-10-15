@@ -1,13 +1,10 @@
 #ifndef ASHEN_MESHLOADER_H
 #define ASHEN_MESHLOADER_H
 
-#include <memory>
 #include <filesystem>
-#include <vector>
 
 #include "Ashen/Graphics/Objects/Material.h"
 #include "Ashen/Graphics/Objects/Mesh.h"
-#include "Ashen/Math/Math.h"
 
 namespace ash {
     namespace fs = std::filesystem;
@@ -16,7 +13,7 @@ namespace ash {
      * @brief Result of loading a model file
      */
     struct ModelData {
-        std::vector<Mesh> meshes;
+        Vector<Mesh> meshes;
         std::unordered_map<std::string, std::shared_ptr<Material>> materials;
         bool hasMultipleMeshes = false;
 
@@ -49,12 +46,12 @@ namespace ash {
         /**
          * @brief Get list of supported formats
          */
-        static std::vector<std::string> GetSupportedFormats();
+        static Vector<std::string> GetSupportedFormats();
 
         /**
          * @brief Scan directory for mesh files
          */
-        static std::vector<std::string> ScanForMeshes(const fs::path& directory);
+        static Vector<std::string> ScanForMeshes(const fs::path& directory);
     };
 }
 

@@ -7,13 +7,12 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
-#include <filesystem>
 
 #include <glad/glad.h>
 
 #include "Ashen/Math/Math.h"
 #include "Ashen/Core/Logger.h"
+#include "Ashen/Core/Types.h"
 #include "Ashen/GraphicsAPI/GLEnums.h"
 #include "Ashen/GraphicsAPI/GLObject.h"
 
@@ -340,7 +339,7 @@ namespace ash {
     private:
         mutable std::unordered_map<std::string, GLint> m_UniformCache;
         std::unordered_set<ShaderStage> m_AttachedStages;
-        std::vector<GLuint> m_AttachedShaderIDs;
+        Vector<GLuint> m_AttachedShaderIDs;
         mutable std::unordered_set<std::string> m_WarnedUniforms;
         ShaderConfig m_Config;
 

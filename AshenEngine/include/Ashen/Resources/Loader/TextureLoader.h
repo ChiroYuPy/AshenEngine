@@ -1,7 +1,6 @@
 #ifndef ASHEN_TEXTURELOADER_H
 #define ASHEN_TEXTURELOADER_H
 
-#include <memory>
 #include <filesystem>
 #include <array>
 #include "Ashen/GraphicsAPI/Texture.h"
@@ -56,7 +55,7 @@ namespace ash {
         /**
          * @brief Scan directory for available textures
          */
-        static std::vector<std::string> ScanForTextures(const fs::path& directory);
+        static Vector<std::string> ScanForTextures(const fs::path& directory);
 
     private:
         /**

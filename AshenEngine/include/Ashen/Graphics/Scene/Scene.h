@@ -1,8 +1,6 @@
 #ifndef ASHEN_SCENE_H
 #define ASHEN_SCENE_H
 
-#include <memory>
-#include <vector>
 #include <string>
 #include "Ashen/Graphics/Rendering/Renderer3D.h"
 #include "Ashen/Math/Math.h"
@@ -47,7 +45,7 @@ namespace ash {
         void SetMaterial(std::shared_ptr<Material> material) { m_Material = material; }
         std::shared_ptr<Material> GetMaterial() const { return m_Material; }
 
-        void SetVisible(bool visible) { m_Visible = visible; }
+        void SetVisible(const bool visible) { m_Visible = visible; }
         bool IsVisible() const { return m_Visible; }
 
     private:
@@ -141,15 +139,15 @@ namespace ash {
         const std::string& GetName() const { return m_Name; }
         void SetName(const std::string& name) { m_Name = name; }
 
-        const std::vector<std::shared_ptr<MeshEntity>>& GetEntities() const {
+        const Vector<std::shared_ptr<MeshEntity>>& GetEntities() const {
             return m_Entities;
         }
 
     private:
         std::string m_Name;
-        std::vector<std::shared_ptr<MeshEntity>> m_Entities;
+        Vector<std::shared_ptr<MeshEntity>> m_Entities;
         std::unique_ptr<DirectionalLight> m_DirectionalLight;
-        std::vector<PointLight> m_PointLights;
+        Vector<PointLight> m_PointLights;
         SceneEnvironment m_Environment;
     };
 }

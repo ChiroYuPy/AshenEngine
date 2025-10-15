@@ -34,8 +34,8 @@ namespace voxelity {
 
     struct MeshData {
         ChunkCoord coord;
-        std::vector<FaceInstance> opaqueFaces;
-        std::vector<FaceInstance> transparentFaces;
+        ash::Vector<FaceInstance> opaqueFaces;
+        ash::Vector<FaceInstance> transparentFaces;
     };
 
     struct MeshBuildRequest {
@@ -49,7 +49,7 @@ namespace voxelity {
 
     class ChunkManager {
     public:
-        explicit ChunkManager(ash::Scope<ITerrainGenerator> generator, int threadCount = 2);
+        explicit ChunkManager(ash::Own<ITerrainGenerator> generator, int threadCount = 2);
 
         ~ChunkManager();
 
@@ -89,8 +89,8 @@ namespace voxelity {
 
     private:
         // Données principales (thread principal uniquement)
-        std::unordered_map<ChunkCoord, ash::Scope<Chunk> > m_chunks;
-        ash::Scope<ITerrainGenerator> m_generator;
+        std::unordered_map<ChunkCoord, ash::Own<Chunk> > m_chunks;
+        ash::Own<ITerrainGenerator> m_generator;
 
         // Files thread-safe pour communication inter-threads
         std::priority_queue<ChunkLoadRequest> m_generationQueue;
@@ -115,8 +115,8 @@ namespace voxelity {
         int m_lastRenderDistance = 0;
 
         // Threads de travail
-        std::vector<std::thread> m_generationThreads;
-        std::vector<std::thread> m_meshThreads;
+        ash::Vector<std::thread> m_generationThreads;
+        ash::Vector<std::thread> m_meshThreads;
 
         // Fonctions de travail des threads
         void generationWorker();
@@ -125,7 +125,7 @@ namespace voxelity {
 
         void queueChunkLoad(const ChunkCoord &coord, int priority);
 
-        static std::vector<ChunkCoord> getChunksInRadius(const glm::ivec3 &center, int radius);
+        static ash::Vector<ChunkCoord> getChunksInRadius(const glm::ivec3 &center, int radius);
 
         // Génération et construction de mesh (appelées depuis les threads)
         std::unique_ptr<VoxelArray> generateChunkData(const ChunkCoord &coord) const;

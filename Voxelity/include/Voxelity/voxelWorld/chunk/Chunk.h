@@ -49,8 +49,8 @@ namespace voxelity {
         glm::ivec3 getPosition() const;
 
         // Upload de mesh (thread principal uniquement - OpenGL)
-        void uploadMesh(const std::vector<FaceInstance> &opaqueFaces,
-                        const std::vector<FaceInstance> &transparentFaces);
+        void uploadMesh(const ash::Vector<FaceInstance> &opaqueFaces,
+                        const ash::Vector<FaceInstance> &transparentFaces);
 
         // Rendu (thread principal uniquement)
         void drawOpaque(const ash::ShaderProgram &shader) const;

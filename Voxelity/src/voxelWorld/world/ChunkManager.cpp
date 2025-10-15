@@ -9,7 +9,7 @@
 #include "Voxelity/voxelWorld/utils/DirectionUtils.h"
 
 namespace voxelity {
-    ChunkManager::ChunkManager(ash::Scope<ITerrainGenerator> generator, const int threadCount)
+    ChunkManager::ChunkManager(ash::Own<ITerrainGenerator> generator, const int threadCount)
         : m_generator(std::move(generator)) {
         // Lancer les threads de génération
         for (int i = 0; i < threadCount; ++i) {
@@ -64,7 +64,7 @@ namespace voxelity {
             m_lastPlayerChunk = playerChunk;
             m_lastRenderDistance = renderDistance;
 
-            std::vector<ChunkCoord> requiredChunks = getChunksInRadius(playerChunk, renderDistance);
+            ash::Vector<ChunkCoord> requiredChunks = getChunksInRadius(playerChunk, renderDistance);
             const std::unordered_set<ChunkCoord> requiredSet(requiredChunks.begin(), requiredChunks.end());
 
             // Ajouter nouveaux chunks à générer
@@ -79,7 +79,7 @@ namespace voxelity {
             }
 
             // Décharger chunks éloignés
-            std::vector<ChunkCoord> toUnload;
+            ash::Vector<ChunkCoord> toUnload;
             for (const auto &coord: m_chunks | std::views::keys) {
                 if (!requiredSet.contains(coord))
                     toUnload.push_back(coord);
@@ -91,7 +91,7 @@ namespace voxelity {
     }
 
     void ChunkManager::processCompletedGeneration() {
-        std::vector<ChunkCoord> newlyGeneratedChunks; {
+        ash::Vector<ChunkCoord> newlyGeneratedChunks; {
             std::lock_guard lock(m_completedGenerationMutex);
 
             while (!m_completedGeneration.empty()) {
@@ -201,7 +201,7 @@ namespace voxelity {
             static_cast<int>(center.z)
         );
 
-        const std::vector<ChunkCoord> coords = getChunksInRadius(centerChunk, radius);
+        const ash::Vector<ChunkCoord> coords = getChunksInRadius(centerChunk, radius);
         for (const auto &coord: coords) {
             if (Chunk *chunk = getChunk(coord)) {
                 func(coord, chunk);
@@ -405,8 +405,8 @@ namespace voxelity {
         return VoxelID::AIR;
     }
 
-    std::vector<ChunkCoord> ChunkManager::getChunksInRadius(const glm::ivec3 &center, const int radius) {
-        std::vector<ChunkCoord> result;
+    ash::Vector<ChunkCoord> ChunkManager::getChunksInRadius(const glm::ivec3 &center, const int radius) {
+        ash::Vector<ChunkCoord> result;
         for (int x = center.x - radius; x <= center.x + radius; ++x) {
             for (int y = center.y - radius; y <= center.y + radius; ++y) {
                 for (int z = center.z - radius; z <= center.z + radius; ++z) {

@@ -34,7 +34,7 @@ namespace ash {
         return std::ranges::find(supported, extension) != supported.end();
     }
 
-    std::vector<std::string> ImageLoader::GetSupportedExtensions() {
+    Vector<std::string> ImageLoader::GetSupportedExtensions() {
         return {".png", ".jpg", ".jpeg", ".bmp", ".tga"};
     }
 }

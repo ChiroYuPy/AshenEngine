@@ -25,6 +25,12 @@ file(GLOB_RECURSE ENGINE_HEADERS "include/*.h" "include/*.hpp")
 add_library(AshenEngineLib STATIC
         ${ENGINE_SOURCES}
         ${ENGINE_HEADERS}
+        include/Ashen/Scene/Node.h
+        include/Ashen/Math/Transform.h
+        include/Ashen/Scene/SceneTree.h
+        include/Ashen/Scene/2D/Control.h
+        include/Ashen/Scene/2D/Container.h
+        src/Scene/Node.cpp
 )
 
 add_library(Ashen::Engine ALIAS AshenEngineLib)

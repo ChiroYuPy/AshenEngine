@@ -25,7 +25,7 @@ namespace ash {
 
         WindowProperties windowProperties;
         windowProperties.Title = m_Settings.Name + " v" + m_Settings.Version;
-        m_Window = MakeScope<Window>(windowProperties);
+        m_Window = MakeOwn<Window>(windowProperties);
 
         m_Window->SetEventCallback([this](Event &e) {
             Input::OnEvent(e);

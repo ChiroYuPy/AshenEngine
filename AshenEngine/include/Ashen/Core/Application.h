@@ -1,11 +1,10 @@
 #ifndef ASHEN_APPLICATION_H
 #define ASHEN_APPLICATION_H
 
-#include <string>
-
 #include "Ashen/Core/Layer.h"
 #include "Ashen/Core/LayerStack.h"
 #include "Ashen/Core/Window.h"
+#include "Ashen/Core/Types.h"
 #include "Ashen/Math/Math.h"
 
 namespace ash {

@@ -23,7 +23,7 @@ endif()
 set(CMAKE_CXX_STANDARD 17) # Dawn requires C++17
 
 # Dear ImGui
-set(IMGUI_DIR ../..)
+set(IMGUI_DIR ../../)
 
 # Libraries
 if(EMSCRIPTEN)
@@ -68,7 +68,7 @@ else()
 endif()
 
 add_executable(example_glfw_wgpu
-        main.cpp
+  main.cpp
   # backend files
   ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
   ${IMGUI_DIR}/backends/imgui_impl_wgpu.cpp
@@ -112,6 +112,6 @@ if(EMSCRIPTEN)
   set_target_properties(example_glfw_wgpu PROPERTIES OUTPUT_NAME "index")
   # copy our custom index.html to build directory
   add_custom_command(TARGET example_glfw_wgpu POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "web/index.html" $<TARGET_FILE_DIR:example_glfw_wgpu>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_LIST_DIR}/web/index.html" $<TARGET_FILE_DIR:example_glfw_wgpu>
   )
 endif()

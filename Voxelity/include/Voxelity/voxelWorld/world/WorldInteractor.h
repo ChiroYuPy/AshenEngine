@@ -35,7 +35,7 @@ namespace voxelity {
     private:
         World &m_world;
         WorldRenderer &m_chunkRenderer;
-        ash::Scope<VoxelRaycaster> m_raycaster;
+        ash::Own<VoxelRaycaster> m_raycaster;
 
         VoxelType m_selectedBlockType;
     };

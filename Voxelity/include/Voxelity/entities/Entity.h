@@ -3,7 +3,7 @@
 
 #include <glm/glm.hpp>
 
-#include "Ashen/Math/BoundingBox.h"
+#include "Ashen/Math/BBox.h"
 
 namespace voxelity {
     class World;
@@ -45,7 +45,7 @@ namespace voxelity {
             return glm::mix(previousRotation, rotation, alpha);
         }
 
-        [[nodiscard]] ash::BoundingBox3D getBoundingBox() const {
+        [[nodiscard]] ash::BBox3 getBoundingBox() const {
             return {position - boundingBoxSize * 0.5f, position + boundingBoxSize * 0.5f};
         }
 

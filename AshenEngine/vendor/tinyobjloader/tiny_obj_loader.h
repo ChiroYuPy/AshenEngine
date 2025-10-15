@@ -697,8 +697,8 @@ MaterialReader::~MaterialReader() {}
 struct vertex_index_t {
   int v_idx, vt_idx, vn_idx;
   vertex_index_t() : v_idx(-1), vt_idx(-1), vn_idx(-1) {}
-  explicit vertex_index_t(int idx) : v_idx(idx), vt_idx(idx), vn_idx(idx) {}
-  vertex_index_t(int vidx, int vtidx, int vnidx)
+  explicit vertex_index_t(const int idx) : v_idx(idx), vt_idx(idx), vn_idx(idx) {}
+  vertex_index_t(const int vidx, const int vtidx, const int vnidx)
       : v_idx(vidx), vt_idx(vtidx), vn_idx(vnidx) {}
 };
 
@@ -827,7 +827,7 @@ struct warning_context {
 };
 
 // Make index zero-base, and also support relative index.
-static inline bool fixIndex(int idx, int n, int *ret, bool allow_zero,
+static inline bool fixIndex(const int idx, const int n, int *ret, const bool allow_zero,
                             const warning_context &context) {
   if (!ret) {
     return false;
@@ -1038,7 +1038,7 @@ fail:
   return false;
 }
 
-static inline real_t parseReal(const char **token, double default_value = 0.0) {
+static inline real_t parseReal(const char **token, const double default_value = 0.0) {
   (*token) += strspn((*token), " \t");
   const char *end = (*token) + strcspn((*token), " \t\r");
   double val = default_value;
@@ -1129,7 +1129,7 @@ static inline int parseVertexWithColor(real_t *x, real_t *y, real_t *z,
   return 6;
 }
 
-static inline bool parseOnOff(const char **token, bool default_value = true) {
+static inline bool parseOnOff(const char **token, const bool default_value = true) {
   (*token) += strspn((*token), " \t");
   const char *end = (*token) + strcspn((*token), " \t\r");
 
@@ -1145,7 +1145,7 @@ static inline bool parseOnOff(const char **token, bool default_value = true) {
 }
 
 static inline texture_type_t parseTextureType(
-    const char **token, texture_type_t default_value = TEXTURE_TYPE_NONE) {
+    const char **token, const texture_type_t default_value = TEXTURE_TYPE_NONE) {
   (*token) += strspn((*token), " \t");
   const char *end = (*token) + strcspn((*token), " \t\r");
   texture_type_t ty = default_value;
@@ -1196,7 +1196,7 @@ static tag_sizes parseTagTriple(const char **token) {
 }
 
 // Parse triples with index offsets: i, i/j/k, i//k, i/j
-static bool parseTriple(const char **token, int vsize, int vnsize, int vtsize,
+static bool parseTriple(const char **token, const int vsize, const int vnsize, const int vtsize,
                         vertex_index_t *ret, const warning_context &context) {
   if (!ret) {
     return false;
@@ -1448,7 +1448,7 @@ static void InitMaterial(material_t *material) {
 
 // code from https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
 template <typename T>
-static int pnpoly(int nvert, T *vertx, T *verty, T testx, T testy) {
+static int pnpoly(const int nvert, T *vertx, T *verty, T testx, T testy) {
   int i, j, c = 0;
   for (i = 0, j = nvert - 1; i < nvert; j = i++) {
     if (((verty[i] > testy) != (verty[j] > testy)) &&
@@ -1463,7 +1463,7 @@ static int pnpoly(int nvert, T *vertx, T *verty, T testx, T testy) {
 struct TinyObjPoint {
   real_t x, y, z;
   TinyObjPoint() : x(0), y(0), z(0) {}
-  TinyObjPoint(real_t x_, real_t y_, real_t z_) : x(x_), y(y_), z(z_) {}
+  TinyObjPoint(const real_t x_, const real_t y_, const real_t z_) : x(x_), y(y_), z(z_) {}
 };
 
 inline TinyObjPoint cross(const TinyObjPoint &v1, const TinyObjPoint &v2) {
@@ -2037,7 +2037,7 @@ static bool exportGroupsToShape(shape_t *shape, const PrimGroup &prim_group,
 
 // Split a string with specified delimiter character and escape character.
 // https://rosettacode.org/wiki/Tokenize_a_string_with_escaping#C.2B.2B
-static void SplitString(const std::string &s, char delim, char escape,
+static void SplitString(const std::string &s, const char delim, const char escape,
                         std::vector<std::string> &elems) {
   std::string token;
 

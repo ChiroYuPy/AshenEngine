@@ -23,7 +23,7 @@
 
 // Math
 #include "Ashen/Math/Math.h"
-#include "Ashen/Math/BoundingBox.h"
+#include "Ashen/Math/BBox.h"
 
 // Graphics
 #include "Ashen/Graphics/Camera/Camera.h"

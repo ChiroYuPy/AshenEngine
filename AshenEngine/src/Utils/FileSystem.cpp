@@ -26,9 +26,9 @@ namespace ash {
 
     // Fonction helper pour filtrer les fichiers selon les extensions
     template<typename Iterator>
-    static std::vector<fs::path> CollectFiles(const Iterator &begin, const Iterator &end,
-                                              const std::vector<std::string> &extensions) {
-        std::vector<fs::path> files;
+    static Vector<fs::path> CollectFiles(const Iterator &begin, const Iterator &end,
+                                              const Vector<std::string> &extensions) {
+        Vector<fs::path> files;
         for (auto it = begin; it != end; ++it) {
             if (!it->is_regular_file()) continue;
 
@@ -46,9 +46,9 @@ namespace ash {
         return files;
     }
 
-    std::vector<fs::path> FileSystem::ScanDirectory(
+    Vector<fs::path> FileSystem::ScanDirectory(
         const fs::path &dir,
-        const std::vector<std::string> &extensions,
+        const Vector<std::string> &extensions,
         const bool recursive
     ) {
         if (!Exists(dir) || !IsDirectory(dir))

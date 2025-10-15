@@ -3,7 +3,7 @@
 #include "Voxelity/voxelWorld/generation/ITerrainGenerator.h"
 
 namespace voxelity {
-    World::World(ash::Scope<ITerrainGenerator> generator)
+    World::World(ash::Own<ITerrainGenerator> generator)
         : m_chunkManager(std::make_unique<ChunkManager>(std::move(generator))) {
     }
 

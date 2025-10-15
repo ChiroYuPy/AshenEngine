@@ -2,8 +2,9 @@
 #define ASHEN_FILESYSTEM_H
 
 #include <filesystem>
-#include <vector>
 #include <string>
+
+#include "Ashen/Core/Types.h"
 
 namespace ash {
     namespace fs = std::filesystem;
@@ -35,9 +36,9 @@ namespace ash {
          * @param recursive Whether to scan recursively
          * @return List of file paths matching the criteria
          */
-        static std::vector<fs::path> ScanDirectory(
+        static Vector<fs::path> ScanDirectory(
             const fs::path &dir,
-            const std::vector<std::string> &extensions = {},
+            const Vector<std::string> &extensions = {},
             bool recursive = true
         );
 

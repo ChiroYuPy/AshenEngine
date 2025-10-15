@@ -45,7 +45,7 @@ namespace voxelity {
 
         entity.onGround = false;
 
-        ash::BoundingBox3D entityBox = entity.getBoundingBox();
+        ash::BBox3 entityBox = entity.getBoundingBox();
         glm::vec3 remainingMotion = motion;
         glm::vec3 actualMotion(0.0f);
 
@@ -91,13 +91,13 @@ namespace voxelity {
         return actualMotion;
     }
 
-    float PhysicsSystem::sweepAxis(const ash::BoundingBox3D &aabb, const float motion, const int axis,
+    float PhysicsSystem::sweepAxis(const ash::BBox3 &aabb, const float motion, const int axis,
                                    const World &world, CollisionResult &result) const {
         result.clear();
 
         if (std::abs(motion) < m_config.collisionEpsilon) return 0.0f;
 
-        ash::BoundingBox3D sweepBox = aabb;
+        ash::BBox3 sweepBox = aabb;
         if (motion > 0.0f) {
             sweepBox.max[axis] += motion;
         } else {
@@ -106,14 +106,14 @@ namespace voxelity {
 
         sweepBox = sweepBox.Expand(m_config.collisionEpsilon);
 
-        std::vector<glm::ivec3> blocks;
+        ash::Vector<glm::ivec3> blocks;
         getBroadPhaseBlocks(sweepBox, blocks, world);
 
         float closestHit = motion;
         bool hitFound = false;
 
         for (const auto &blockPos: blocks) {
-            const ash::BoundingBox3D blockBox = ash::BoundingBox3D::fromBlock(blockPos);
+            const ash::BBox3 blockBox = ash::BBox3::fromBlock(blockPos);
 
             float hitDist;
             if (motion > 0.0f) {
@@ -123,7 +123,7 @@ namespace voxelity {
             }
 
             if (std::abs(hitDist) < std::abs(closestHit)) {
-                ash::BoundingBox3D testBox = aabb.Offset(glm::vec3(
+                ash::BBox3 testBox = aabb.Offset(glm::vec3(
                     axis == 0 ? hitDist : 0.0f,
                     axis == 1 ? hitDist : 0.0f,
                     axis == 2 ? hitDist : 0.0f
@@ -152,7 +152,7 @@ namespace voxelity {
         return closestHit - sign * m_config.collisionEpsilon;
     }
 
-    void PhysicsSystem::getBroadPhaseBlocks(const ash::BoundingBox3D &aabb, std::vector<glm::ivec3> &blocks,
+    void PhysicsSystem::getBroadPhaseBlocks(const ash::BBox3 &aabb, ash::Vector<glm::ivec3> &blocks,
                                             const World &world) {
         blocks.clear();
 

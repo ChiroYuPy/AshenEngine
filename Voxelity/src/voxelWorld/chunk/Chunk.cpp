@@ -50,8 +50,8 @@ namespace voxelity {
         return {m_position.x, m_position.y, m_position.z};
     }
 
-    void Chunk::uploadMesh(const std::vector<FaceInstance> &opaqueFaces,
-                           const std::vector<FaceInstance> &transparentFaces) {
+    void Chunk::uploadMesh(const ash::Vector<FaceInstance> &opaqueFaces,
+                           const ash::Vector<FaceInstance> &transparentFaces) {
         m_opaqueMesh.uploadInstances(opaqueFaces);
         m_transparentMesh.uploadInstances(transparentFaces);
         m_dirty = false;

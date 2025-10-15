@@ -60,7 +60,7 @@ namespace ash {
         void Destroy();
 
         GLFWwindow *m_Handle = nullptr;
-        Scope<GraphicsContext> m_Context;
+        Own<GraphicsContext> m_Context;
 
         struct WindowData {
             std::string Title;

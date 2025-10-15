@@ -2,10 +2,10 @@
 #define ASHEN_MESH_H
 
 #include <functional>
-#include <vector>
 #include <string>
-#include <memory>
 #include <optional>
+
+#include "Ashen/Core/Types.h"
 #include "Ashen/GraphicsAPI/VertexArray.h"
 #include "Ashen/GraphicsAPI/Buffer.h"
 #include "Ashen/Math/Math.h"
@@ -40,7 +40,7 @@ namespace ash {
      * @brief Interleaved vertex data structure
      */
     struct VertexData {
-        std::vector<float> data;
+        Vector<float> data;
         VertexAttribute attributes = VertexAttribute::None;
         size_t vertexCount = 0;
         size_t stride = 0;
@@ -75,7 +75,7 @@ namespace ash {
         /**
          * @brief Create mesh from vertex data and indices
          */
-        void SetData(const VertexData &vertexData, const std::vector<uint32_t> &indices);
+        void SetData(const VertexData &vertexData, const Vector<uint32_t> &indices);
 
         /**
          * @brief Add a submesh for multi-material rendering
@@ -110,7 +110,7 @@ namespace ash {
         /**
          * @brief Get submeshes
          */
-        [[nodiscard]] const std::vector<SubMesh> &GetSubMeshes() const { return m_SubMeshes; }
+        [[nodiscard]] const Vector<SubMesh> &GetSubMeshes() const { return m_SubMeshes; }
 
         /**
          * @brief Draw the entire mesh
@@ -130,7 +130,7 @@ namespace ash {
         VertexAttribute m_Attributes = VertexAttribute::None;
         size_t m_VertexCount = 0;
         size_t m_IndexCount = 0;
-        std::vector<SubMesh> m_SubMeshes;
+        Vector<SubMesh> m_SubMeshes;
 
         VertexBufferLayout CreateLayout(VertexAttribute attrs) const;
     };
@@ -172,7 +172,7 @@ namespace ash {
         /**
          * @brief Get indices
          */
-        [[nodiscard]] const std::vector<uint32_t> &GetIndices() const { return m_Indices; }
+        [[nodiscard]] const Vector<uint32_t> &GetIndices() const { return m_Indices; }
 
         /**
          * @brief Reset builder
@@ -181,13 +181,13 @@ namespace ash {
 
     private:
         VertexAttribute m_Attributes = VertexAttribute::None;
-        std::vector<Vec3> m_Positions;
-        std::vector<Vec3> m_Normals;
-        std::vector<Vec2> m_TexCoords;
-        std::vector<Vec4> m_Colors;
-        std::vector<Vec3> m_Tangents;
-        std::vector<Vec3> m_Bitangents;
-        std::vector<uint32_t> m_Indices;
+        Vector<Vec3> m_Positions;
+        Vector<Vec3> m_Normals;
+        Vector<Vec2> m_TexCoords;
+        Vector<Vec4> m_Colors;
+        Vector<Vec3> m_Tangents;
+        Vector<Vec3> m_Bitangents;
+        Vector<uint32_t> m_Indices;
 
         size_t CalculateStride() const;
     };
@@ -221,7 +221,7 @@ namespace MeshPrimitives {
         Mesh CreateIcosahedron(float size = 1.0f);
 
         // Procedural
-        Mesh CreateHeightmap(const std::vector<float>& heights, uint32_t width, uint32_t depth, float heightScale = 1.0f);
+        Mesh CreateHeightmap(const Vector<float>& heights, uint32_t width, uint32_t depth, float heightScale = 1.0f);
         Mesh CreateParametric(
             std::function<Vec3(float, float)> func,
             uint32_t uSegments = 32,

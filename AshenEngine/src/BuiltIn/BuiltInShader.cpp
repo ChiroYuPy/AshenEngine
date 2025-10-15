@@ -442,7 +442,7 @@ void main() {
 
     // ========== API Publique ==========
 
-    std::pair<std::string, std::string> BuiltInShaders::GetSource(Type type) {
+    std::pair<std::string, std::string> BuiltInShaders::GetSource(const Type type) {
         switch (type) {
             case Type::CanvasItem:
                 return {GetCanvasItemVertexShader(), GetCanvasItemColorFragmentShader()};
@@ -462,12 +462,12 @@ void main() {
         }
     }
 
-    ShaderProgram BuiltInShaders::Create(Type type) {
+    ShaderProgram BuiltInShaders::Create(const Type type) {
         auto [vertSource, fragSource] = GetSource(type);
         return ShaderProgram::FromSources(vertSource, fragSource, GetBuiltInShaderConfig());
     }
 
-    std::string BuiltInShaders::GetTypeName(Type type) {
+    std::string BuiltInShaders::GetTypeName(const Type type) {
         switch (type) {
             case Type::CanvasItem: return "CanvasItem";
             case Type::CanvasItemTextured: return "CanvasItemTextured";
@@ -484,7 +484,7 @@ void main() {
                static_cast<int>(type) < static_cast<int>(Type::MAX_TYPES);
     }
 
-    std::shared_ptr<ShaderProgram> BuiltInShaderManager::Get(BuiltInShaders::Type type) {
+    std::shared_ptr<ShaderProgram> BuiltInShaderManager::Get(const BuiltInShaders::Type type) {
         const auto it = m_Shaders.find(type);
         if (it != m_Shaders.end())
             return it->second;

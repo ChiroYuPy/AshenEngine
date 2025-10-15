@@ -1,7 +1,6 @@
 #ifndef ASHEN_SHADERLOADER_H
 #define ASHEN_SHADERLOADER_H
 
-#include <memory>
 #include <filesystem>
 #include "Ashen/GraphicsAPI/Shader.h"
 #include "Ashen/Utils/FileSystem.h"
@@ -45,7 +44,7 @@ namespace ash {
          * @brief Scan directory for available shader pairs
          * @return List of shader names (without extensions)
          */
-        static std::vector<std::string> ScanForShaders(const fs::path& directory);
+        static Vector<std::string> ScanForShaders(const fs::path& directory);
     };
 }
 

@@ -2,7 +2,6 @@
 #define VOXELITY_PLAYER_H
 
 #include "Entity.h"
-#include <memory>
 
 #include "Ashen/Core/Types.h"
 #include "Ashen/Graphics/Camera/Camera.h"
@@ -39,8 +38,8 @@ namespace voxelity {
 
     private:
         ash::Ref<ash::PerspectiveCamera> m_camera;
-        ash::Scope<PlayerController> m_controller;
-        ash::Scope<PhysicsSystem> m_physics;
+        ash::Own<PlayerController> m_controller;
+        ash::Own<PhysicsSystem> m_physics;
 
         float m_jumpForce = 10.0f;
         bool m_isFlying = false;

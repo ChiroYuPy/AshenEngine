@@ -1,8 +1,6 @@
 #ifndef VOXELITY_PLAYERCONTROLLER_H
 #define VOXELITY_PLAYERCONTROLLER_H
 
-#include <memory>
-
 #include "Ashen/Core/Types.h"
 #include "Ashen/Graphics/Camera/Camera.h"
 #include "Ashen/Events/Event.h"

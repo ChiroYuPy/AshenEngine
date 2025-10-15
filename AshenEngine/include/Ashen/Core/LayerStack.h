@@ -1,8 +1,6 @@
 #ifndef ASHEN_LAYERSTACK_H
 #define ASHEN_LAYERSTACK_H
 
-#include <vector>
-
 #include "Ashen/Core/Layer.h"
 #include "Ashen/Core/Types.h"
 #include "Ashen/Events/Event.h"
@@ -21,10 +19,10 @@ namespace ash {
         template<typename T, typename... Args>
             requires std::is_base_of_v<Layer, T>
         T *PushLayer(Args &&... args) {
-            auto layer = MakeScope<T>(std::forward<Args>(args)...);
+            auto layer = MakeOwn<T>(std::forward<Args>(args)...);
             T *ptr = layer.get();
             layer->OnAttach();
-            m_Layers.push_back(std::move(layer));
+            m_Layers.push_back(Move(layer));
             return ptr;
         }
 
@@ -48,7 +46,7 @@ namespace ash {
         [[nodiscard]] auto rend() const { return m_Layers.rend(); }
 
     private:
-        std::vector<Scope<Layer>> m_Layers;
+        Vector<Own<Layer>> m_Layers;
     };
 }
 

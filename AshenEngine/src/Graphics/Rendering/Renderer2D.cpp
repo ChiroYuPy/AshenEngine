@@ -32,7 +32,7 @@ namespace ash {
             quads.VertexArray2D->AddVertexBuffer(quads.VertexBuffer2D, layout);
 
             quads.IndexBuffer2D = MakeRef<IndexBuffer>();
-            std::vector<uint32_t> indices(QuadData::MaxIndices);
+            Vector<uint32_t> indices(QuadData::MaxIndices);
             uint32_t offset = 0;
             for (size_t i = 0; i < QuadData::MaxIndices; i += 6) {
                 indices[i + 0] = offset + 0;
@@ -172,7 +172,7 @@ namespace ash {
             circles.VertexArray2D->AddVertexBuffer(circles.VertexBuffer2D, layout);
 
             circles.IndexBuffer2D = MakeRef<IndexBuffer>();
-            std::vector<uint32_t> indices(CircleData::MaxIndices);
+            Vector<uint32_t> indices(CircleData::MaxIndices);
             uint32_t offset = 0;
             for (size_t i = 0; i < CircleData::MaxIndices; i += 6) {
                 indices[i + 0] = offset + 0;
@@ -577,8 +577,8 @@ namespace ash {
 
     // =============== POLYGONS ===============
 
-    void Renderer2D::DrawPolygon(const std::vector<Vec2> &points, const Vec4 &color) {
-        std::vector<Vec3> points3d;
+    void Renderer2D::DrawPolygon(const Vector<Vec2> &points, const Vec4 &color) {
+        Vector<Vec3> points3d;
         points3d.reserve(points.size());
         for (const auto &p: points)
             points3d.emplace_back(p.x, p.y, 0.0f);
@@ -586,7 +586,7 @@ namespace ash {
         DrawPolygon(points3d, color);
     }
 
-    void Renderer2D::DrawPolygon(const std::vector<Vec3> &points, const Vec4 &color) {
+    void Renderer2D::DrawPolygon(const Vector<Vec3> &points, const Vec4 &color) {
         if (points.size() < 3) return;
 
         // Triangulation simple en éventail depuis le premier point
@@ -629,8 +629,8 @@ namespace ash {
         }
     }
 
-    void Renderer2D::DrawPolygonOutline(const std::vector<Vec2> &points, const Vec4 &color) {
-        std::vector<Vec3> points3d;
+    void Renderer2D::DrawPolygonOutline(const Vector<Vec2> &points, const Vec4 &color) {
+        Vector<Vec3> points3d;
         points3d.reserve(points.size());
         for (const auto &p: points)
             points3d.emplace_back(p.x, p.y, 0.0f);
@@ -638,7 +638,7 @@ namespace ash {
         DrawPolygonOutline(points3d, color);
     }
 
-    void Renderer2D::DrawPolygonOutline(const std::vector<Vec3> &points, const Vec4 &color) {
+    void Renderer2D::DrawPolygonOutline(const Vector<Vec3> &points, const Vec4 &color) {
         if (points.size() < 2) return;
 
         for (size_t i = 0; i < points.size(); i++) {
