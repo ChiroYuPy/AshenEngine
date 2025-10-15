@@ -1,68 +1,57 @@
-project(Ashen LANGUAGES CXX)
+project(AshenEngine)
 
-# ===========================
-# Core sources
-# ===========================
-set(CORE_SOURCES
+# ===== VENDOR LIBRARIES =====
+
+# GLAD (OpenGL loader)
+add_subdirectory(vendor/glad)
+
+# Vendor sources
+add_library(AshenVendor STATIC
         vendor/src/IMG.cpp
         vendor/src/OpenSimplex2S.cpp
-
-        src/Core/Application.cpp
-        src/Core/Input.cpp
-        src/Core/LayerStack.cpp
-        src/Core/Platform.cpp
-        src/Core/Window.cpp
-
-        src/GraphicsAPI/RenderContext.cpp
-        src/GraphicsAPI/GraphicsContext.cpp
-
-        src/Graphics/Rendering/Renderer.cpp
-        src/Graphics/Rendering/Renderer2D.cpp
-        src/Graphics/Rendering/Renderer3D.cpp
-        src/Graphics/Objects/Material.cpp
-        src/Graphics/Objects/Mesh.cpp
-
-        src/Utils/FileSystem.cpp
-        src/Utils/ImageLoader.cpp
-
-        src/Resources/ResourceManager.cpp
-        src/Resources/Loader/ShaderLoader.cpp
-        src/Resources/Loader/TextureLoader.cpp
-        src/Resources/Loader/MeshLoader.cpp
-
-        src/BuiltIn/BuiltInShader.cpp
-)
-
-# ===========================
-# TinyObjLoader
-# ===========================
-set(TINYOBJ_SOURCES
         vendor/tinyobjloader/tiny_obj_loader.cc
 )
 
-# ===========================
-# Add library
-# ===========================
-add_library(Ashen STATIC
-        ${CORE_SOURCES}
-        ${TINYOBJ_SOURCES}
+target_include_directories(AshenVendor PUBLIC
+        vendor/include
+        vendor/tinyobjloader
 )
 
-# ===========================
-# Include directories
-# ===========================
-target_include_directories(Ashen
+# ===== ENGINE LIBRARY =====
+
+file(GLOB_RECURSE ENGINE_SOURCES "src/*.cpp")
+file(GLOB_RECURSE ENGINE_HEADERS "include/*.h" "include/*.hpp")
+
+add_library(AshenEngineLib STATIC
+        ${ENGINE_SOURCES}
+        ${ENGINE_HEADERS}
+)
+
+add_library(Ashen::Engine ALIAS AshenEngineLib)
+
+target_include_directories(AshenEngineLib
         PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/vendor/tinyobjloader
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-# ===========================
-# External dependencies
-# ===========================
-add_subdirectory(vendor/glad)
+# Pas besoin de find_package ici car déjà fait dans le root
+target_link_libraries(AshenEngineLib
+        PUBLIC
+        OpenGL::GL
+        glfw
+        glm::glm
+        glad
+        AshenVendor
+)
 
-find_package(glfw3 REQUIRED)
+set_target_properties(AshenEngineLib PROPERTIES
+        CXX_STANDARD 20
+        CXX_STANDARD_REQUIRED ON
+)
 
-target_link_libraries(Ashen PUBLIC glad glfw)
+target_compile_definitions(AshenEngineLib PUBLIC
+        GLFW_INCLUDE_NONE
+)

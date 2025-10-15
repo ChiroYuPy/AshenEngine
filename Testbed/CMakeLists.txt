@@ -1,18 +1,30 @@
-project(Testbed LANGUAGES CXX)
+project(AshenTestbed)
 
-set(APP_SOURCES
-        src/TestbedApp.cpp
+file(GLOB_RECURSE TESTBED_SOURCES "src/*.cpp")
+file(GLOB_RECURSE TESTBED_HEADERS "include/*.h")
+
+add_executable(AshenTestbed
+        ${TESTBED_SOURCES}
+        ${TESTBED_HEADERS}
 )
 
-add_executable(Testbed ${APP_SOURCES})
-
-target_include_directories(Testbed PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-target_link_libraries(Testbed PRIVATE Ashen)
-
-add_custom_target(testbed_copy_resources
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/resources
-        ${CMAKE_CURRENT_BINARY_DIR}/resources
+target_include_directories(AshenTestbed PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
-add_dependencies(Testbed testbed_copy_resources)
+
+target_link_libraries(AshenTestbed
+        PRIVATE
+        Ashen::Engine
+)
+
+set_target_properties(AshenTestbed PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+)
+
+add_custom_target(run_testbed
+        COMMAND AshenTestbed
+        DEPENDS AshenTestbed
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/Testbed
+        USES_TERMINAL
+)

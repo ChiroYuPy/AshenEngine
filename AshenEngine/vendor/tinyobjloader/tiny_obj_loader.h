@@ -773,12 +773,12 @@ static std::istream &safeGetline(std::istream &is, std::string &t) {
   // The sentry object performs various tasks,
   // such as thread synchronization and updating the stream state.
 
-  const std::istream::sentry se(is, true);
+  std::istream::sentry se(is, true);
   std::streambuf *sb = is.rdbuf();
 
   if (se) {
     for (;;) {
-      const int c = sb->sbumpc();
+      int c = sb->sbumpc();
       switch (c) {
         case '\n':
           return is;
@@ -865,7 +865,7 @@ static inline bool fixIndex(int idx, int n, int *ret, bool allow_zero,
 static inline std::string parseString(const char **token) {
   std::string s;
   (*token) += strspn((*token), " \t");
-  const size_t e = strcspn((*token), " \t\r");
+  size_t e = strcspn((*token), " \t\r");
   s = std::string((*token), &(*token)[e]);
   (*token) += e;
   return s;
@@ -873,7 +873,7 @@ static inline std::string parseString(const char **token) {
 
 static inline int parseInt(const char **token) {
   (*token) += strspn((*token), " \t");
-  const int i = atoi((*token));
+  int i = atoi((*token));
   (*token) += strcspn((*token), " \t\r");
   return i;
 }
@@ -1043,7 +1043,7 @@ static inline real_t parseReal(const char **token, double default_value = 0.0) {
   const char *end = (*token) + strcspn((*token), " \t\r");
   double val = default_value;
   tryParseDouble((*token), end, &val);
-  const real_t f = static_cast<real_t>(val);
+  real_t f = static_cast<real_t>(val);
   (*token) = end;
   return f;
 }
@@ -1052,9 +1052,9 @@ static inline bool parseReal(const char **token, real_t *out) {
   (*token) += strspn((*token), " \t");
   const char *end = (*token) + strcspn((*token), " \t\r");
   double val;
-  const bool ret = tryParseDouble((*token), end, &val);
+  bool ret = tryParseDouble((*token), end, &val);
   if (ret) {
-    const real_t f = static_cast<real_t>(val);
+    real_t f = static_cast<real_t>(val);
     (*out) = f;
   }
   (*token) = end;
@@ -1105,21 +1105,21 @@ static inline int parseVertexWithColor(real_t *x, real_t *y, real_t *z,
   (*z) = parseReal(token, default_z);
 
   // - 4 components(x, y, z, w) ot 6 components
-  const bool has_r = parseReal(token, r);
+  bool has_r = parseReal(token, r);
 
   if (!has_r) {
     (*r) = (*g) = (*b) = 1.0;
     return 3;
   }
 
-  const bool has_g = parseReal(token, g);
+  bool has_g = parseReal(token, g);
 
   if (!has_g) {
     (*g) = (*b) = 1.0;
     return 4;
   }
 
-  const bool has_b = parseReal(token, b);
+  bool has_b = parseReal(token, b);
 
   if (!has_b) {
     (*r) = (*g) = (*b) = 1.0;
@@ -1480,7 +1480,7 @@ inline real_t GetLength(TinyObjPoint &e) {
 }
 
 inline TinyObjPoint Normalize(TinyObjPoint e) {
-  const real_t inv_length = real_t(1) / GetLength(e);
+  real_t inv_length = real_t(1) / GetLength(e);
   return TinyObjPoint(e.x * inv_length, e.y * inv_length, e.z * inv_length);
 }
 
@@ -2043,7 +2043,7 @@ static void SplitString(const std::string &s, char delim, char escape,
 
   bool escaping = false;
   for (size_t i = 0; i < s.size(); ++i) {
-    const char ch = s[i];
+    char ch = s[i];
     if (escaping) {
       escaping = false;
     } else if (ch == escape) {
@@ -2068,7 +2068,7 @@ static std::string JoinPath(const std::string &dir,
     return filename;
   } else {
     // check '/'
-    const char lastChar = *dir.rbegin();
+    char lastChar = *dir.rbegin();
     if (lastChar != '/') {
       return dir + std::string("/") + filename;
     } else {
@@ -3477,7 +3477,7 @@ bool ObjReader::ParseFromFile(const std::string &filename,
     // split at last '/'(for unixish system) or '\\'(for windows) to get
     // the base directory of .obj file
     //
-    const size_t pos = filename.find_last_of("/\\");
+    size_t pos = filename.find_last_of("/\\");
     if (pos != std::string::npos) {
       mtl_search_path = filename.substr(0, pos);
     }
