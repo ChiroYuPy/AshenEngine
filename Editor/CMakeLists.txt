@@ -33,6 +33,9 @@ file(GLOB_RECURSE EDITOR_SOURCES "src/*.cpp")
 
 add_executable(AshenEditor
         ${EDITOR_SOURCES}
+        src/EditorSelection.cpp
+        include/ImGUIContext.h
+        src/ImGUIContext.cpp
 )
 
 target_include_directories(AshenEditor PRIVATE

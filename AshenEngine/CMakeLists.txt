@@ -31,6 +31,9 @@ add_library(AshenEngineLib STATIC
         include/Ashen/Scene/2D/Control.h
         include/Ashen/Scene/2D/Container.h
         src/Scene/Node.cpp
+        include/Ashen/Scene/Property.h
+        include/Ashen/Scene/Component.h
+        src/Scene/SceneTree.cpp
 )
 
 add_library(Ashen::Engine ALIAS AshenEngineLib)

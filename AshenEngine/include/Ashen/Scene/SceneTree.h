@@ -1,38 +1,38 @@
 #ifndef ASHEN_SCENETREE_H
 #define ASHEN_SCENETREE_H
 
+#include <unordered_set>
 #include "Node.h"
 
 namespace ash {
-
     class SceneTree {
-        Ref<Node> root;
-        Ref<Node> currentScene;
-
     public:
-        SceneTree() {
-            root = std::make_shared<Node>("root");
-            root->insideTree = true;
-            root->tree = this;
-        }
+        using NodeRef = std::shared_ptr<Node>;
 
-        ~SceneTree() = default;
+        SceneTree();
+        ~SceneTree();
 
-        [[nodiscard]] Node* GetRoot() const { return root.get(); }
-        [[nodiscard]] Node* getCurrentScene() const { return currentScene.get(); }
+        [[nodiscard]] Node* GetRoot() const { return m_Root.get(); }
+        [[nodiscard]] Node* GetCurrentScene() const { return m_CurrentScene.get(); }
 
-        void change_scene(const Ref<Node> &newScene) {
-            if (!newScene) return;
+        void LoadScene(const NodeRef& scene);
+        void UnloadScene();
 
-            if (currentScene) {
-                root->RemoveChild(currentScene.get());
-            }
+        [[nodiscard]] Node* FindNodeByID(uint32_t id) const;
+        [[nodiscard]] Node* FindNodeByName(const std::string& name) const;
 
-            root->AddChild(newScene);
-            currentScene = newScene;
-        }
+        void Update(float ts) const;
+        void Render() const;
+
+        void Destroy() { m_CurrentScene = nullptr; m_Root = nullptr; }
+
+    private:
+        NodeRef m_Root;
+        NodeRef m_CurrentScene;
+        std::unordered_set<uint32_t> m_NodeRegistry;
+
+        friend class Node;
     };
-
 }
 
 #endif //ASHEN_SCENETREE_H
