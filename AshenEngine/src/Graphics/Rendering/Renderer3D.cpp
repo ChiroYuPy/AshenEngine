@@ -4,7 +4,7 @@
 #include "Ashen/Graphics/Camera/Camera.h"
 #include "Ashen/Graphics/Objects/Mesh.h"
 #include "Ashen/Graphics/Objects/Material.h"
-#include "Ashen/GraphicsAPI/RenderContext.h"
+#include "Ashen/GraphicsAPI/RenderCommand.h"
 
 namespace ash {
 
@@ -63,11 +63,11 @@ namespace ash {
         s_Data->cameraPosition = camera.GetPosition();
 
         // Setup render state
-        RenderContext::EnableDepthTest(true);
-        RenderContext::SetDepthFunc(DepthFunc::Less);
-        RenderContext::EnableCulling(true);
-        RenderContext::SetCullFace(CullFaceMode::Back);
-        RenderContext::SetFrontFace(FrontFace::CounterClockwise);
+        RenderCommand::EnableDepthTest(true);
+        RenderCommand::SetDepthFunc(DepthFunc::Less);
+        RenderCommand::EnableCulling(true);
+        RenderCommand::SetCullFace(CullFaceMode::Back);
+        RenderCommand::SetFrontFace(FrontFace::CounterClockwise);
     }
 
     void Renderer3D::EndScene() {
@@ -111,15 +111,14 @@ namespace ash {
         // On vérifie la présence d'un uniform clé au lieu de tous les tester
         const bool needsLighting = shader->HasUniform("u_CameraPos");
 
-        if (needsLighting) {
+        if (needsLighting)
             SetupLighting(shader);
-        }
 
         // Apply material properties
         material->Apply();
 
         // Draw mesh
-        mesh->Draw();
+        MeshRenderer::Draw(*mesh);
 
         // Update stats
         s_Data->stats.drawCalls++;
@@ -136,11 +135,10 @@ namespace ash {
 
     void Renderer3D::AddPointLight(const PointLight& light) {
         constexpr size_t MAX_POINT_LIGHTS = 4;
-        if (s_Data->pointLights.size() < MAX_POINT_LIGHTS) {
+        if (s_Data->pointLights.size() < MAX_POINT_LIGHTS)
             s_Data->pointLights.push_back(light);
-        } else {
+        else
             Logger::Warn("Maximum number of point lights reached (4)");
-        }
     }
 
     void Renderer3D::ClearLights() {
@@ -169,13 +167,12 @@ namespace ash {
     }
 
     void Renderer3D::SetWireframeMode(const bool enabled) {
-        RenderContext::SetPolygonMode(CullFaceMode::FrontAndBack, enabled ? PolygonMode::Line : PolygonMode::Fill);
+        RenderCommand::SetPolygonMode(CullFaceMode::FrontAndBack, enabled ? PolygonMode::Line : PolygonMode::Fill);
     }
 
     void Renderer3D::FlushRenderQueue() {
-        for (const auto& [mesh, material, transform] : s_Data->renderQueue) {
+        for (const auto& [mesh, material, transform] : s_Data->renderQueue)
             DrawImmediate(mesh, material, transform);
-        }
 
         s_Data->renderQueue.clear();
     }
@@ -184,14 +181,12 @@ namespace ash {
         // CORRECTION: Ne set les uniforms QUE s'ils existent dans le shader
 
         // Camera position (utilisé par PBR et Toon)
-        if (shader->HasUniform("u_CameraPos")) {
+        if (shader->HasUniform("u_CameraPos"))
             shader->SetVec3("u_CameraPos", s_Data->cameraPosition);
-        }
 
         // Ambient light
-        if (shader->HasUniform("u_AmbientLight")) {
+        if (shader->HasUniform("u_AmbientLight"))
             shader->SetVec3("u_AmbientLight", s_Data->environment.ambientColor);
-        }
 
         // Directional light
         if (shader->HasUniform("u_LightDirection")) {

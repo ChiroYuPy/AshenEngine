@@ -2,7 +2,7 @@
 
 #include "Ashen/Events/ApplicationEvent.h"
 #include "Ashen/Events/KeyEvent.h"
-#include "Ashen/GraphicsAPI/RenderContext.h"
+#include "Ashen/GraphicsAPI/RenderCommand.h"
 #include "Ashen/Graphics/Rendering/Renderer2D.h"
 #include "Ashen/Resources/ResourceManager.h"
 
@@ -16,8 +16,8 @@ namespace voxelity {
     }
 
     void UILayer::OnRender() {
-        ash::RenderContext::EnableDepthTest(false);
-        ash::RenderContext::EnableBlending(true);
+        ash::RenderCommand::EnableDepthTest(false);
+        ash::RenderCommand::EnableBlending(true);
 
         const ash::Window &window = VoxelityApp::Get().GetWindow();
         const auto windowWidth = static_cast<float>(window.GetWidth());

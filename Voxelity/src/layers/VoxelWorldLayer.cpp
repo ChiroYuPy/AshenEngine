@@ -2,7 +2,7 @@
 
 #include "Ashen/Core/Input.h"
 #include "Ashen/Events/ApplicationEvent.h"
-#include "Ashen/GraphicsAPI/RenderContext.h"
+#include "Ashen/GraphicsAPI/RenderCommand.h"
 #include "Ashen/Resources/ResourceManager.h"
 
 #include "Voxelity/entities/Player.h"
@@ -84,8 +84,8 @@ namespace voxelity {
     void VoxelWorldLayer::OnRender() {
         if (!m_camera || !m_worldRenderer) return;
 
-        ash::RenderContext::EnableDepthTest(true);
-        ash::RenderContext::SetDepthFunc(ash::DepthFunc::Less);
+        ash::RenderCommand::EnableDepthTest(true);
+        ash::RenderCommand::SetDepthFunc(ash::DepthFunc::Less);
 
         renderSkybox();
         renderWorld();

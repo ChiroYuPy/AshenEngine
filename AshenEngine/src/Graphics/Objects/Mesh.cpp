@@ -1,6 +1,7 @@
 #include "Ashen/Graphics/Objects/Mesh.h"
 
 #include "Ashen/Core/Types.h"
+#include "Ashen/Graphics/Rendering/Renderer.h"
 
 namespace ash {
     // ========== Mesh ==========
@@ -10,75 +11,125 @@ namespace ash {
         m_VertexCount = vertexData.vertexCount;
         m_IndexCount = indices.size();
 
-        // 1. Créer le VAO EN PREMIER
+        // 1. Create VAO first
         m_VAO = VertexArray(VertexArrayConfig::Default());
 
-        // 2. Créer les buffers (sans données)
+        // 2. Create buffers
         m_VBO = std::make_shared<VertexBuffer>(BufferConfig::Static());
         m_IBO = std::make_shared<IndexBuffer>(IndexType::UnsignedInt, BufferConfig::Static());
 
-        // 3. Configurer le layout et attacher les buffers AU VAO
+        // 3. Configure layout and attach to VAO
         const auto layout = CreateLayout(m_Attributes);
-        m_VAO.AddVertexBuffer(m_VBO, layout); // Ceci bind le VAO et le VBO
-        m_VAO.SetIndexBuffer(m_IBO); // Ceci bind l'IBO
+        m_VAO.AddVertexBuffer(m_VBO, layout);
+        m_VAO.SetIndexBuffer(m_IBO);
 
-        // 4. Uploader les données (maintenant que tout est configuré)
+        // 4. Upload data
         m_VBO->SetData(std::span(vertexData.data.data(), vertexData.data.size()));
         m_IBO->SetData(std::span(indices.data(), indices.size()));
+
+        // 5. Compute bounding box
+        ComputeBounds(vertexData);
     }
 
-    void Mesh::AddSubMesh(const SubMesh &submesh) {
-        m_SubMeshes.push_back(submesh);
+    void Mesh::SetSubMeshes(const Vector<SubMesh> &submeshes) {
+        m_SubMeshes = submeshes;
     }
 
-    void Mesh::Draw() const {
-        m_VAO.Draw();
-    }
-
-    void Mesh::DrawSubMesh(const size_t index) const {
-        if (index >= m_SubMeshes.size()) return;
-
-        const auto &submesh = m_SubMeshes[index];
-        m_VAO.Draw(submesh.indexCount, submesh.indexOffset);
-    }
-
-    VertexBufferLayout Mesh::CreateLayout(const VertexAttribute attrs) const {
+    VertexBufferLayout Mesh::CreateLayout(const VertexAttribute attributes) {
         VertexBufferLayout layout;
-        size_t offset = 0;
         uint32_t location = 0;
+        size_t offset = 0;
 
-        if (HasAttribute(attrs, VertexAttribute::Position)) {
+        if (HasAttribute(attributes, VertexAttribute::Position)) {
             layout.AddAttribute(VertexAttributeDescription::Vec3(location++, offset));
             offset += sizeof(Vec3);
         }
 
-        if (HasAttribute(attrs, VertexAttribute::Normal)) {
+        if (HasAttribute(attributes, VertexAttribute::Normal)) {
             layout.AddAttribute(VertexAttributeDescription::Vec3(location++, offset));
             offset += sizeof(Vec3);
         }
 
-        if (HasAttribute(attrs, VertexAttribute::TexCoord)) {
+        if (HasAttribute(attributes, VertexAttribute::TexCoord)) {
             layout.AddAttribute(VertexAttributeDescription::Vec2(location++, offset));
             offset += sizeof(Vec2);
         }
 
-        if (HasAttribute(attrs, VertexAttribute::Color)) {
+        if (HasAttribute(attributes, VertexAttribute::Color)) {
             layout.AddAttribute(VertexAttributeDescription::Vec4(location++, offset));
             offset += sizeof(Vec4);
         }
 
-        if (HasAttribute(attrs, VertexAttribute::Tangent)) {
+        if (HasAttribute(attributes, VertexAttribute::Tangent)) {
             layout.AddAttribute(VertexAttributeDescription::Vec3(location++, offset));
             offset += sizeof(Vec3);
         }
 
-        if (HasAttribute(attrs, VertexAttribute::Bitangent)) {
+        if (HasAttribute(attributes, VertexAttribute::Bitangent)) {
             layout.AddAttribute(VertexAttributeDescription::Vec3(location++, offset));
             offset += sizeof(Vec3);
         }
 
-        layout.SetStride(offset);
+        layout.SetStride(static_cast<uint32_t>(offset));
         return layout;
+    }
+
+    void Mesh::ComputeBounds(const VertexData &vertexData) {
+        if (!HasAttribute(vertexData.attributes, VertexAttribute::Position) ||
+            vertexData.vertexCount == 0) {
+            m_BoundsMin = Vec3(0.0f);
+            m_BoundsMax = Vec3(0.0f);
+            return;
+            }
+
+        const auto layout = CreateLayout(vertexData.attributes);
+        const size_t stride = layout.GetStride() / sizeof(float);
+        const size_t positionOffset = 0; // Position is always first
+
+        m_BoundsMin = Vec3(std::numeric_limits<float>::max());
+        m_BoundsMax = Vec3(std::numeric_limits<float>::lowest());
+
+        for (size_t i = 0; i < vertexData.vertexCount; ++i) {
+            const size_t index = i * stride + positionOffset;
+            const Vec3 position(
+                vertexData.data[index],
+                vertexData.data[index + 1],
+                vertexData.data[index + 2]
+            );
+
+            m_BoundsMin = glm::min(m_BoundsMin, position);
+            m_BoundsMax = glm::max(m_BoundsMax, position);
+        }
+    }
+
+    // ========== MeshRenderer ==========
+
+    void MeshRenderer::Draw(const Mesh& mesh) {
+        Renderer::Draw(mesh.GetVAO());
+    }
+
+    void MeshRenderer::DrawSubMesh(const Mesh& mesh, const size_t submeshIndex) {
+        if (submeshIndex >= mesh.GetSubMeshCount()) {
+            return;
+        }
+
+        const auto& submesh = mesh.GetSubMeshes()[submeshIndex];
+        Renderer::DrawIndexed(mesh.GetVAO(), submesh.indexCount, submesh.indexOffset);
+    }
+
+    void MeshRenderer::DrawInstanced(const Mesh& mesh, const uint32_t instanceCount) {
+        Renderer::DrawInstanced(mesh.GetVAO(), instanceCount);
+    }
+
+    void MeshRenderer::DrawSubMeshInstanced(const Mesh& mesh, const size_t submeshIndex,
+                                             const uint32_t instanceCount) {
+        if (submeshIndex >= mesh.GetSubMeshCount()) {
+            return;
+        }
+
+        const auto& submesh = mesh.GetSubMeshes()[submeshIndex];
+        Renderer::DrawIndexedInstanced(mesh.GetVAO(), submesh.indexCount,
+                                        instanceCount, submesh.indexOffset);
     }
 
     // ========== MeshBuilder ==========

@@ -2,10 +2,12 @@
 #define ASHEN_RENDERCOMMAND_H
 
 #include "GLEnums.h"
+#include "VertexArray.h"
+#include "Ashen/Core/Types.h"
 #include "Ashen/Math/Math.h"
 
 namespace ash {
-    class RenderContext {
+    class RenderCommand {
     public:
         static void Clear(ClearBuffer buffers = ClearBuffer::Color | ClearBuffer::Depth);
 
@@ -29,11 +31,9 @@ namespace ash {
 
         static void EnableBlending(bool enable);
 
-        static void SetBlendFunc(BlendFactor src = BlendFactor::SrcAlpha,
-                                 BlendFactor dst = BlendFactor::OneMinusSrcAlpha);
+        static void SetBlendFunc(BlendFactor src = BlendFactor::SrcAlpha, BlendFactor dst = BlendFactor::OneMinusSrcAlpha);
 
-        static void SetBlendFuncSeparate(BlendFactor srcRGB, BlendFactor dstRGB, BlendFactor srcAlpha,
-                                         BlendFactor dstAlpha);
+        static void SetBlendFuncSeparate(BlendFactor srcRGB, BlendFactor dstRGB, BlendFactor srcAlpha, BlendFactor dstAlpha);
 
         static void SetBlendOp(BlendEquation op = BlendEquation::Add);
 
@@ -46,8 +46,6 @@ namespace ash {
         static void SetFrontFace(FrontFace orientation = FrontFace::CounterClockwise);
 
         static void SetPolygonMode(CullFaceMode faces, PolygonMode mode);
-
-        static void SetWireframe(bool enable);
 
         static void SetPointSize(float size);
 
@@ -68,6 +66,12 @@ namespace ash {
         static void SetColorMask(bool r, bool g, bool b, bool a);
 
         static void EnableMultisample(bool enable);
+
+        static void DrawArrays(PrimitiveType mode, int first, int count);
+        static void DrawElements(PrimitiveType mode, int count, IndexType type, const void* indices);
+        static void DrawArraysInstanced(PrimitiveType mode, int first, int count, int instanceCount);
+        static void DrawElementsInstanced(PrimitiveType mode, int count, IndexType type,
+                                           const void* indices, int instanceCount);
 
         [[nodiscard]] static bool IsDepthTestEnabled();
 

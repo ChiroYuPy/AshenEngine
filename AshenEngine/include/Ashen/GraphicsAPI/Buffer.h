@@ -150,7 +150,7 @@ namespace ash {
             UpdateData(data, offset);
         }
 
-        [[nodiscard]] size_t Count() const { return m_Count; }
+        [[nodiscard]] size_t GetCount() const { return m_Count; }
 
         static VertexBuffer Create(const std::span<const float> &data,
                                    const BufferConfig &config = BufferConfig::Static()) {
@@ -198,7 +198,7 @@ namespace ash {
             UpdateData(data, offset);
         }
 
-        [[nodiscard]] size_t Count() const { return m_Count; }
+        [[nodiscard]] size_t GetCount() const { return m_Count; }
         [[nodiscard]] IndexType GetIndexType() const { return m_IndexType; }
 
         static IndexBuffer Create(const std::span<const uint32_t> &data,

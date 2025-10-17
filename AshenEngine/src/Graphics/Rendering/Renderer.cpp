@@ -5,18 +5,18 @@
 #include "Ashen/Core/Logger.h"
 #include "Ashen/Graphics/Rendering/Renderer2D.h"
 #include "Ashen/Graphics/Rendering/Renderer3D.h"
-#include "Ashen/GraphicsAPI/RenderContext.h"
+#include "Ashen/GraphicsAPI/RenderCommand.h"
 #include "Ashen/GraphicsAPI/VertexArray.h"
 
 namespace ash {
     Renderer::Statistics Renderer::s_Stats;
 
     void Renderer::Init() {
-        RenderContext::EnableDepthTest(true);
-        RenderContext::SetDepthFunc(DepthFunc::Less);
-        RenderContext::EnableCulling(true);
-        RenderContext::SetCullFace(CullFaceMode::Back);
-        RenderContext::SetFrontFace(FrontFace::CounterClockwise);
+        RenderCommand::EnableDepthTest(true);
+        RenderCommand::SetDepthFunc(DepthFunc::Less);
+        RenderCommand::EnableCulling(true);
+        RenderCommand::SetCullFace(CullFaceMode::Back);
+        RenderCommand::SetFrontFace(FrontFace::CounterClockwise);
 
         Renderer2D::Init();
         Renderer3D::Init();
@@ -31,59 +31,78 @@ namespace ash {
     }
 
     void Renderer::BeginFrame() {
-        RenderContext::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
-        RenderContext::Clear();
+        RenderCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+        RenderCommand::Clear();
         ResetStats();
     }
 
     void Renderer::EndFrame() {
+        //TODO post-process, etc...
     }
 
     void Renderer::OnWindowResize(const uint32_t width, const uint32_t height) {
-        RenderContext::SetViewport(width, height);
+        RenderCommand::SetViewport(width, height);
     }
 
-    void Renderer::DrawIndexed(const VertexArray &vao, const uint32_t indexCount) {
+    void Renderer::Draw(const VertexArray& vao) {
+        if (vao.HasIndexBuffer()) {
+            DrawIndexed(vao, vao.GetIndexCount(), 0);
+        } else {
+            DrawArrays(vao, vao.GetVertexCount(), 0);
+        }
+    }
+
+    void Renderer::DrawIndexed(const VertexArray& vao, const uint32_t indexCount,
+                                const uint32_t indexOffset) {
         vao.Bind();
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indexCount), GL_UNSIGNED_INT, nullptr);
+
+        const void* offset = reinterpret_cast<const void*>(indexOffset * sizeof(uint32_t));
+        RenderCommand::DrawElements(PrimitiveType::Triangles, static_cast<int>(indexCount),
+                                    IndexType::UnsignedInt, offset);
 
         s_Stats.DrawCalls++;
         s_Stats.Indices += indexCount;
         s_Stats.Triangles += indexCount / 3;
     }
 
-    void Renderer::DrawArrays(const VertexArray &vao, const uint32_t vertexCount, const uint32_t first) {
+    void Renderer::DrawArrays(const VertexArray& vao, const uint32_t vertexCount,
+                               const uint32_t vertexOffset) {
         vao.Bind();
-        glDrawArrays(GL_TRIANGLES, static_cast<GLsizei>(first), static_cast<GLsizei>(vertexCount));
+
+        RenderCommand::DrawArrays(PrimitiveType::Triangles, static_cast<int>(vertexOffset),
+                                  static_cast<int>(vertexCount));
 
         s_Stats.DrawCalls++;
         s_Stats.Vertices += vertexCount;
         s_Stats.Triangles += vertexCount / 3;
     }
 
-    void Renderer::DrawIndexedInstanced(const VertexArray &vao, const uint32_t indexCount,
-                                        const uint32_t instanceCount) {
+    void Renderer::DrawInstanced(const VertexArray& vao, const uint32_t instanceCount) {
+        if (vao.HasIndexBuffer()) {
+            DrawIndexedInstanced(vao, vao.GetIndexCount(), instanceCount, 0);
+        } else {
+            vao.Bind();
+            RenderCommand::DrawArraysInstanced(PrimitiveType::Triangles, 0,
+                                                static_cast<int>(vao.GetVertexCount()),
+                                                static_cast<int>(instanceCount));
+
+            s_Stats.DrawCalls++;
+            s_Stats.Vertices += vao.GetVertexCount() * instanceCount;
+            s_Stats.Triangles += (vao.GetVertexCount() / 3) * instanceCount;
+        }
+    }
+
+    void Renderer::DrawIndexedInstanced(const VertexArray& vao, const uint32_t indexCount,
+                                         const uint32_t instanceCount, const uint32_t indexOffset) {
         vao.Bind();
-        glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(indexCount),
-                                GL_UNSIGNED_INT, nullptr, static_cast<GLsizei>(instanceCount));
+
+        const void* offset = reinterpret_cast<const void*>(indexOffset * sizeof(uint32_t));
+        RenderCommand::DrawElementsInstanced(PrimitiveType::Triangles, static_cast<int>(indexCount),
+                                              IndexType::UnsignedInt, offset,
+                                              static_cast<int>(instanceCount));
 
         s_Stats.DrawCalls++;
         s_Stats.Indices += indexCount * instanceCount;
         s_Stats.Triangles += (indexCount / 3) * instanceCount;
-    }
-
-    void Renderer::DrawArraysInstanced(const VertexArray &vao, const uint32_t vertexCount,
-                                       const uint32_t instanceCount, const uint32_t first) {
-        vao.Bind();
-        glDrawArraysInstanced(GL_TRIANGLES, static_cast<GLsizei>(first),
-                              static_cast<GLsizei>(vertexCount), static_cast<GLsizei>(instanceCount));
-
-        s_Stats.DrawCalls++;
-        s_Stats.Vertices += vertexCount * instanceCount;
-        s_Stats.Triangles += (vertexCount / 3) * instanceCount;
-    }
-
-    void Renderer::ResetStats() {
-        s_Stats.Reset();
     }
 }

@@ -71,56 +71,32 @@ namespace ash {
     class Mesh {
     public:
         Mesh() = default;
+        ~Mesh() = default;
 
-        /**
-         * @brief Create mesh from vertex data and indices
-         */
-        void SetData(const VertexData &vertexData, const Vector<uint32_t> &indices);
+        Mesh(const Mesh&) = delete;
+        Mesh& operator=(const Mesh&) = delete;
+        Mesh(Mesh&&) noexcept = default;
+        Mesh& operator=(Mesh&&) noexcept = default;
 
-        /**
-         * @brief Add a submesh for multi-material rendering
-         */
-        void AddSubMesh(const SubMesh &submesh);
+        // ---- Data Management ----
+        void SetData(const VertexData& vertexData, const Vector<uint32_t>& indices);
+        void SetSubMeshes(const Vector<SubMesh>& submeshes);
 
-        /**
-         * @brief Get vertex array object
-         */
-        [[nodiscard]] const VertexArray &GetVAO() const { return m_VAO; }
+        // ---- Accessors ONLY ----
+        const VertexArray& GetVAO() const { return m_VAO; }
+        size_t GetVertexCount() const { return m_VertexCount; }
+        size_t GetIndexCount() const { return m_IndexCount; }
+        VertexAttribute GetAttributes() const { return m_Attributes; }
 
-        /**
-         * @brief Get vertex attributes flags
-         */
-        [[nodiscard]] VertexAttribute GetAttributes() const { return m_Attributes; }
+        const Vector<SubMesh>& GetSubMeshes() const { return m_SubMeshes; }
+        size_t GetSubMeshCount() const { return m_SubMeshes.size(); }
+        bool HasSubMeshes() const { return !m_SubMeshes.empty(); }
 
-        /**
-         * @brief Get number of vertices
-         */
-        [[nodiscard]] size_t GetVertexCount() const { return m_VertexCount; }
-
-        /**
-         * @brief Get number of indices
-         */
-        [[nodiscard]] size_t GetIndexCount() const { return m_IndexCount; }
-
-        /**
-         * @brief Check if mesh has submeshes
-         */
-        [[nodiscard]] bool HasSubMeshes() const { return !m_SubMeshes.empty(); }
-
-        /**
-         * @brief Get submeshes
-         */
-        [[nodiscard]] const Vector<SubMesh> &GetSubMeshes() const { return m_SubMeshes; }
-
-        /**
-         * @brief Draw the entire mesh
-         */
-        void Draw() const;
-
-        /**
-         * @brief Draw a specific submesh
-         */
-        void DrawSubMesh(size_t index) const;
+        // ---- Bounding Volume ----
+        const Vec3& GetBoundsMin() const { return m_BoundsMin; }
+        const Vec3& GetBoundsMax() const { return m_BoundsMax; }
+        Vec3 GetBoundsCenter() const { return (m_BoundsMin + m_BoundsMax) * 0.5f; }
+        Vec3 GetBoundsExtents() const { return (m_BoundsMax - m_BoundsMin) * 0.5f; }
 
     private:
         VertexArray m_VAO;
@@ -130,9 +106,23 @@ namespace ash {
         VertexAttribute m_Attributes = VertexAttribute::None;
         size_t m_VertexCount = 0;
         size_t m_IndexCount = 0;
+
         Vector<SubMesh> m_SubMeshes;
 
-        VertexBufferLayout CreateLayout(VertexAttribute attrs) const;
+        Vec3 m_BoundsMin{0.0f};
+        Vec3 m_BoundsMax{0.0f};
+
+        static VertexBufferLayout CreateLayout(VertexAttribute attributes);
+        void ComputeBounds(const VertexData& vertexData);
+    };
+
+    class MeshRenderer {
+    public:
+        // ---- Rendering Methods ----
+        static void Draw(const Mesh& mesh);
+        static void DrawSubMesh(const Mesh& mesh, size_t submeshIndex);
+        static void DrawInstanced(const Mesh& mesh, uint32_t instanceCount);
+        static void DrawSubMeshInstanced(const Mesh& mesh, size_t submeshIndex, uint32_t instanceCount);
     };
 
     /**

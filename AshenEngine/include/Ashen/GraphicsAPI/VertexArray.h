@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 
 #include "Ashen/GraphicsAPI/Buffer.h"
+#include "Ashen/Core/Types.h"
 #include "Ashen/Math/Math.h"
 #include "Ashen/GraphicsAPI/GLObject.h"
 
@@ -158,7 +159,7 @@ namespace ash {
     };
 
     struct VertexArrayConfig {
-        PrimitiveMode primitiveMode = PrimitiveMode::Triangles;
+        PrimitiveType primitiveMode = PrimitiveType::Triangles;
         bool enablePrimitiveRestart = false;
         uint32_t primitiveRestartIndex = 0xFFFFFFFF;
 
@@ -168,19 +169,19 @@ namespace ash {
 
         static VertexArrayConfig Lines() {
             VertexArrayConfig config;
-            config.primitiveMode = PrimitiveMode::Lines;
+            config.primitiveMode = PrimitiveType::Lines;
             return config;
         }
 
         static VertexArrayConfig Points() {
             VertexArrayConfig config;
-            config.primitiveMode = PrimitiveMode::Points;
+            config.primitiveMode = PrimitiveType::Points;
             return config;
         }
 
         static VertexArrayConfig TriangleStrip() {
             VertexArrayConfig config;
-            config.primitiveMode = PrimitiveMode::TriangleStrip;
+            config.primitiveMode = PrimitiveType::TriangleStrip;
             config.enablePrimitiveRestart = true;
             return config;
         }
@@ -287,70 +288,19 @@ namespace ash {
             m_IndexBuffer = ibo;
         }
 
-        [[nodiscard]] const Vector<std::shared_ptr<VertexBuffer> > &GetVertexBuffers() const {
-            return m_VertexBuffers;
+        bool HasIndexBuffer() const { return m_IndexBuffer != nullptr; }
+        bool HasVertices() const { return !m_VertexBuffers.empty(); }
+
+        uint32_t GetIndexCount() const {
+            return m_IndexBuffer ? m_IndexBuffer->GetCount() : 0;
         }
 
-        [[nodiscard]] const std::shared_ptr<IndexBuffer> &GetIndexBuffer() const {
-            return m_IndexBuffer;
+        uint32_t GetVertexCount() const {
+            if (m_VertexBuffers.empty()) return 0;
+            return m_VertexBuffers[0]->GetCount();
         }
 
         [[nodiscard]] const VertexArrayConfig &GetConfig() const { return m_Config; }
-
-        void Draw(const size_t count = 0, const size_t offset = 0) const {
-            Bind();
-            const size_t drawCount = count > 0 ? count : GetVertexCount();
-
-            if (m_IndexBuffer) {
-                glDrawElements(
-                    static_cast<GLenum>(m_Config.primitiveMode),
-                    static_cast<GLsizei>(drawCount),
-                    static_cast<GLenum>(m_IndexBuffer->GetIndexType()),
-                    reinterpret_cast<void *>(offset * GetIndexSize())
-                );
-            } else if (!m_VertexBuffers.empty()) {
-                glDrawArrays(
-                    static_cast<GLenum>(m_Config.primitiveMode),
-                    static_cast<GLint>(offset),
-                    static_cast<GLsizei>(drawCount)
-                );
-            }
-        }
-
-        void DrawInstanced(const size_t instanceCount, const size_t count = 0, const size_t offset = 0) const {
-            Bind();
-            const size_t drawCount = count > 0 ? count : GetVertexCount();
-
-            if (m_IndexBuffer) {
-                glDrawElementsInstanced(
-                    static_cast<GLenum>(m_Config.primitiveMode),
-                    static_cast<GLsizei>(drawCount),
-                    static_cast<GLenum>(m_IndexBuffer->GetIndexType()),
-                    reinterpret_cast<void *>(offset * GetIndexSize()),
-                    static_cast<GLsizei>(instanceCount)
-                );
-            } else if (!m_VertexBuffers.empty()) {
-                glDrawArraysInstanced(
-                    static_cast<GLenum>(m_Config.primitiveMode),
-                    static_cast<GLint>(offset),
-                    static_cast<GLsizei>(drawCount),
-                    static_cast<GLsizei>(instanceCount)
-                );
-            }
-        }
-
-        void DrawIndexedBaseVertex(const size_t count, const size_t offset, const int baseVertex) const {
-            Bind();
-            if (m_IndexBuffer) {
-                glDrawElementsBaseVertex(
-                    static_cast<GLenum>(m_Config.primitiveMode),
-                    static_cast<GLsizei>(count),
-                    static_cast<GLenum>(m_IndexBuffer->GetIndexType()),
-                    reinterpret_cast<void *>(offset * GetIndexSize()),
-                    baseVertex
-                );
-            }
-        }
 
         static VertexArray Create(const std::shared_ptr<VertexBuffer> &vbo,
                                   const VertexBufferLayout &layout,
@@ -382,14 +332,6 @@ namespace ash {
                 glEnableVertexAttribArray(location);
                 m_EnabledAttribs.set(location);
             }
-        }
-
-        [[nodiscard]] size_t GetVertexCount() const {
-            if (m_IndexBuffer)
-                return m_IndexBuffer->Count();
-            if (!m_VertexBuffers.empty())
-                return m_VertexBuffers[0]->Count();
-            return 0;
         }
 
         [[nodiscard]] size_t GetIndexSize() const {

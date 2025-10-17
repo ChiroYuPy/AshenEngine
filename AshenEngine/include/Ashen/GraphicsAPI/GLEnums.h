@@ -192,7 +192,7 @@ namespace ash {
         Stencil8 = GL_STENCIL_INDEX8
     };
 
-    enum class PrimitiveMode : GLenum {
+    enum class PrimitiveType : GLenum {
         Points = GL_POINTS,
         Lines = GL_LINES,
         LineStrip = GL_LINE_STRIP,

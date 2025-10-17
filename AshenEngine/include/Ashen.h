@@ -12,7 +12,6 @@
 #include "Ashen/Core/Logger.h"
 #include "Ashen/Core/Platform.h"
 #include "Ashen/Core/Types.h"
-#include "Ashen/Core/IWindow.h"
 #include "Ashen/Core/Color.h"
 
 // Events
@@ -36,8 +35,6 @@
 // Renderer
 #include "Ashen/GraphicsAPI/GLEnums.h"
 #include "Ashen/GraphicsAPI/GLObject.h"
-#include "Ashen/GraphicsAPI/GLUtils.h"
-#include "Ashen/GraphicsAPI/RenderCommand.h"
 #include "Ashen/GraphicsAPI/FrameBuffer.h"
 #include "Ashen/GraphicsAPI/VertexArray.h"
 #include "Ashen/GraphicsAPI/Buffer.h"
