@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 namespace ash {
     using Vec2 = glm::vec2;
@@ -63,7 +63,7 @@ namespace ash {
     }
 
     inline Mat4 quatToMat4(const Quat &q) {
-        return glm::toMat4(q);
+        return glm::mat4_cast(q);
     }
 
     inline const float *valuePtr(const Mat4 &mat) {

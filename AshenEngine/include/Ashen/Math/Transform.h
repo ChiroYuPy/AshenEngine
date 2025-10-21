@@ -3,7 +3,7 @@
 
 #include "Ashen/Math/Math.h"
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 namespace ash {
     class Transform {
@@ -23,7 +23,7 @@ namespace ash {
 
             // Rotation (Euler angles to quaternion)
             const auto q = glm::quat(rotation);
-            m = m * glm::toMat4(q);
+            m = m * glm::mat4_cast(q);
 
             // Scale
             m = glm::scale(m, scale);

@@ -1,5 +1,3 @@
-
-
 #include "Ashen/Scene/SceneTree.h"
 
 namespace ash {

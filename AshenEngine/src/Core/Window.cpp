@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include <glad/glad.h>
+#include <../../vendor/include/glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "Ashen/Core/Logger.h"

@@ -17,10 +17,6 @@ find_package(glm REQUIRED)
 # Ajouter les sous-projets
 add_subdirectory(AshenEngine)
 
-if (BUILD_EDITOR)
-    add_subdirectory(Editor)
-endif ()
-
 if (BUILD_TESTBED)
     add_subdirectory(Testbed)
 endif ()

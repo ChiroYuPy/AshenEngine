@@ -2,19 +2,16 @@ project(AshenEngine)
 
 # ===== VENDOR LIBRARIES =====
 
-# GLAD (OpenGL loader)
-add_subdirectory(vendor/glad)
-
 # Vendor sources
 add_library(AshenVendor STATIC
+        vendor/src/glad.c
         vendor/src/IMG.cpp
         vendor/src/OpenSimplex2S.cpp
-        vendor/tinyobjloader/tiny_obj_loader.cc
+        vendor/src/tiny_obj_loader.cc
 )
 
 target_include_directories(AshenVendor PUBLIC
         vendor/include
-        vendor/tinyobjloader
 )
 
 # ===== ENGINE LIBRARY =====
@@ -52,7 +49,6 @@ target_link_libraries(AshenEngineLib
         OpenGL::GL
         glfw
         glm::glm
-        glad
         AshenVendor
 )
 
