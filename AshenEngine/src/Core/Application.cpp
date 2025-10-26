@@ -12,16 +12,19 @@
 
 #include <GLFW/glfw3.h>
 
+#include "Ashen/Core/Platform.h"
+
 namespace ash {
     Application::Application(ApplicationSettings settings)
         : m_Settings(std::move(settings)), m_Running(false) {
+
+        Logger::Get().SetMinLevel(m_Settings.MinLogLevel);
+
         if (s_Instance) {
             Logger::Error("Application already exists!");
             return;
         }
         s_Instance = this;
-
-        Logger::Info() << "Application started: " << m_Settings.Name << " v" << m_Settings.Version;
 
         WindowProperties windowProperties;
         windowProperties.Title = m_Settings.Name + " v" + m_Settings.Version;
@@ -37,8 +40,21 @@ namespace ash {
         AssetLibrary::PreloadCommon();
 
         Renderer::Init();
-
         Input::Init(*m_Window);
+
+        Logger::Info() << "Application started: " << m_Settings.Name << " v" << m_Settings.Version;
+
+        Logger::Debug() << "=== System Info ===";
+        Logger::Debug() << "Platform:          " << Platform::GetPlatformName();
+        Logger::Debug() << "Architecture:      " << (Platform::Is64Bit() ? "64-bit" : "32-bit");
+        Logger::Debug() << "CPU:               " << Platform::GetCPUName();
+        Logger::Debug() << "Cores:             " << Platform::GetCPUCoreCount();
+        Logger::Debug() << "RAM:               " << Platform::GetTotalRAM() / (1024 * 1024) << " MB";
+        Logger::Debug() << "GPU:               " << Platform::GetGPUName() << " (Vendor: " << Platform::GetGPUVendor() << ")";
+        Logger::Debug() << "Endianness:        " << (Platform::GetEndianness() == Platform::Endianness::Little
+                                                         ? "Little"
+                                                         : "Big");
+        Logger::Debug() << "===================";
     }
 
     Application::~Application() {
@@ -108,17 +124,17 @@ namespace ash {
     void Application::OnEvent(Event &event) {
         EventDispatcher dispatcher(event);
 
-        dispatcher.Dispatch<WindowResizeEvent>([](const WindowResizeEvent &e) {
+        dispatcher.Dispatch<WindowResizeEvent>([](const WindowResizeEvent &e) -> bool {
             Renderer::OnWindowResize(e.GetWidth(), e.GetHeight());
             return false;
         });
 
         m_LayerStack.OnEvent(event);
 
-        dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent &) {
-            Stop();
-            return true;
-        });
+        // dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent &) -> bool {
+        //     Stop();
+        //     return true;
+        // });
     }
 
     void Application::UpdateLayers(const float ts) const {

@@ -9,53 +9,74 @@
 namespace ash {
     class RenderCommand {
     public:
+        // ---- Clear ----
         static void Clear(ClearBuffer buffers = ClearBuffer::Color | ClearBuffer::Depth);
 
         static void SetClearColor(const Vec4 &color);
 
         static void SetClearColor(float r, float g, float b, float a);
 
+        // ---- Viewport / Scissor ----
         static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
         static void SetViewport(uint32_t width, uint32_t height);
 
-        static void EnableScissor(bool enable);
+        static void EnableScissor();
+
+        static void DisableScissor();
 
         static void SetScissor(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
-        static void EnableDepthTest(bool enable);
+        // ---- Depth ----
+        static void EnableDepthTest();
+
+        static void DisableDepthTest();
 
         static void SetDepthFunc(DepthFunc func = DepthFunc::Less);
 
         static void SetDepthWrite(bool enable);
 
-        static void EnableBlending(bool enable);
+        // ---- Blending ----
+        static void EnableBlending();
 
-        static void SetBlendFunc(BlendFactor src = BlendFactor::SrcAlpha, BlendFactor dst = BlendFactor::OneMinusSrcAlpha);
+        static void DisableBlending();
 
-        static void SetBlendFuncSeparate(BlendFactor srcRGB, BlendFactor dstRGB, BlendFactor srcAlpha, BlendFactor dstAlpha);
+        static void SetBlendFunc(BlendFactor src = BlendFactor::SrcAlpha,
+                                 BlendFactor dst = BlendFactor::OneMinusSrcAlpha);
+
+        static void SetBlendFuncSeparate(BlendFactor srcRGB, BlendFactor dstRGB, BlendFactor srcAlpha,
+                                         BlendFactor dstAlpha);
 
         static void SetBlendOp(BlendEquation op = BlendEquation::Add);
 
         static void SetBlendColor(const Vec4 &color);
 
-        static void EnableCulling(bool enable);
+        // ---- Culling ----
+        static void EnableCulling();
+
+        static void DisableCulling();
 
         static void SetCullFace(CullFaceMode mode = CullFaceMode::Back);
 
         static void SetFrontFace(FrontFace orientation = FrontFace::CounterClockwise);
 
+        // ---- Polygon ----
         static void SetPolygonMode(CullFaceMode faces, PolygonMode mode);
+
+        static void EnablePolygonOffset();
+
+        static void DisablePolygonOffset();
+
+        static void SetPolygonOffset(float factor, float units);
 
         static void SetPointSize(float size);
 
         static void SetLineWidth(float width);
 
-        static void EnablePolygonOffset(bool enable);
+        // ---- Stencil ----
+        static void EnableStencil();
 
-        static void SetPolygonOffset(float factor, float units);
-
-        static void EnableStencil(bool enable);
+        static void DisableStencil();
 
         static void SetStencilFunc(StencilOp func, int ref, uint32_t mask);
 
@@ -63,16 +84,25 @@ namespace ash {
 
         static void SetStencilMask(uint32_t mask);
 
+        // ---- Color Mask ----
         static void SetColorMask(bool r, bool g, bool b, bool a);
 
-        static void EnableMultisample(bool enable);
+        // ---- Multisample ----
+        static void EnableMultisample();
 
+        static void DisableMultisample();
+
+        // ---- Drawing ----
         static void DrawArrays(PrimitiveType mode, int first, int count);
-        static void DrawElements(PrimitiveType mode, int count, IndexType type, const void* indices);
-        static void DrawArraysInstanced(PrimitiveType mode, int first, int count, int instanceCount);
-        static void DrawElementsInstanced(PrimitiveType mode, int count, IndexType type,
-                                           const void* indices, int instanceCount);
 
+        static void DrawElements(PrimitiveType mode, int count, IndexType type, const void *indices);
+
+        static void DrawArraysInstanced(PrimitiveType mode, int first, int count, int instanceCount);
+
+        static void DrawElementsInstanced(PrimitiveType mode, int count, IndexType type, const void *indices,
+                                          int instanceCount);
+
+        // ---- Queries ----
         [[nodiscard]] static bool IsDepthTestEnabled();
 
         [[nodiscard]] static bool IsBlendingEnabled();
@@ -95,6 +125,6 @@ namespace ash {
         static inline bool s_DepthWrite = true;
         static inline bool s_MultisampleEnabled = true;
     };
-}
+} // namespace ash
 
-#endif //ASHEN_RENDERCOMMAND_H
+#endif // ASHEN_RENDERCOMMAND_H

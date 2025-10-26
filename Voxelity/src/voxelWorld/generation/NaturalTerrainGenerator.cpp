@@ -54,9 +54,9 @@ namespace voxelity {
 
     double NaturalTerrainGenerator::getCaveNoise(const glm::ivec3 &worldPos) {
         const double cave1 = noise.noise3_XYBeforeZ(worldPos.x * CAVE_SCALE, worldPos.y * CAVE_SCALE,
-                                              worldPos.z * CAVE_SCALE);
+                                                    worldPos.z * CAVE_SCALE);
         const double cave2 = noise.noise3_XYBeforeZ(worldPos.x * CAVE_SCALE * 1.5 + 500, worldPos.y * CAVE_SCALE * 1.5,
-                                              worldPos.z * CAVE_SCALE * 1.5 + 500);
+                                                    worldPos.z * CAVE_SCALE * 1.5 + 500);
         return std::abs(cave1) + std::abs(cave2);
     }
 

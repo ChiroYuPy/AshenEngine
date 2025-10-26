@@ -7,10 +7,9 @@
 #include "Ashen/GraphicsAPI/RenderCommand.h"
 
 namespace ash {
-
     struct Renderer3D::SceneData {
         // Camera
-        const Camera* camera = nullptr;
+        const Camera *camera = nullptr;
         Mat4 viewMatrix{};
         Mat4 projectionMatrix{};
         Mat4 viewProjectionMatrix{};
@@ -53,7 +52,7 @@ namespace ash {
         Logger::Info("Renderer3D shutdown");
     }
 
-    void Renderer3D::BeginScene(const Camera& camera) {
+    void Renderer3D::BeginScene(const Camera &camera) {
         s_Data->Reset();
 
         s_Data->camera = &camera;
@@ -63,9 +62,9 @@ namespace ash {
         s_Data->cameraPosition = camera.GetPosition();
 
         // Setup render state
-        RenderCommand::EnableDepthTest(true);
+        RenderCommand::EnableDepthTest();
         RenderCommand::SetDepthFunc(DepthFunc::Less);
-        RenderCommand::EnableCulling(true);
+        RenderCommand::EnableCulling();
         RenderCommand::SetCullFace(CullFaceMode::Back);
         RenderCommand::SetFrontFace(FrontFace::CounterClockwise);
     }
@@ -74,14 +73,14 @@ namespace ash {
         FlushRenderQueue();
     }
 
-    void Renderer3D::Submit(const RenderObject& object) {
+    void Renderer3D::Submit(const RenderObject &object) {
         s_Data->renderQueue.push_back(object);
     }
 
     void Renderer3D::Submit(
-        const std::shared_ptr<Mesh>& mesh,
-        const std::shared_ptr<Material>& material,
-        const Mat4& transform
+        const std::shared_ptr<Mesh> &mesh,
+        const std::shared_ptr<Material> &material,
+        const Mat4 &transform
     ) {
         RenderObject obj;
         obj.mesh = mesh;
@@ -91,9 +90,9 @@ namespace ash {
     }
 
     void Renderer3D::DrawImmediate(
-        const std::shared_ptr<Mesh>& mesh,
-        const std::shared_ptr<Material>& material,
-        const Mat4& transform
+        const std::shared_ptr<Mesh> &mesh,
+        const std::shared_ptr<Material> &material,
+        const Mat4 &transform
     ) {
         if (!mesh || !material) return;
 
@@ -128,12 +127,12 @@ namespace ash {
         shader->Unbind();
     }
 
-    void Renderer3D::SetDirectionalLight(const DirectionalLight& light) {
+    void Renderer3D::SetDirectionalLight(const DirectionalLight &light) {
         s_Data->directionalLight = light;
         s_Data->hasDirectionalLight = true;
     }
 
-    void Renderer3D::AddPointLight(const PointLight& light) {
+    void Renderer3D::AddPointLight(const PointLight &light) {
         constexpr size_t MAX_POINT_LIGHTS = 4;
         if (s_Data->pointLights.size() < MAX_POINT_LIGHTS)
             s_Data->pointLights.push_back(light);
@@ -146,19 +145,19 @@ namespace ash {
         s_Data->pointLights.clear();
     }
 
-    void Renderer3D::SetEnvironment(const SceneEnvironment& env) {
+    void Renderer3D::SetEnvironment(const SceneEnvironment &env) {
         s_Data->environment = env;
     }
 
-    void Renderer3D::SetSkybox(const std::shared_ptr<TextureCubeMap>& skybox) {
+    void Renderer3D::SetSkybox(const std::shared_ptr<TextureCubeMap> &skybox) {
         s_Data->environment.skybox = skybox;
     }
 
-    void Renderer3D::SetAmbientLight(const Vec3& color) {
+    void Renderer3D::SetAmbientLight(const Vec3 &color) {
         s_Data->environment.ambientColor = color;
     }
 
-    const RenderStats& Renderer3D::GetStats() {
+    const RenderStats &Renderer3D::GetStats() {
         return s_Data->stats;
     }
 
@@ -171,13 +170,13 @@ namespace ash {
     }
 
     void Renderer3D::FlushRenderQueue() {
-        for (const auto& [mesh, material, transform] : s_Data->renderQueue)
+        for (const auto &[mesh, material, transform]: s_Data->renderQueue)
             DrawImmediate(mesh, material, transform);
 
         s_Data->renderQueue.clear();
     }
 
-    void Renderer3D::SetupLighting(const std::shared_ptr<ShaderProgram>& shader) {
+    void Renderer3D::SetupLighting(const std::shared_ptr<ShaderProgram> &shader) {
         // CORRECTION: Ne set les uniforms QUE s'ils existent dans le shader
 
         // Camera position (utilisé par PBR et Toon)
@@ -208,7 +207,7 @@ namespace ash {
             shader->SetInt("u_PointLightCount", pointLightCount);
 
             for (int i = 0; i < pointLightCount; ++i) {
-                const auto& light = s_Data->pointLights[i];
+                const auto &light = s_Data->pointLights[i];
 
                 // Construire les noms d'uniforms une seule fois
                 const std::string posUniform = "u_PointLightPositions[" + std::to_string(i) + "]";

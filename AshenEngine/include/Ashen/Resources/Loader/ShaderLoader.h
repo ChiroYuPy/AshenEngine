@@ -2,49 +2,57 @@
 #define ASHEN_SHADERLOADER_H
 
 #include <filesystem>
-#include "Ashen/GraphicsAPI/Shader.h"
-#include "Ashen/Utils/FileSystem.h"
+#include <string>
 
 namespace ash {
     namespace fs = std::filesystem;
 
+    // Forward declaration
+    class ShaderProgram;
+
     /**
-     * @brief Loads shaders from files and creates ShaderProgram objects
+     * @brief Static shader loader - all methods are static
+     * Compiles and links GLSL shaders from source files
      */
-    class ShaderLoader {
+    class ShaderLoader final {
     public:
-        /**
-         * @brief Load a shader program from vertex and fragment shader files
-         */
-        static ShaderProgram Load(const fs::path& vertPath, const fs::path& fragPath);
+        // No instantiation
+        ShaderLoader() = delete;
 
         /**
-         * @brief Load a shader program with geometry shader
+         * @brief Load vertex + fragment shader pair
+         * @param vertPath Path to .vert file
+         * @param fragPath Path to .frag file
+         * @return Compiled and linked shader program (moved)
          */
-        static ShaderProgram LoadWithGeometry(
+        [[nodiscard]] static ShaderProgram Load(
+            const fs::path& vertPath,
+            const fs::path& fragPath
+        );
+
+        /**
+         * @brief Load shader with geometry stage
+         * @param vertPath Path to .vert file
+         * @param fragPath Path to .frag file
+         * @param geomPath Path to .geom file
+         * @return Compiled and linked shader program (moved)
+         */
+        [[nodiscard]] static ShaderProgram LoadWithGeometry(
             const fs::path& vertPath,
             const fs::path& fragPath,
             const fs::path& geomPath
         );
 
         /**
-         * @brief Create shader program from source strings
+         * @brief Create shader from source strings
+         * @param vertSource Vertex shader GLSL code
+         * @param fragSource Fragment shader GLSL code
+         * @return Compiled and linked shader program (moved)
          */
-        static ShaderProgram FromSources(
+        [[nodiscard]] static ShaderProgram FromSources(
             const std::string& vertSource,
             const std::string& fragSource
         );
-
-        /**
-         * @brief Check if both .vert and .frag files exist for a shader name
-         */
-        static bool ShaderExists(const fs::path& basePath, const std::string& shaderName);
-
-        /**
-         * @brief Scan directory for available shader pairs
-         * @return List of shader names (without extensions)
-         */
-        static Vector<std::string> ScanForShaders(const fs::path& directory);
     };
 }
 

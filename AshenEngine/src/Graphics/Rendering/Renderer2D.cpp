@@ -477,8 +477,8 @@ namespace ash {
                                      const float rotation, const Ref<Texture2D> &texture,
                                      const Vec4 &tintColor) {
         const Mat4 transform = glm::translate(Mat4(1.0f), position)
-                         * glm::rotate(Mat4(1.0f), rotation, Vec3(0.0f, 0.0f, 1.0f))
-                         * glm::scale(Mat4(1.0f), Vec3(size.x, size.y, 1.0f));
+                               * glm::rotate(Mat4(1.0f), rotation, Vec3(0.0f, 0.0f, 1.0f))
+                               * glm::scale(Mat4(1.0f), Vec3(size.x, size.y, 1.0f));
         DrawQuad(transform, texture, tintColor);
     }
 

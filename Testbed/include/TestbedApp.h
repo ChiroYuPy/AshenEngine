@@ -7,10 +7,6 @@ namespace ash {
     class TestbedApp : public Application {
     public:
         explicit TestbedApp(const ApplicationSettings &settings);
-
-        static TestbedApp &Get() {
-            return static_cast<TestbedApp &>(Application::Get());
-        }
     };
 }
 

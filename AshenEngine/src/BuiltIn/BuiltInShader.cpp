@@ -2,7 +2,6 @@
 #include "Ashen/Core/Logger.h"
 
 namespace ash {
-
     static ShaderConfig GetBuiltInShaderConfig() {
         ShaderConfig config;
         config.validateOnLink = true;
@@ -492,7 +491,7 @@ void main() {
         auto shader = std::make_shared<ShaderProgram>(BuiltInShaders::Create(type));
         m_Shaders[type] = shader;
 
-        Logger::Info() << "Created built-in shader: " << BuiltInShaders::GetTypeName(type);
+        Logger::Trace() << "Created built-in shader: " << BuiltInShaders::GetTypeName(type);
 
         return shader;
     }
@@ -508,8 +507,7 @@ void main() {
         Get(BuiltInShaders::Type::SpatialUnlit);
         Get(BuiltInShaders::Type::Toon);
         Get(BuiltInShaders::Type::Sky);
-        
+
         Logger::Info() << "Preloaded all built-in shaders";
     }
-
 }

@@ -6,178 +6,234 @@
 #include <string>
 #include <unordered_map>
 
-#include "Ashen/BuiltIn/BuiltInShader.h"
-#include "Ashen/Graphics/Objects/Material.h"
-#include "Ashen/Graphics/Objects/Mesh.h"
-#include "Ashen/GraphicsAPI/Shader.h"
-#include "Ashen/GraphicsAPI/Texture.h"
+#include "Ashen/Core/Types.h"
+#include "Ashen/Math/Math.h"
 
+// Forward declarations from other modules
 namespace ash {
     namespace fs = std::filesystem;
+    class ShaderProgram;
+    class Texture2D;
+    class Mesh;
+    class Material;
+    class CanvasItemMaterial;
+    class SpatialMaterial;
+    class ToonMaterial;
+    class SkyMaterial;
+    struct TextureConfig;
 
     /**
-     * @brief Manages resource paths and working directory
+     * @brief Thread-safe resource paths manager
      */
-    class ResourcePaths {
+    class ResourcePaths final {
     public:
-        static ResourcePaths& Instance() {
-            static ResourcePaths instance;
-            return instance;
-        }
+        static ResourcePaths& Instance();
+
+        // No copy/move
+        ResourcePaths(const ResourcePaths&) = delete;
+        ResourcePaths& operator=(const ResourcePaths&) = delete;
+        ResourcePaths(ResourcePaths&&) = delete;
+        ResourcePaths& operator=(ResourcePaths&&) = delete;
 
         void SetWorkingDirectory(const fs::path& dir);
         [[nodiscard]] fs::path GetPath(const std::string& filename) const;
-        [[nodiscard]] const fs::path& Root() const { return m_Root; }
-        [[nodiscard]] Vector<fs::path> Scan(const Vector<std::string>& extensions) const;
+        [[nodiscard]] const fs::path& Root() const;
 
     private:
         ResourcePaths() = default;
+
         fs::path m_Root;
         mutable std::mutex m_Mutex;
     };
 
     /**
-     * @brief Base resource manager template
+     * @brief Thread-safe base resource manager
+     * Resources are cached and shared via shared_ptr
      */
     template<typename T>
     class ResourceManager {
     public:
         virtual ~ResourceManager() = default;
 
-        virtual std::shared_ptr<T> Get(const std::string& id) {
-            std::lock_guard<std::mutex> lock(m_Mutex);
-            auto it = m_Resources.find(id);
-            if (it != m_Resources.end()) {
-                return it->second;
+        // No copy/move
+        ResourceManager(const ResourceManager&) = delete;
+        ResourceManager& operator=(const ResourceManager&) = delete;
+        ResourceManager(ResourceManager&&) = delete;
+        ResourceManager& operator=(ResourceManager&&) = delete;
+
+        /**
+         * @brief Get or load a resource by ID
+         * Thread-safe, returns cached resource if available
+         */
+        [[nodiscard]] Ref<T> Get(const std::string& id) {
+            {
+                std::lock_guard lock(m_Mutex);
+                auto it = m_Resources.find(id);
+                if (it != m_Resources.end()) {
+                    return it->second;
+                }
             }
             return Load(id);
         }
 
-        virtual std::shared_ptr<T> Load(const std::string& id) = 0;
-
-        virtual void Clear() {
-            std::lock_guard<std::mutex> lock(m_Mutex);
-            m_Resources.clear();
-        }
-
-        [[nodiscard]] size_t Count() const {
-            std::lock_guard<std::mutex> lock(m_Mutex);
-            return m_Resources.size();
-        }
-
+        /**
+         * @brief Check if resource exists in cache
+         */
         [[nodiscard]] bool Has(const std::string& id) const {
-            std::lock_guard<std::mutex> lock(m_Mutex);
+            std::lock_guard lock(m_Mutex);
             return m_Resources.contains(id);
         }
 
+        /**
+         * @brief Get number of cached resources
+         */
+        [[nodiscard]] size_t Count() const {
+            std::lock_guard lock(m_Mutex);
+            return m_Resources.size();
+        }
+
+        /**
+         * @brief Clear all cached resources
+         */
+        virtual void Clear() {
+            std::lock_guard lock(m_Mutex);
+            m_Resources.clear();
+        }
+
     protected:
-        std::unordered_map<std::string, std::shared_ptr<T>> m_Resources;
+        ResourceManager() = default;
+
+        /**
+         * @brief Load resource implementation (called when not in cache)
+         * Must be implemented by derived classes
+         */
+        virtual Ref<T> Load(const std::string& id) = 0;
+
+        /**
+         * @brief Thread-safe cache insertion
+         */
+        void Cache(const std::string& id, Ref<T> resource) {
+            std::lock_guard lock(m_Mutex);
+            m_Resources[id] = std::move(resource);
+        }
+
+        std::unordered_map<std::string, Ref<T>> m_Resources;
         mutable std::mutex m_Mutex;
     };
 
     /**
-     * @brief Shader manager
+     * @brief Shader resource manager
+     * Handles both built-in and custom shaders
      */
-    class ShaderManager : public ResourceManager<ShaderProgram> {
+    class ShaderManager final : public ResourceManager<ShaderProgram> {
     public:
-        static ShaderManager& Instance() {
-            static ShaderManager instance;
-            return instance;
-        }
+        static ShaderManager& Instance();
 
-        std::shared_ptr<ShaderProgram> GetBuiltIn(BuiltInShaders::Type type);
-        std::shared_ptr<ShaderProgram> Load(const std::string& id) override;
-        std::shared_ptr<ShaderProgram> LoadFromPaths(
-            const std::string& id,
-            const fs::path& vertPath,
-            const fs::path& fragPath
-        );
+        // Built-in shaders (enum from BuiltInShader.h)
+        enum class BuiltIn {
+            CanvasItem,
+            CanvasItemTextured,
+            Spatial,
+            SpatialUnlit,
+            Toon,
+            Sky
+        };
 
-        static Vector<std::string> GetAvailableShaders();
+        /**
+         * @brief Get a built-in shader
+         */
+        [[nodiscard]] Ref<ShaderProgram> GetBuiltIn(BuiltIn type);
+
+        /**
+         * @brief Load custom shader from vertex/fragment files
+         * Files should be named: id.vert and id.frag
+         */
+        Ref<ShaderProgram> Load(const std::string& id) override;
+
+        void Clear() override;
 
     private:
         ShaderManager() = default;
     };
 
     /**
-     * @brief Texture manager
+     * @brief Texture resource manager
      */
-    class TextureManager : public ResourceManager<Texture2D> {
+    class TextureManager final : public ResourceManager<Texture2D> {
     public:
-        static TextureManager& Instance() {
-            static TextureManager instance;
-            return instance;
-        }
+        static TextureManager& Instance();
 
-        std::shared_ptr<Texture2D> Load(const std::string& id) override;
-        std::shared_ptr<Texture2D> LoadWithConfig(
-            const std::string& id,
-            const TextureConfig& config
-        );
-        std::shared_ptr<Texture2D> LoadFromPath(
-            const std::string& id,
-            const fs::path& path,
-            const TextureConfig& config = TextureConfig::Default()
-        );
-
-        static Vector<std::string> GetAvailableTextures();
+        /**
+         * @brief Load texture with automatic format detection
+         * Searches for file with supported extensions
+         */
+        Ref<Texture2D> Load(const std::string& id) override;
 
     private:
         TextureManager() = default;
     };
 
     /**
-     * @brief Mesh manager
+     * @brief Mesh resource manager
      */
-    class MeshManager : public ResourceManager<Mesh> {
+    class MeshManager final : public ResourceManager<Mesh> {
     public:
-        static MeshManager& Instance() {
-            static MeshManager instance;
-            return instance;
-        }
+        static MeshManager& Instance();
 
-        std::shared_ptr<Mesh> Load(const std::string& id) override;
-        std::shared_ptr<Mesh> LoadFromPath(
-            const std::string& id,
-            const fs::path& path,
-            bool flipUVs = false
-        );
+        /**
+         * @brief Load mesh from file
+         * Searches for file with supported extensions (.obj)
+         */
+        Ref<Mesh> Load(const std::string& id) override;
 
-        // Primitive meshes (cached)
-        std::shared_ptr<Mesh> GetCube();
-        std::shared_ptr<Mesh> GetSphere();
-        std::shared_ptr<Mesh> GetPlane();
-        std::shared_ptr<Mesh> GetQuad();
-
-        static Vector<std::string> GetAvailableMeshes();
+        /**
+         * @brief Get primitive meshes (cached)
+         */
+        [[nodiscard]] Ref<Mesh> GetCube();
+        [[nodiscard]] Ref<Mesh> GetSphere();
+        [[nodiscard]] Ref<Mesh> GetPlane();
+        [[nodiscard]] Ref<Mesh> GetQuad();
 
     private:
         MeshManager() = default;
     };
 
     /**
-     * @brief Material manager
+     * @brief Material factory and manager
+     * Materials are created via factory methods, not loaded from files
      */
-    class MaterialManager : public ResourceManager<Material> {
+    class MaterialManager final {
     public:
-        static MaterialManager& Instance() {
-            static MaterialManager instance;
-            return instance;
-        }
+        static MaterialManager& Instance();
 
-        // CanvasItem materials (2D)
-        std::shared_ptr<CanvasItemMaterial> CreateCanvasItem(
+        // No copy/move
+        MaterialManager(const MaterialManager&) = delete;
+        MaterialManager& operator=(const MaterialManager&) = delete;
+        MaterialManager(MaterialManager&&) = delete;
+        MaterialManager& operator=(MaterialManager&&) = delete;
+
+        // ====== Factory Methods ======
+
+        /**
+         * @brief Create 2D colored material
+         */
+        [[nodiscard]] Ref<CanvasItemMaterial> CreateCanvasItem(
             const std::string& id,
             const Vec4& albedo = Vec4(1.0f)
         );
 
-        std::shared_ptr<CanvasItemMaterial> CreateCanvasItemTextured(
+        /**
+         * @brief Create 2D textured material
+         */
+        [[nodiscard]] Ref<CanvasItemMaterial> CreateCanvasItemTextured(
             const std::string& id,
             const std::string& textureName
         );
 
-        // Spatial materials (3D)
-        std::shared_ptr<SpatialMaterial> CreateSpatial(
+        /**
+         * @brief Create 3D PBR material
+         */
+        [[nodiscard]] Ref<SpatialMaterial> CreateSpatial(
             const std::string& id,
             const Vec4& albedo = Vec4(1.0f),
             float metallic = 0.0f,
@@ -185,81 +241,89 @@ namespace ash {
             float specular = 0.5f
         );
 
-        std::shared_ptr<SpatialMaterial> CreateSpatialUnlit(
+        /**
+         * @brief Create 3D unlit material
+         */
+        [[nodiscard]] Ref<SpatialMaterial> CreateSpatialUnlit(
             const std::string& id,
             const Vec4& albedo = Vec4(1.0f)
         );
 
-        // Toon materials
-        std::shared_ptr<ToonMaterial> CreateToon(
+        /**
+         * @brief Create toon/cel-shaded material
+         */
+        [[nodiscard]] Ref<ToonMaterial> CreateToon(
             const std::string& id,
             const Vec4& albedo = Vec4(1.0f),
             int toonLevels = 3,
             float rimAmount = 0.716f
         );
 
-        // Sky materials
-        std::shared_ptr<SkyMaterial> CreateSky(
+        /**
+         * @brief Create sky material
+         */
+        [[nodiscard]] Ref<SkyMaterial> CreateSky(
             const std::string& id,
             const Vec4& color = Vec4(0.5f, 0.7f, 1.0f, 1.0f)
         );
 
-        // Custom materials
-        std::shared_ptr<Material> CreateCustom(
-            const std::string& id,
-            const std::string& shaderName
-        );
+        /**
+         * @brief Get cached material by ID
+         */
+        [[nodiscard]] Ref<Material> Get(const std::string& id) const;
 
-        std::shared_ptr<Material> Load(const std::string& id) override {
-            // Materials are created, not loaded from files
-            return Get(id);
-        }
+        /**
+         * @brief Check if material exists
+         */
+        [[nodiscard]] bool Has(const std::string& id) const;
 
-        // Getters
-        std::shared_ptr<CanvasItemMaterial> GetCanvasItem(const std::string& id);
-        std::shared_ptr<SpatialMaterial> GetSpatial(const std::string& id);
-        std::shared_ptr<ToonMaterial> GetToon(const std::string& id);
-        std::shared_ptr<SkyMaterial> GetSky(const std::string& id);
+        /**
+         * @brief Get number of cached materials
+         */
+        [[nodiscard]] size_t Count() const;
 
-        void Clear() override {
-            std::lock_guard<std::mutex> lock(m_Mutex);
-            m_Resources.clear();
-            m_CanvasItemMaterials.clear();
-            m_SpatialMaterials.clear();
-            m_ToonMaterials.clear();
-            m_SkyMaterials.clear();
-        }
+        /**
+         * @brief Clear all cached materials
+         */
+        void Clear();
 
     private:
         MaterialManager() = default;
 
-        std::unordered_map<std::string, std::shared_ptr<CanvasItemMaterial>> m_CanvasItemMaterials;
-        std::unordered_map<std::string, std::shared_ptr<SpatialMaterial>> m_SpatialMaterials;
-        std::unordered_map<std::string, std::shared_ptr<ToonMaterial>> m_ToonMaterials;
-        std::unordered_map<std::string, std::shared_ptr<SkyMaterial>> m_SkyMaterials;
+        std::unordered_map<std::string, Ref<Material>> m_Materials;
+        mutable std::mutex m_Mutex;
     };
 
     /**
      * @brief Unified asset library interface
+     * Static facade for all resource managers
      */
-    class AssetLibrary {
+    class AssetLibrary final {
     public:
-        static void Initialize();
-        static void PreloadCommon();
-        static void ClearAll();
-        static void LogAvailableResources();
-        static size_t GetTotalResourceCount();
+        // No instantiation
+        AssetLibrary() = delete;
 
-        // Managers
+        /**
+         * @brief Initialize asset library (called once at startup)
+         */
+        static void Initialize();
+
+        /**
+         * @brief Preload commonly used assets
+         */
+        static void PreloadCommon();
+
+        /**
+         * @brief Clear all cached resources
+         */
+        static void ClearAll();
+
+        // Manager accessors
         static ShaderManager& Shaders() { return ShaderManager::Instance(); }
         static TextureManager& Textures() { return TextureManager::Instance(); }
         static MeshManager& Meshes() { return MeshManager::Instance(); }
         static MaterialManager& Materials() { return MaterialManager::Instance(); }
-
-    private:
-        AssetLibrary() = delete;
     };
-
 }
 
 #endif // ASHEN_RESOURCEMANAGER_H

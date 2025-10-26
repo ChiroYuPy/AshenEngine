@@ -188,7 +188,7 @@ namespace voxelity {
         m_meshCV.notify_one();
     }
 
-    void ChunkManager::forEachChunk(const std::function<void(const ChunkCoord &, Chunk *)> &func) {
+    void ChunkManager::forEachChunk(const std::function < void(const ChunkCoord &, Chunk *) > &func) {
         for (auto &[coord, chunk]: m_chunks)
             func(coord, chunk.get());
     }

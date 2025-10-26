@@ -21,35 +21,43 @@ namespace ash {
         size_t offset;
         uint32_t divisor = 0;
 
-        static VertexAttributeDescription Float(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription Float(const uint32_t location, const size_t offset = 0,
+                                                const uint32_t divisor = 0) {
             return {location, 1, VertexAttribType::Float, false, offset, divisor};
         }
 
-        static VertexAttributeDescription Vec2(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription Vec2(const uint32_t location, const size_t offset = 0,
+                                               const uint32_t divisor = 0) {
             return {location, 2, VertexAttribType::Float, false, offset, divisor};
         }
 
-        static VertexAttributeDescription Vec3(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription Vec3(const uint32_t location, const size_t offset = 0,
+                                               const uint32_t divisor = 0) {
             return {location, 3, VertexAttribType::Float, false, offset, divisor};
         }
 
-        static VertexAttributeDescription Vec4(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription Vec4(const uint32_t location, const size_t offset = 0,
+                                               const uint32_t divisor = 0) {
             return {location, 4, VertexAttribType::Float, false, offset, divisor};
         }
 
-        static VertexAttributeDescription Int(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription Int(const uint32_t location, const size_t offset = 0,
+                                              const uint32_t divisor = 0) {
             return {location, 1, VertexAttribType::Int, false, offset, divisor};
         }
 
-        static VertexAttributeDescription IVec2(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription IVec2(const uint32_t location, const size_t offset = 0,
+                                                const uint32_t divisor = 0) {
             return {location, 2, VertexAttribType::Int, false, offset, divisor};
         }
 
-        static VertexAttributeDescription IVec3(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription IVec3(const uint32_t location, const size_t offset = 0,
+                                                const uint32_t divisor = 0) {
             return {location, 3, VertexAttribType::Int, false, offset, divisor};
         }
 
-        static VertexAttributeDescription IVec4(const uint32_t location, const size_t offset = 0, const uint32_t divisor = 0) {
+        static VertexAttributeDescription IVec4(const uint32_t location, const size_t offset = 0,
+                                                const uint32_t divisor = 0) {
             return {location, 4, VertexAttribType::Int, false, offset, divisor};
         }
 
@@ -70,22 +78,22 @@ namespace ash {
         }
 
         static VertexAttributeDescription Byte(const uint32_t loc, const size_t off = 0, const bool norm = true,
-                                    const uint32_t div = 0) {
+                                               const uint32_t div = 0) {
             return {loc, 1, VertexAttribType::Byte, norm, off, div};
         }
 
         static VertexAttributeDescription UByte(const uint32_t loc, const size_t off = 0, const bool norm = true,
-                                     const uint32_t div = 0) {
+                                                const uint32_t div = 0) {
             return {loc, 1, VertexAttribType::UnsignedByte, norm, off, div};
         }
 
         static VertexAttributeDescription Short(const uint32_t loc, const size_t off = 0, const bool norm = true,
-                                     const uint32_t div = 0) {
+                                                const uint32_t div = 0) {
             return {loc, 1, VertexAttribType::Short, norm, off, div};
         }
 
         static VertexAttributeDescription UShort(const uint32_t loc, const size_t off = 0, const bool norm = true,
-                                      const uint32_t div = 0) {
+                                                 const uint32_t div = 0) {
             return {loc, 1, VertexAttribType::UnsignedShort, norm, off, div};
         }
     };
@@ -94,7 +102,8 @@ namespace ash {
     public:
         VertexBufferLayout() = default;
 
-        explicit VertexBufferLayout(const std::initializer_list<VertexAttributeDescription> attributes, const size_t stride = 0)
+        explicit VertexBufferLayout(const std::initializer_list<VertexAttributeDescription> attributes,
+                                    const size_t stride = 0)
             : m_Attributes(attributes), m_Stride(stride) {
             if (m_Stride == 0)
                 CalculateStride();
@@ -116,8 +125,8 @@ namespace ash {
         //TODO: abstracted types predefined layouts
         static VertexBufferLayout Position2D() {
             return VertexBufferLayout({
-                VertexAttributeDescription::Vec2(0, 0)
-            }, sizeof(Vec2));
+                                          VertexAttributeDescription::Vec2(0, 0)
+                                      }, sizeof(Vec2));
         }
 
     private:
@@ -302,22 +311,45 @@ namespace ash {
 
         [[nodiscard]] const VertexArrayConfig &GetConfig() const { return m_Config; }
 
-        static VertexArray Create(const std::shared_ptr<VertexBuffer> &vbo,
-                                  const VertexBufferLayout &layout,
-                                  const VertexArrayConfig &config = VertexArrayConfig::Default()) {
-            VertexArray vao(config);
-            vao.AddVertexBuffer(vbo, layout);
+        static Ref<VertexArray> Create(const VertexArrayConfig &config = VertexArrayConfig::Default()) {
+            return MakeRef<VertexArray>(config);
+        }
+
+        static Ref<VertexArray> CreateWithBuffer(const Ref<VertexBuffer> &vbo,
+                                                 const VertexBufferLayout &layout,
+                                                 const VertexArrayConfig &config = VertexArrayConfig::Default()) {
+            auto vao = MakeRef<VertexArray>(config);
+            vao->AddVertexBuffer(vbo, layout);
             return vao;
         }
 
-        static VertexArray CreateIndexed(const std::shared_ptr<VertexBuffer> &vbo,
-                                         const VertexBufferLayout &layout,
-                                         const std::shared_ptr<IndexBuffer> &ibo,
-                                         const VertexArrayConfig &config = VertexArrayConfig::Default()) {
-            VertexArray vao(config);
-            vao.AddVertexBuffer(vbo, layout);
-            vao.SetIndexBuffer(ibo);
+        static Ref<VertexArray> CreateIndexed(const Ref<VertexBuffer> &vbo,
+                                              const VertexBufferLayout &layout,
+                                              const Ref<IndexBuffer> &ibo,
+                                              const VertexArrayConfig &config = VertexArrayConfig::Default()) {
+            auto vao = MakeRef<VertexArray>(config);
+            vao->AddVertexBuffer(vbo, layout);
+            vao->SetIndexBuffer(ibo);
             return vao;
+        }
+
+        // Helper for common case: create everything at once
+        template<typename T>
+        static Ref<VertexArray> CreateFromData(const std::span<const T> &vertices,
+                                               const VertexBufferLayout &layout,
+                                               const VertexArrayConfig &config = VertexArrayConfig::Default()) {
+            auto vbo = VertexBuffer::Create(vertices);
+            return CreateWithBuffer(vbo, layout, config);
+        }
+
+        template<typename VertexT, typename IndexT = uint32_t>
+        static Ref<VertexArray> CreateIndexedFromData(const std::span<const VertexT> &vertices,
+                                                      const std::span<const IndexT> &indices,
+                                                      const VertexBufferLayout &layout,
+                                                      const VertexArrayConfig &config = VertexArrayConfig::Default()) {
+            auto vbo = VertexBuffer::Create(vertices);
+            auto ibo = IndexBuffer::Create(indices);
+            return CreateIndexed(vbo, layout, ibo, config);
         }
 
     private:

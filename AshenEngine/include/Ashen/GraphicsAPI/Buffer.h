@@ -2,14 +2,15 @@
 #define ASHEN_BUFFER_H
 
 #include <span>
+#include <stdexcept>
 
 #include <glad/glad.h>
 
+#include "Ashen/Core/Types.h"
 #include "Ashen/GraphicsAPI/GLEnums.h"
 #include "Ashen/GraphicsAPI/GLObject.h"
 
 namespace ash {
-
     struct BufferConfig {
         BufferUsage usage = BufferUsage::StaticDraw;
 
@@ -89,7 +90,7 @@ namespace ash {
         [[nodiscard]] BufferTarget Target() const { return m_Target; }
         [[nodiscard]] const BufferConfig &GetConfig() const { return m_Config; }
 
-        void *Map(BufferAccess access) const {
+        [[nodiscard]] void *Map(BufferAccess access) const {
             Bind();
             return glMapBuffer(static_cast<GLenum>(m_Target), static_cast<GLenum>(access));
         }
@@ -152,11 +153,29 @@ namespace ash {
 
         [[nodiscard]] size_t GetCount() const { return m_Count; }
 
-        static VertexBuffer Create(const std::span<const float> &data,
-                                   const BufferConfig &config = BufferConfig::Static()) {
-            VertexBuffer vbo(config);
-            vbo.SetData(data);
+        template<typename T>
+        static Ref<VertexBuffer> Create(const std::span<const T> &data,
+                                        const BufferConfig &config = BufferConfig::Static()) {
+            auto vbo = MakeRef<VertexBuffer>(config);
+            vbo->SetData(data);
             return vbo;
+        }
+
+        static Ref<VertexBuffer> CreateEmpty(size_t count, size_t elementSize,
+                                             const BufferConfig &config = BufferConfig::Dynamic()) {
+            auto vbo = MakeRef<VertexBuffer>(config);
+            vbo->SetEmpty(count, elementSize);
+            return vbo;
+        }
+
+        template<typename T>
+        static Ref<VertexBuffer> CreateDynamic(const std::span<const T> &data) {
+            return Create(data, BufferConfig::Dynamic());
+        }
+
+        template<typename T>
+        static Ref<VertexBuffer> CreateStream(const std::span<const T> &data) {
+            return Create(data, BufferConfig::Stream());
         }
 
     private:
@@ -201,11 +220,38 @@ namespace ash {
         [[nodiscard]] size_t GetCount() const { return m_Count; }
         [[nodiscard]] IndexType GetIndexType() const { return m_IndexType; }
 
-        static IndexBuffer Create(const std::span<const uint32_t> &data,
-                                  const BufferConfig &config = BufferConfig::Static()) {
-            IndexBuffer ibo(IndexType::UnsignedInt, config);
-            ibo.SetData(data);
+        template<typename T = uint32_t>
+        static Ref<IndexBuffer> Create(const std::span<const T> &data,
+                                       const BufferConfig &config = BufferConfig::Static()) {
+            static_assert(std::is_same_v<T, uint8_t> ||
+                          std::is_same_v<T, uint16_t> ||
+                          std::is_same_v<T, uint32_t>,
+                          "Index type must be uint8_t, uint16_t, or uint32_t");
+
+            IndexType type;
+            if constexpr (std::is_same_v<T, uint8_t>)
+                type = IndexType::UnsignedByte;
+            else if constexpr (std::is_same_v<T, uint16_t>)
+                type = IndexType::UnsignedShort;
+            else
+                type = IndexType::UnsignedInt;
+
+            auto ibo = MakeRef<IndexBuffer>(type, config);
+            ibo->SetData(data);
             return ibo;
+        }
+
+        static Ref<IndexBuffer> CreateEmpty(size_t count, size_t indexSize,
+                                            IndexType type = IndexType::UnsignedInt,
+                                            const BufferConfig &config = BufferConfig::Dynamic()) {
+            auto ibo = MakeRef<IndexBuffer>(type, config);
+            ibo->SetEmpty(count, indexSize);
+            return ibo;
+        }
+
+        template<typename T = uint32_t>
+        static Ref<IndexBuffer> CreateDynamic(const std::span<const T> &data) {
+            return Create(data, BufferConfig::Dynamic());
         }
 
     private:
@@ -243,10 +289,26 @@ namespace ash {
             AllocateEmpty(size);
         }
 
-        static UniformBuffer Create(const size_t size,
-                                    const BufferConfig &config = BufferConfig::Dynamic()) {
-            UniformBuffer ubo(config);
-            ubo.Allocate(size);
+        template<typename T>
+        static Ref<UniformBuffer> Create(const T &data,
+                                         const BufferConfig &config = BufferConfig::Dynamic()) {
+            auto ubo = MakeRef<UniformBuffer>(config);
+            ubo->SetData(data);
+            return ubo;
+        }
+
+        template<typename T>
+        static Ref<UniformBuffer> Create(const std::span<const T> &data,
+                                         const BufferConfig &config = BufferConfig::Dynamic()) {
+            auto ubo = MakeRef<UniformBuffer>(config);
+            ubo->SetData(data);
+            return ubo;
+        }
+
+        static Ref<UniformBuffer> CreateEmpty(size_t size,
+                                              const BufferConfig &config = BufferConfig::Dynamic()) {
+            auto ubo = MakeRef<UniformBuffer>(config);
+            ubo->Allocate(size);
             return ubo;
         }
     };
@@ -271,10 +333,18 @@ namespace ash {
             AllocateEmpty(size);
         }
 
-        static ShaderStorageBuffer Create(const size_t size,
-                                          const BufferConfig &config = BufferConfig::Dynamic()) {
-            ShaderStorageBuffer ssbo(config);
-            ssbo.Allocate(size);
+        template<typename T>
+        static Ref<ShaderStorageBuffer> Create(const std::span<const T> &data,
+                                               const BufferConfig &config = BufferConfig::Dynamic()) {
+            auto ssbo = MakeRef<ShaderStorageBuffer>(config);
+            ssbo->SetData(data);
+            return ssbo;
+        }
+
+        static Ref<ShaderStorageBuffer> CreateEmpty(size_t size,
+                                                    const BufferConfig &config = BufferConfig::Dynamic()) {
+            auto ssbo = MakeRef<ShaderStorageBuffer>(config);
+            ssbo->Allocate(size);
             return ssbo;
         }
     };

@@ -6,7 +6,6 @@
 #include "Ashen/GraphicsAPI/Shader.h"
 
 namespace ash {
-
     /**
      * @brief Built-in shader types
      */
@@ -14,16 +13,16 @@ namespace ash {
     public:
         enum class Type {
             // 2D Shaders
-            CanvasItem,         // Basic 2D shader for sprites/UI
+            CanvasItem, // Basic 2D shader for sprites/UI
             CanvasItemTextured, // Textured 2D shader
 
             // 3D Shaders
-            Spatial,            // Basic 3D shader with Blinn-Phong lighting
-            SpatialUnlit,       // Unlit 3D shader
-            Toon,               // Cell-shaded/Toon shader
+            Spatial, // Basic 3D shader with Blinn-Phong lighting
+            SpatialUnlit, // Unlit 3D shader
+            Toon, // Cell-shaded/Toon shader
 
             // Environment
-            Sky,                // Skybox shader
+            Sky, // Skybox shader
 
             MAX_TYPES
         };
@@ -54,20 +53,26 @@ namespace ash {
 
         // 2D Fragment Shaders
         static std::string GetCanvasItemColorFragmentShader();
+
         static std::string GetCanvasItemTexturedFragmentShader();
 
         // 3D Vertex Shaders
         static std::string GetSpatialVertexShader();
+
         static std::string GetSpatialUnlitVertexShader();
+
         static std::string GetToonVertexShader();
 
         // 3D Fragment Shaders
         static std::string GetSpatialFragmentShader();
+
         static std::string GetSpatialUnlitFragmentShader();
+
         static std::string GetToonFragmentShader();
 
         // Environment Shaders
         static std::string GetSkyVertexShader();
+
         static std::string GetSkyFragmentShader();
     };
 
@@ -76,20 +81,22 @@ namespace ash {
      */
     class BuiltInShaderManager {
     public:
-        static BuiltInShaderManager& Instance() {
+        static BuiltInShaderManager &Instance() {
             static BuiltInShaderManager instance;
             return instance;
         }
 
         std::shared_ptr<ShaderProgram> Get(BuiltInShaders::Type type);
+
         void Clear();
+
         void PreloadAll();
 
     private:
         BuiltInShaderManager() = default;
-        std::unordered_map<BuiltInShaders::Type, std::shared_ptr<ShaderProgram>> m_Shaders;
-    };
 
+        std::unordered_map<BuiltInShaders::Type, std::shared_ptr<ShaderProgram> > m_Shaders;
+    };
 }
 
 #endif // ASHEN_BUILTINSHADERS_H

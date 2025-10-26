@@ -9,8 +9,7 @@
 #include "Ashen/Math/Math.h"
 
 namespace ash {
-
-    using MaterialValue = std::variant<float, int, bool, Vec2, Vec3, Vec4, Mat3, Mat4, std::shared_ptr<Texture2D>>;
+    using MaterialValue = std::variant<float, int, bool, Vec2, Vec3, Vec4, Mat3, Mat4, std::shared_ptr<Texture2D> >;
 
     /**
      * @brief Base material class
@@ -18,32 +17,49 @@ namespace ash {
     class Material {
     public:
         explicit Material(std::shared_ptr<ShaderProgram> shader);
+
         Material() = default;
+
         virtual ~Material() = default;
 
         void SetShader(std::shared_ptr<ShaderProgram> shader);
-        [[nodiscard]] const std::shared_ptr<ShaderProgram>& GetShader() const { return m_Shader; }
+
+        [[nodiscard]] const std::shared_ptr<ShaderProgram> &GetShader() const { return m_Shader; }
 
         // Property setters
-        void SetFloat(const std::string& name, float value);
-        void SetInt(const std::string& name, int value);
-        void SetBool(const std::string& name, bool value);
-        void SetVec2(const std::string& name, const Vec2& value);
-        void SetVec3(const std::string& name, const Vec3& value);
-        void SetVec4(const std::string& name, const Vec4& value);
-        void SetMat3(const std::string& name, const Mat3& value);
-        void SetMat4(const std::string& name, const Mat4& value);
-        void SetTexture(const std::string& name, std::shared_ptr<Texture2D> texture);
+        void SetFloat(const std::string &name, float value);
+
+        void SetInt(const std::string &name, int value);
+
+        void SetBool(const std::string &name, bool value);
+
+        void SetVec2(const std::string &name, const Vec2 &value);
+
+        void SetVec3(const std::string &name, const Vec3 &value);
+
+        void SetVec4(const std::string &name, const Vec4 &value);
+
+        void SetMat3(const std::string &name, const Mat3 &value);
+
+        void SetMat4(const std::string &name, const Mat4 &value);
+
+        void SetTexture(const std::string &name, std::shared_ptr<Texture2D> texture);
 
         // Property getters
-        [[nodiscard]] std::optional<float> GetFloat(const std::string& name) const;
-        [[nodiscard]] std::optional<int> GetInt(const std::string& name) const;
-        [[nodiscard]] std::optional<Vec3> GetVec3(const std::string& name) const;
-        [[nodiscard]] std::optional<Vec4> GetVec4(const std::string& name) const;
-        [[nodiscard]] bool HasProperty(const std::string& name) const;
+        [[nodiscard]] std::optional<float> GetFloat(const std::string &name) const;
+
+        [[nodiscard]] std::optional<int> GetInt(const std::string &name) const;
+
+        [[nodiscard]] std::optional<Vec3> GetVec3(const std::string &name) const;
+
+        [[nodiscard]] std::optional<Vec4> GetVec4(const std::string &name) const;
+
+        [[nodiscard]] bool HasProperty(const std::string &name) const;
 
         virtual void Apply() const;
+
         virtual void Bind() const;
+
         virtual void Unbind() const;
 
     protected:
@@ -54,7 +70,8 @@ namespace ash {
         // mais réinitialisées à chaque Apply() pour éviter les conflits
         mutable std::unordered_map<std::string, uint32_t> m_TextureUnits;
 
-        void ApplyProperty(const std::string& name, const MaterialValue& value) const;
+        void ApplyProperty(const std::string &name, const MaterialValue &value) const;
+
         void ResetTextureUnits() const; // NOUVEAU: Méthode pour réinitialiser les unités
     };
 
@@ -64,9 +81,11 @@ namespace ash {
     class CanvasItemMaterial : public Material {
     public:
         CanvasItemMaterial();
+
         explicit CanvasItemMaterial(std::shared_ptr<ShaderProgram> customShader);
 
-        void SetAlbedo(const Vec4& color);
+        void SetAlbedo(const Vec4 &color);
+
         void SetTexture(std::shared_ptr<Texture2D> texture);
 
         [[nodiscard]] Vec4 GetAlbedo() const;
@@ -78,15 +97,19 @@ namespace ash {
     class SpatialMaterial : public Material {
     public:
         SpatialMaterial();
+
         explicit SpatialMaterial(std::shared_ptr<ShaderProgram> customShader);
 
         // Albedo
-        void SetAlbedo(const Vec4& color);
+        void SetAlbedo(const Vec4 &color);
+
         void SetAlbedoTexture(std::shared_ptr<Texture2D> texture);
 
         // Surface properties
         void SetMetallic(float value);
+
         void SetRoughness(float value);
+
         void SetSpecular(float value);
 
         // Flags
@@ -94,8 +117,11 @@ namespace ash {
 
         // Getters
         [[nodiscard]] Vec4 GetAlbedo() const;
+
         [[nodiscard]] float GetMetallic() const;
+
         [[nodiscard]] float GetRoughness() const;
+
         [[nodiscard]] float GetSpecular() const;
     };
 
@@ -105,22 +131,30 @@ namespace ash {
     class ToonMaterial : public Material {
     public:
         ToonMaterial();
+
         explicit ToonMaterial(std::shared_ptr<ShaderProgram> customShader);
 
         // Albedo
-        void SetAlbedo(const Vec4& color);
+        void SetAlbedo(const Vec4 &color);
+
         void SetAlbedoTexture(std::shared_ptr<Texture2D> texture);
 
         // Toon properties
         void SetToonLevels(int levels);
+
         void SetOutlineThickness(float thickness);
-        void SetOutlineColor(const Vec3& color);
+
+        void SetOutlineColor(const Vec3 &color);
+
         void SetSpecularGlossiness(float glossiness);
+
         void SetRimAmount(float amount);
+
         void SetRimThreshold(float threshold);
 
         // Getters
         [[nodiscard]] Vec4 GetAlbedo() const;
+
         [[nodiscard]] int GetToonLevels() const;
     };
 
@@ -130,10 +164,12 @@ namespace ash {
     class SkyMaterial : public Material {
     public:
         SkyMaterial();
+
         explicit SkyMaterial(std::shared_ptr<ShaderProgram> customShader);
 
-        void SetSkyColor(const Vec4& color);
-        void SetCubemap(const std::shared_ptr<TextureCubeMap>& cubemap);
+        void SetSkyColor(const Vec4 &color);
+
+        void SetCubemap(const std::shared_ptr<TextureCubeMap> &cubemap);
 
         [[nodiscard]] Vec4 GetSkyColor() const;
     };
@@ -144,31 +180,32 @@ namespace ash {
     class MaterialFactory {
     public:
         // 2D Materials
-        static std::shared_ptr<CanvasItemMaterial> CreateCanvasItem(const Vec4& albedo = Vec4(1.0f));
+        static std::shared_ptr<CanvasItemMaterial> CreateCanvasItem(const Vec4 &albedo = Vec4(1.0f));
+
         static std::shared_ptr<CanvasItemMaterial> CreateCanvasItemTextured(std::shared_ptr<Texture2D> texture);
 
         // 3D Materials
         static std::shared_ptr<SpatialMaterial> CreateSpatial(
-            const Vec4& albedo = Vec4(1.0f),
+            const Vec4 &albedo = Vec4(1.0f),
             float metallic = 0.0f,
             float roughness = 0.5f,
             float specular = 0.5f
         );
 
-        static std::shared_ptr<SpatialMaterial> CreateSpatialUnlit(const Vec4& albedo = Vec4(1.0f));
+        static std::shared_ptr<SpatialMaterial> CreateSpatialUnlit(const Vec4 &albedo = Vec4(1.0f));
 
         // Toon/Cell-Shaded Materials
         static std::shared_ptr<ToonMaterial> CreateToon(
-            const Vec4& albedo = Vec4(1.0f),
+            const Vec4 &albedo = Vec4(1.0f),
             int toonLevels = 3,
             float rimAmount = 0.716f
         );
 
         // Environment
-        static std::shared_ptr<SkyMaterial> CreateSky(const Vec4& color = Vec4(0.5f, 0.7f, 1.0f, 1.0f));
+        static std::shared_ptr<SkyMaterial> CreateSky(const Vec4 &color = Vec4(0.5f, 0.7f, 1.0f, 1.0f));
+
         static std::shared_ptr<SkyMaterial> CreateSkyCubemap(std::shared_ptr<TextureCubeMap> cubemap);
     };
-
 }
 
 #endif // ASHEN_MATERIAL_H

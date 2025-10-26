@@ -12,9 +12,9 @@ namespace ash {
     Renderer::Statistics Renderer::s_Stats;
 
     void Renderer::Init() {
-        RenderCommand::EnableDepthTest(true);
+        RenderCommand::EnableDepthTest();
         RenderCommand::SetDepthFunc(DepthFunc::Less);
-        RenderCommand::EnableCulling(true);
+        RenderCommand::EnableCulling();
         RenderCommand::SetCullFace(CullFaceMode::Back);
         RenderCommand::SetFrontFace(FrontFace::CounterClockwise);
 
@@ -44,7 +44,7 @@ namespace ash {
         RenderCommand::SetViewport(width, height);
     }
 
-    void Renderer::Draw(const VertexArray& vao) {
+    void Renderer::Draw(const VertexArray &vao) {
         if (vao.HasIndexBuffer()) {
             DrawIndexed(vao, vao.GetIndexCount(), 0);
         } else {
@@ -52,11 +52,11 @@ namespace ash {
         }
     }
 
-    void Renderer::DrawIndexed(const VertexArray& vao, const uint32_t indexCount,
-                                const uint32_t indexOffset) {
+    void Renderer::DrawIndexed(const VertexArray &vao, const uint32_t indexCount,
+                               const uint32_t indexOffset) {
         vao.Bind();
 
-        const void* offset = reinterpret_cast<const void*>(indexOffset * sizeof(uint32_t));
+        const void *offset = reinterpret_cast<const void *>(indexOffset * sizeof(uint32_t));
         RenderCommand::DrawElements(PrimitiveType::Triangles, static_cast<int>(indexCount),
                                     IndexType::UnsignedInt, offset);
 
@@ -65,8 +65,8 @@ namespace ash {
         s_Stats.Triangles += indexCount / 3;
     }
 
-    void Renderer::DrawArrays(const VertexArray& vao, const uint32_t vertexCount,
-                               const uint32_t vertexOffset) {
+    void Renderer::DrawArrays(const VertexArray &vao, const uint32_t vertexCount,
+                              const uint32_t vertexOffset) {
         vao.Bind();
 
         RenderCommand::DrawArrays(PrimitiveType::Triangles, static_cast<int>(vertexOffset),
@@ -77,29 +77,29 @@ namespace ash {
         s_Stats.Triangles += vertexCount / 3;
     }
 
-    void Renderer::DrawInstanced(const VertexArray& vao, const uint32_t instanceCount) {
+    void Renderer::DrawInstanced(const VertexArray &vao, const uint32_t instanceCount) {
         if (vao.HasIndexBuffer()) {
             DrawIndexedInstanced(vao, vao.GetIndexCount(), instanceCount, 0);
         } else {
             vao.Bind();
             RenderCommand::DrawArraysInstanced(PrimitiveType::Triangles, 0,
-                                                static_cast<int>(vao.GetVertexCount()),
-                                                static_cast<int>(instanceCount));
+                                               static_cast<int>(vao.GetVertexCount()),
+                                               static_cast<int>(instanceCount));
 
             s_Stats.DrawCalls++;
             s_Stats.Vertices += vao.GetVertexCount() * instanceCount;
-            s_Stats.Triangles += (vao.GetVertexCount() / 3) * instanceCount;
+            s_Stats.Triangles += vao.GetVertexCount() / 3 * instanceCount;
         }
     }
 
-    void Renderer::DrawIndexedInstanced(const VertexArray& vao, const uint32_t indexCount,
-                                         const uint32_t instanceCount, const uint32_t indexOffset) {
+    void Renderer::DrawIndexedInstanced(const VertexArray &vao, const uint32_t indexCount,
+                                        const uint32_t instanceCount, const uint32_t indexOffset) {
         vao.Bind();
 
-        const void* offset = reinterpret_cast<const void*>(indexOffset * sizeof(uint32_t));
+        const void *offset = reinterpret_cast<const void *>(indexOffset * sizeof(uint32_t));
         RenderCommand::DrawElementsInstanced(PrimitiveType::Triangles, static_cast<int>(indexCount),
-                                              IndexType::UnsignedInt, offset,
-                                              static_cast<int>(instanceCount));
+                                             IndexType::UnsignedInt, offset,
+                                             static_cast<int>(instanceCount));
 
         s_Stats.DrawCalls++;
         s_Stats.Indices += indexCount * instanceCount;

@@ -19,6 +19,8 @@ namespace voxelity {
         setupSkybox();
         setupInputHandler();
 
+        ash::Logger::Error() << "test";
+
         m_world->updateLoadedChunks({}, m_config.renderDistance);
     }
 

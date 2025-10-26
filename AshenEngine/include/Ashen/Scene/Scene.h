@@ -34,10 +34,11 @@ namespace ash {
     class MeshEntity {
     public:
         MeshEntity(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material)
-            : m_Mesh(mesh), m_Material(material) {}
+            : m_Mesh(mesh), m_Material(material) {
+        }
 
-        Transform& GetTransform() { return m_Transform; }
-        const Transform& GetTransform() const { return m_Transform; }
+        Transform &GetTransform() { return m_Transform; }
+        const Transform &GetTransform() const { return m_Transform; }
 
         void SetMesh(std::shared_ptr<Mesh> mesh) { m_Mesh = mesh; }
         std::shared_ptr<Mesh> GetMesh() const { return m_Mesh; }
@@ -60,7 +61,8 @@ namespace ash {
      */
     class Scene {
     public:
-        Scene(const std::string& name = "Scene") : m_Name(name) {}
+        Scene(const std::string &name = "Scene") : m_Name(name) {
+        }
 
         // Entity management
         std::shared_ptr<MeshEntity> CreateEntity(
@@ -72,7 +74,7 @@ namespace ash {
             return entity;
         }
 
-        void RemoveEntity(const std::shared_ptr<MeshEntity>& entity) {
+        void RemoveEntity(const std::shared_ptr<MeshEntity> &entity) {
             m_Entities.erase(
                 std::remove(m_Entities.begin(), m_Entities.end(), entity),
                 m_Entities.end()
@@ -84,7 +86,7 @@ namespace ash {
         }
 
         // Rendering
-        void Render(Camera& camera) {
+        void Render(Camera &camera) {
             Renderer3D::BeginScene(camera);
             Renderer3D::SetEnvironment(m_Environment);
             Renderer3D::ClearLights();
@@ -93,12 +95,12 @@ namespace ash {
             if (m_DirectionalLight) {
                 Renderer3D::SetDirectionalLight(*m_DirectionalLight);
             }
-            for (const auto& light : m_PointLights) {
+            for (const auto &light: m_PointLights) {
                 Renderer3D::AddPointLight(light);
             }
 
             // Render entities
-            for (const auto& entity : m_Entities) {
+            for (const auto &entity: m_Entities) {
                 if (entity && entity->IsVisible()) {
                     Renderer3D::Submit(
                         entity->GetMesh(),
@@ -112,14 +114,14 @@ namespace ash {
         }
 
         // Lighting
-        void SetDirectionalLight(const DirectionalLight& light) {
+        void SetDirectionalLight(const DirectionalLight &light) {
             if (!m_DirectionalLight) {
                 m_DirectionalLight = std::make_unique<DirectionalLight>();
             }
             *m_DirectionalLight = light;
         }
 
-        void AddPointLight(const PointLight& light) {
+        void AddPointLight(const PointLight &light) {
             m_PointLights.push_back(light);
         }
 
@@ -129,23 +131,23 @@ namespace ash {
         }
 
         // Environment
-        void SetEnvironment(const SceneEnvironment& env) {
+        void SetEnvironment(const SceneEnvironment &env) {
             m_Environment = env;
         }
 
-        SceneEnvironment& GetEnvironment() { return m_Environment; }
+        SceneEnvironment &GetEnvironment() { return m_Environment; }
 
         // Properties
-        const std::string& GetName() const { return m_Name; }
-        void SetName(const std::string& name) { m_Name = name; }
+        const std::string &GetName() const { return m_Name; }
+        void SetName(const std::string &name) { m_Name = name; }
 
-        const Vector<std::shared_ptr<MeshEntity>>& GetEntities() const {
+        const Vector<std::shared_ptr<MeshEntity> > &GetEntities() const {
             return m_Entities;
         }
 
     private:
         std::string m_Name;
-        Vector<std::shared_ptr<MeshEntity>> m_Entities;
+        Vector<std::shared_ptr<MeshEntity> > m_Entities;
         std::unique_ptr<DirectionalLight> m_DirectionalLight;
         Vector<PointLight> m_PointLights;
         SceneEnvironment m_Environment;

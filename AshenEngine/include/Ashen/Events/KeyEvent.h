@@ -1,78 +1,118 @@
 #ifndef ASHEN_KEYEVENT_H
 #define ASHEN_KEYEVENT_H
 
-#include <sstream>
+#include <format>
 
+#include "Ashen/Core/Codes.h"
 #include "Ashen/Events/Event.h"
-#include "Ashen/Core/KeyCodes.h"
 
 namespace ash {
+    // =============================================================================
+    // Base KeyEvent
+    // =============================================================================
+
     class KeyEvent : public Event {
     public:
-        KeyCode GetKeyCode() const { return m_KeyCode; }
+        [[nodiscard]] KeyCode GetKeyCode() const noexcept { return m_KeyCode; }
 
-        EVENT_CLASS_CATEGORY (EventCategoryKeyboard
-        |
-        EventCategoryInput
-        )
+        [[nodiscard]] EventCategory GetCategories() const noexcept override {
+            return EventCategory::Keyboard | EventCategory::Input;
+        }
 
     protected:
-        explicit KeyEvent(const KeyCode keycode)
+        explicit KeyEvent(const KeyCode keycode) noexcept
             : m_KeyCode(keycode) {
         }
 
         KeyCode m_KeyCode;
     };
 
+    // =============================================================================
+    // KeyPressedEvent
+    // =============================================================================
+
     class KeyPressedEvent final : public KeyEvent {
     public:
-        explicit KeyPressedEvent(const KeyCode keycode, const bool isRepeat = false)
+        explicit KeyPressedEvent(const KeyCode keycode, const bool isRepeat = false) noexcept
             : KeyEvent(keycode), m_IsRepeat(isRepeat) {
         }
 
-        bool IsRepeat() const { return m_IsRepeat; }
+        [[nodiscard]] bool IsRepeat() const noexcept { return m_IsRepeat; }
 
-        std::string toString() const override {
-            std::stringstream ss;
-            ss << "KeyPressedEvent: " << m_KeyCode << " (repeat = " << m_IsRepeat << ")";
-            return ss.str();
+        [[nodiscard]] std::string ToString() const override {
+            return std::format("KeyPressedEvent: {} (repeat={})",
+                               static_cast<int>(m_KeyCode), m_IsRepeat);
         }
 
-        EVENT_CLASS_TYPE (KeyPressed)
+        static constexpr EventType GetStaticType() noexcept {
+            return EventType::KeyPressed;
+        }
+
+        [[nodiscard]] EventType GetType() const noexcept override {
+            return GetStaticType();
+        }
+
+        [[nodiscard]] std::string_view GetName() const noexcept override {
+            return "KeyPressed";
+        }
 
     private:
         bool m_IsRepeat;
     };
 
+    // =============================================================================
+    // KeyReleasedEvent
+    // =============================================================================
+
     class KeyReleasedEvent final : public KeyEvent {
     public:
-        explicit KeyReleasedEvent(const KeyCode keycode)
+        explicit KeyReleasedEvent(const KeyCode keycode) noexcept
             : KeyEvent(keycode) {
         }
 
-        std::string toString() const override {
-            std::stringstream ss;
-            ss << "KeyReleasedEvent: " << m_KeyCode;
-            return ss.str();
+        [[nodiscard]] std::string ToString() const override {
+            return std::format("KeyReleasedEvent: {}", static_cast<int>(m_KeyCode));
         }
 
-        EVENT_CLASS_TYPE (KeyReleased)
+        static constexpr EventType GetStaticType() noexcept {
+            return EventType::KeyReleased;
+        }
+
+        [[nodiscard]] EventType GetType() const noexcept override {
+            return GetStaticType();
+        }
+
+        [[nodiscard]] std::string_view GetName() const noexcept override {
+            return "KeyReleased";
+        }
     };
+
+    // =============================================================================
+    // KeyTypedEvent
+    // =============================================================================
 
     class KeyTypedEvent final : public KeyEvent {
     public:
-        explicit KeyTypedEvent(const KeyCode keycode)
+        explicit KeyTypedEvent(const KeyCode keycode) noexcept
             : KeyEvent(keycode) {
         }
 
-        std::string toString() const override {
-            std::stringstream ss;
-            ss << "KeyTypedEvent: " << m_KeyCode;
-            return ss.str();
+        [[nodiscard]] std::string ToString() const override {
+            return std::format("KeyTypedEvent: {}", static_cast<int>(m_KeyCode));
         }
 
-        EVENT_CLASS_TYPE (KeyTyped)
+        static constexpr EventType GetStaticType() noexcept {
+            return EventType::KeyTyped;
+        }
+
+        [[nodiscard]] EventType GetType() const noexcept override {
+            return GetStaticType();
+        }
+
+        [[nodiscard]] std::string_view GetName() const noexcept override {
+            return "KeyTyped";
+        }
     };
-}
+} // namespace ash
 
 #endif //ASHEN_KEYEVENT_H

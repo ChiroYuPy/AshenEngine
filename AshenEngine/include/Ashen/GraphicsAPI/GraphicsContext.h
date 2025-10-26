@@ -4,18 +4,17 @@
 struct GLFWwindow;
 
 namespace ash {
-
     class GraphicsContext {
     public:
-        explicit GraphicsContext(GLFWwindow* windowHandle);
+        explicit GraphicsContext(GLFWwindow *windowHandle);
 
         void Init() const;
+
         void SwapBuffers() const;
 
     private:
-        GLFWwindow* m_WindowHandle;
+        GLFWwindow *m_WindowHandle;
     };
-
 }
 
 #endif //ASHEN_GRAPHICSCONTEXT_H

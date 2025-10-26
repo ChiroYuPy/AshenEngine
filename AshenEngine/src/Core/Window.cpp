@@ -11,10 +11,9 @@
 #include "Ashen/Events/MouseEvent.h"
 
 namespace ash {
-
     static uint8_t s_GLFWWindowCount = 0;
 
-    static void GLFWErrorCallback(int error, const char* description) {
+    static void GLFWErrorCallback(int error, const char *description) {
         Logger::Error("GLFW Error ({0}): {1}", error, description);
     }
 
@@ -64,7 +63,7 @@ namespace ash {
         m_Handle = nullptr;
     }
 
-    void* Window::GetHandle() const {
+    void *Window::GetHandle() const {
         return m_Handle;
     }
 
@@ -76,7 +75,7 @@ namespace ash {
 
         // Window resize callback
         glfwSetWindowSizeCallback(m_Handle, [](GLFWwindow *window, const int width, const int height) {
-            void* up = glfwGetWindowUserPointer(window);
+            void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
             WindowData &data = *static_cast<WindowData *>(up);
             data.Size.x = width;
@@ -88,7 +87,7 @@ namespace ash {
 
         // Window close callback
         glfwSetWindowCloseCallback(m_Handle, [](GLFWwindow *window) {
-            void* up = glfwGetWindowUserPointer(window);
+            void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
             const WindowData &data = *static_cast<WindowData *>(up);
 
@@ -98,7 +97,7 @@ namespace ash {
 
         // Window focus callback
         glfwSetWindowFocusCallback(m_Handle, [](GLFWwindow *window, const int focused) {
-            void* up = glfwGetWindowUserPointer(window);
+            void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
             const WindowData &data = *static_cast<WindowData *>(up);
 
@@ -113,23 +112,23 @@ namespace ash {
 
         // Key callback
         glfwSetKeyCallback(m_Handle, [](GLFWwindow *window, const int key, int scancode, const int action, int mods) {
-            void* up = glfwGetWindowUserPointer(window);
+            void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
             const WindowData &data = *static_cast<WindowData *>(up);
 
             switch (action) {
                 case GLFW_PRESS: {
-                    KeyPressedEvent event(key, false);
+                    KeyPressedEvent event(static_cast<KeyCode>(key), false);
                     data.EventCallback(event);
                     break;
                 }
                 case GLFW_RELEASE: {
-                    KeyReleasedEvent event(key);
+                    KeyReleasedEvent event(static_cast<KeyCode>(key));
                     data.EventCallback(event);
                     break;
                 }
                 case GLFW_REPEAT: {
-                    KeyPressedEvent event(key, true);
+                    KeyPressedEvent event(static_cast<KeyCode>(key), true);
                     data.EventCallback(event);
                     break;
                 }
@@ -138,28 +137,28 @@ namespace ash {
 
         // Char callback (for text input)
         glfwSetCharCallback(m_Handle, [](GLFWwindow *window, const unsigned int keycode) {
-            void* up = glfwGetWindowUserPointer(window);
+            void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
             const WindowData &data = *static_cast<WindowData *>(up);
 
-            KeyTypedEvent event(keycode);
+            KeyTypedEvent event(static_cast<KeyCode>(keycode));
             data.EventCallback(event);
         });
 
         // Mouse button callback
         glfwSetMouseButtonCallback(m_Handle, [](GLFWwindow *window, const int button, const int action, int mods) {
-            void* up = glfwGetWindowUserPointer(window);
+            void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
             const WindowData &data = *static_cast<WindowData *>(up);
 
             switch (action) {
                 case GLFW_PRESS: {
-                    MouseButtonPressedEvent event(button);
+                    MouseButtonPressedEvent event(static_cast<MouseButton>(button));
                     data.EventCallback(event);
                     break;
                 }
                 case GLFW_RELEASE: {
-                    MouseButtonReleasedEvent event(button);
+                    MouseButtonReleasedEvent event(static_cast<MouseButton>(button));
                     data.EventCallback(event);
                     break;
                 }
@@ -168,7 +167,7 @@ namespace ash {
 
         // Mouse scroll callback
         glfwSetScrollCallback(m_Handle, [](GLFWwindow *window, const double xOffset, const double yOffset) {
-            void* up = glfwGetWindowUserPointer(window);
+            void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
             const WindowData &data = *static_cast<WindowData *>(up);
 
@@ -178,7 +177,7 @@ namespace ash {
 
         // Mouse position callback
         glfwSetCursorPosCallback(m_Handle, [](GLFWwindow *window, const double xPos, const double yPos) {
-            void* up = glfwGetWindowUserPointer(window);
+            void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
             const WindowData &data = *static_cast<WindowData *>(up);
 
@@ -187,8 +186,8 @@ namespace ash {
         });
 
         // Framebuffer size callback (if you care about framebuffer vs window size)
-        glfwSetFramebufferSizeCallback(m_Handle, [](GLFWwindow* window, const int width, const int height) {
-            void* up = glfwGetWindowUserPointer(window);
+        glfwSetFramebufferSizeCallback(m_Handle, [](GLFWwindow *window, const int width, const int height) {
+            void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
             WindowData &data = *static_cast<WindowData *>(up);
 

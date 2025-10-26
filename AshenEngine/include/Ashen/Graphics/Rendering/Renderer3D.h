@@ -67,47 +67,57 @@ namespace ash {
     class Renderer3D {
     public:
         static void Init();
+
         static void Shutdown();
 
         // Scene management
-        static void BeginScene(const Camera& camera);
+        static void BeginScene(const Camera &camera);
+
         static void EndScene();
 
         // Submit objects for rendering
-        static void Submit(const RenderObject& object);
+        static void Submit(const RenderObject &object);
+
         static void Submit(
-            const Ref<Mesh>& mesh,
-            const Ref<Material>& material,
-            const Mat4& transform = Mat4(1.0f)
+            const Ref<Mesh> &mesh,
+            const Ref<Material> &material,
+            const Mat4 &transform = Mat4(1.0f)
         );
 
         // Draw immediately without queuing
         static void DrawImmediate(
-            const Ref<Mesh>& mesh,
-            const Ref<Material>& material,
-            const Mat4& transform = Mat4(1.0f)
+            const Ref<Mesh> &mesh,
+            const Ref<Material> &material,
+            const Mat4 &transform = Mat4(1.0f)
         );
 
         // Lighting
-        static void SetDirectionalLight(const DirectionalLight& light);
-        static void AddPointLight(const PointLight& light);
+        static void SetDirectionalLight(const DirectionalLight &light);
+
+        static void AddPointLight(const PointLight &light);
+
         static void ClearLights();
 
         // Environment
-        static void SetEnvironment(const SceneEnvironment& env);
-        static void SetSkybox(const Ref<TextureCubeMap>& skybox);
-        static void SetAmbientLight(const Vec3& color);
+        static void SetEnvironment(const SceneEnvironment &env);
+
+        static void SetSkybox(const Ref<TextureCubeMap> &skybox);
+
+        static void SetAmbientLight(const Vec3 &color);
 
         // Utilities
         static void SetWireframeMode(bool enabled);
-        static const RenderStats& GetStats();
+
+        static const RenderStats &GetStats();
+
         static void ResetStats();
 
     private:
         struct SceneData;
         static std::unique_ptr<SceneData> s_Data;
 
-        static void SetupLighting(const Ref<ShaderProgram>& shader);
+        static void SetupLighting(const Ref<ShaderProgram> &shader);
+
         static void FlushRenderQueue();
     };
 }

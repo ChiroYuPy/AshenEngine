@@ -3,55 +3,38 @@
 
 #include <filesystem>
 
-#include "Ashen/Graphics/Objects/Material.h"
-#include "Ashen/Graphics/Objects/Mesh.h"
-
 namespace ash {
     namespace fs = std::filesystem;
 
-    /**
-     * @brief Result of loading a model file
-     */
-    struct ModelData {
-        Vector<Mesh> meshes;
-        std::unordered_map<std::string, std::shared_ptr<Material>> materials;
-        bool hasMultipleMeshes = false;
-
-        [[nodiscard]] bool IsValid() const { return !meshes.empty(); }
-    };
+    // Forward declaration
+    class Mesh;
 
     /**
-     * @brief Mesh loader supporting multiple formats
+     * @brief Static mesh loader - all methods are static
+     * Loads 3D models from various file formats
      */
-    class MeshLoader {
+    class MeshLoader final {
     public:
-        /**
-         * @brief Load a mesh from file
-         * @param path Path to model file
-         * @param flipUVs Whether to flip texture coordinates vertically
-         * @return ModelData containing meshes and materials
-         */
-        static ModelData Load(const fs::path& path, bool flipUVs = true);
+        // No instantiation
+        MeshLoader() = delete;
 
         /**
-         * @brief Load a single mesh from file (uses first mesh if multiple)
+         * @brief Load mesh from file
+         * Supported formats: .obj
+         * @param path Path to mesh file
+         * @param flipUVs Whether to flip V coordinate (default: true for OpenGL)
+         * @return Loaded mesh (moved)
+         * @throws std::runtime_error if file not found or loading fails
          */
-        static Mesh LoadSingle(const fs::path& path, bool flipUVs = true);
+        [[nodiscard]] static Mesh Load(
+            const fs::path& path,
+            bool flipUVs = true
+        );
 
         /**
-         * @brief Check if file format is supported
+         * @brief Check if file extension is supported
          */
-        static bool IsSupported(const std::string& extension);
-
-        /**
-         * @brief Get list of supported formats
-         */
-        static Vector<std::string> GetSupportedFormats();
-
-        /**
-         * @brief Scan directory for mesh files
-         */
-        static Vector<std::string> ScanForMeshes(const fs::path& directory);
+        [[nodiscard]] static bool IsSupported(const std::string& extension);
     };
 }
 

@@ -1,6 +1,6 @@
 #version 430 core
 
-layout(location = 0) in uint iData;
+layout (location = 0) in uint iData;
 
 uniform mat4 u_ViewProjection;
 uniform vec3 u_ChunkPos;
@@ -30,12 +30,12 @@ vec3(0, -1, 0)// Y-
 );
 
 void main() {
-    uint x       = (iData >>  0u) & 31u;
-    uint y       = (iData >>  5u) & 31u;
-    uint z       = (iData >> 10u) & 31u;
-    uint faceID  = (iData >> 15u) & 7u;
+    uint x = (iData >> 0u) & 31u;
+    uint y = (iData >> 5u) & 31u;
+    uint z = (iData >> 10u) & 31u;
+    uint faceID = (iData >> 15u) & 7u;
     uint voxelID = (iData >> 18u) & 255u;
-    uint aoData  = (iData >> 26u) & 3u;// 2 bits pour AO (0-3)
+    uint aoData = (iData >> 26u) & 3u;// 2 bits pour AO (0-3)
 
     vec3 voxelPos = vec3(float(x), float(y), float(z));
     vec4 localPos = vec4(FACE_QUAD[faceID][gl_VertexID], 1.0);

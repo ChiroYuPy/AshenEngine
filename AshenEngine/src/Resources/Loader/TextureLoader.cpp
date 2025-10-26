@@ -1,37 +1,23 @@
 #include "Ashen/Resources/Loader/TextureLoader.h"
 
-#include "Ashen/Core/Logger.h"
+#include "Ashen/GraphicsAPI/Texture.h"
+#include "Ashen/Utils/ImageLoader.h"
+#include "Ashen/Utils/FileSystem.h"
 
 namespace ash {
-    Texture2D TextureLoader::Load2D(const fs::path& path, const TextureConfig& config) {
-        if (!FileSystem::Exists(path))
+
+    Texture2D TextureLoader::Load2D(
+        const fs::path& path,
+        const TextureConfig& config
+    ) {
+        if (!FileSystem::Exists(path)) {
             throw std::runtime_error("Texture file not found: " + path.string());
+        }
 
+        // Load image data
         const ImageData imageData = ImageLoader::Load(path, true);
-        return FromImageData(imageData, config);
-    }
 
-    Texture2D TextureLoader::FromImageData(const ImageData& imageData, const TextureConfig& config) {
-        if (!imageData.IsValid())
-            throw std::runtime_error("Invalid image data");
-
-        Texture2D texture;
-
-        TextureFormat internalFormat, format;
-        GetTextureFormats(imageData.channels, internalFormat, format);
-
-        texture.SetData(
-            internalFormat,
-            imageData.width,
-            imageData.height,
-            format,
-            PixelDataType::UnsignedByte,
-            imageData.pixels.data()
-        );
-
-        texture.ApplyConfig(config);
-
-        return texture;
+        return CreateFromImageData(imageData, config);
     }
 
     TextureCubeMap TextureLoader::LoadCubemap(
@@ -47,13 +33,30 @@ namespace ash {
         };
 
         for (int i = 0; i < 6; ++i) {
-            if (!FileSystem::Exists(facesPaths[i]))
+            if (!FileSystem::Exists(facesPaths[i])) {
                 throw std::runtime_error("Cubemap face not found: " + facesPaths[i].string());
+            }
 
             const ImageData imageData = ImageLoader::Load(facesPaths[i], false);
 
+            // Determine texture formats
             TextureFormat internalFormat, format;
-            GetTextureFormats(imageData.channels, internalFormat, format);
+            switch (imageData.channels) {
+                case 1:
+                    internalFormat = TextureFormat::R8;
+                    format = TextureFormat::Red;
+                    break;
+                case 3:
+                    internalFormat = TextureFormat::RGB8;
+                    format = TextureFormat::RGB;
+                    break;
+                case 4:
+                    internalFormat = TextureFormat::RGBA8;
+                    format = TextureFormat::RGBA;
+                    break;
+                default:
+                    throw std::runtime_error("Unsupported channel count: " + std::to_string(imageData.channels));
+            }
 
             cubemap.SetFace(
                 faces[i],
@@ -70,43 +73,41 @@ namespace ash {
         return cubemap;
     }
 
-    fs::path TextureLoader::FindTexture(const fs::path& basePath, const std::string& textureName) {
-        // Check if the exact path exists
+    fs::path TextureLoader::FindTexture(
+        const fs::path& basePath,
+        const std::string& textureName
+    ) {
+        // Check exact path first
         fs::path texPath = basePath / textureName;
-        if (FileSystem::Exists(texPath))
+        if (FileSystem::Exists(texPath)) {
             return texPath;
+        }
 
         // Try with supported extensions
-        for (const auto& ext : ImageLoader::GetSupportedExtensions()) {
+        const auto extensions = ImageLoader::GetSupportedExtensions();
+        for (const auto& ext : extensions) {
             texPath = basePath / (textureName + ext);
-            if (FileSystem::Exists(texPath))
+            if (FileSystem::Exists(texPath)) {
                 return texPath;
+            }
         }
 
-        return {};
+        return {}; // Not found
     }
 
-    Vector<std::string> TextureLoader::ScanForTextures(const fs::path& directory) {
-        Vector<std::string> textures;
-        const auto files = FileSystem::ScanDirectory(
-            directory,
-            ImageLoader::GetSupportedExtensions(),
-            true
-        );
-
-        for (const auto& file : files) {
-            textures.push_back(file.filename().string());
-        }
-
-        return textures;
-    }
-
-    void TextureLoader::GetTextureFormats(
-        const int channels,
-        TextureFormat& internalFormat,
-        TextureFormat& format
+    Texture2D TextureLoader::CreateFromImageData(
+        const ImageData& imageData,
+        const TextureConfig& config
     ) {
-        switch (channels) {
+        if (!imageData.IsValid()) {
+            throw std::runtime_error("Invalid image data");
+        }
+
+        Texture2D texture;
+
+        // Determine texture formats based on channel count
+        TextureFormat internalFormat, format;
+        switch (imageData.channels) {
             case 1:
                 internalFormat = TextureFormat::R8;
                 format = TextureFormat::Red;
@@ -120,7 +121,22 @@ namespace ash {
                 format = TextureFormat::RGBA;
                 break;
             default:
-                throw std::runtime_error("Unsupported number of channels: " + std::to_string(channels));
+                throw std::runtime_error("Unsupported channel count: " + std::to_string(imageData.channels));
         }
+
+        // Upload texture data to GPU
+        texture.SetData(
+            internalFormat,
+            imageData.width,
+            imageData.height,
+            format,
+            PixelDataType::UnsignedByte,
+            imageData.pixels.data()
+        );
+
+        // Apply configuration (filtering, wrapping, mipmaps)
+        texture.ApplyConfig(config);
+
+        return texture;
     }
 }

@@ -5,10 +5,8 @@
 #include "Ashen/Core/Logger.h"
 
 namespace ash {
-
-    GraphicsContext::GraphicsContext(GLFWwindow* windowHandle)
-        : m_WindowHandle(windowHandle)
-    {
+    GraphicsContext::GraphicsContext(GLFWwindow *windowHandle)
+        : m_WindowHandle(windowHandle) {
         if (!m_WindowHandle)
             Logger::Error("Window handle is null!");
     }
@@ -37,5 +35,4 @@ namespace ash {
     void GraphicsContext::SwapBuffers() const {
         glfwSwapBuffers(m_WindowHandle);
     }
-
 }

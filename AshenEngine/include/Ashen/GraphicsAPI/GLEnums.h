@@ -277,7 +277,8 @@ namespace ash {
         IncrementWrap = GL_INCR_WRAP,
         Decrement = GL_DECR,
         DecrementWrap = GL_DECR_WRAP,
-        Invert = GL_INVERT
+        Invert = GL_INVERT,
+        Always = GL_ALWAYS,
     };
 
     enum class CullFaceMode : GLenum {

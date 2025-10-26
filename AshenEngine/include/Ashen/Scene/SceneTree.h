@@ -1,38 +1,91 @@
-#ifndef ASHEN_SCENETREE_H
-#define ASHEN_SCENETREE_H
+#ifndef ASHEN_SCENE_TREE_H
+#define ASHEN_SCENE_TREE_H
 
-#include <unordered_set>
+#include "Control.h"
 #include "Node.h"
+#include "Ashen/Events/Event.h"
 
 namespace ash {
     class SceneTree {
     public:
-        using NodeRef = std::shared_ptr<Node>;
-
         SceneTree();
+
         ~SceneTree();
 
-        [[nodiscard]] Node* GetRoot() const { return m_Root.get(); }
-        [[nodiscard]] Node* GetCurrentScene() const { return m_CurrentScene.get(); }
+        // Scene management
+        void ChangeScene(const Ref<Node> &newRoot);
 
-        void LoadScene(const NodeRef& scene);
-        void UnloadScene();
+        void ChangeSceneDeferred(const Ref<Node> &newRoot);
 
-        [[nodiscard]] Node* FindNodeByID(uint32_t id) const;
-        [[nodiscard]] Node* FindNodeByName(const std::string& name) const;
+        Ref<Node> GetRoot() const { return m_Root; }
+        Ref<Node> GetCurrentScene() const { return m_CurrentScene; }
 
-        void Update(float ts) const;
-        void Render() const;
+        // Frame processing
+        void Process(float delta);
 
-        void Destroy() { m_CurrentScene = nullptr; m_Root = nullptr; }
+        void PhysicsProcess(float delta);
+
+        void Input(Event &event);
+
+        // Node lifecycle
+        void NotifyNodeEnterTree(Node *node);
+
+        void NotifyNodeExitTree(Node *node);
+
+        void NotifyNodeReady(const Node *node);
+
+        // Queued deletion
+        void QueueDelete(const Ref<Node> &node);
+
+        void ProcessQueuedDeletions();
+
+        // Pausing
+        void SetPaused(const bool paused) { m_Paused = paused; }
+        bool IsPaused() const { return m_Paused; }
+
+        // Focus management (for UI)
+        void SetFocusedControl(Control *control);
+
+        Control *GetFocusedControl() const { return m_FocusedControl; }
+
+        // Node queries
+        Ref<Node> FindNodeByPath(const String &path) const;
+
+        Ref<Node> FindNodeByUUID(const UUID &uuid) const;
+
+        Vector<Ref<Node> > GetNodesInGroup(const String &group) const;
+
+        // Groups
+        void AddToGroup(Node *node, const String &group);
+
+        void RemoveFromGroup(Node *node, const String &group);
+
+        void CallGroup(const String &group, const String &method,
+                       const Function<void(Ref<Node>)> &callback);
+
+        // Signals
+        Function<void()> OnTreeChanged;
+        Function<void(Ref<Node>)> OnNodeAdded;
+        Function<void(Ref<Node>)> OnNodeRemoved;
 
     private:
-        NodeRef m_Root;
-        NodeRef m_CurrentScene;
-        std::unordered_set<uint32_t> m_NodeRegistry;
+        void ProcessNode(const Ref<Node> &node, float delta);
 
-        friend class Node;
+        void PhysicsProcessNode(const Ref<Node> &node, float delta);
+
+        void InputNode(const Ref<Node> &node, Event &event);
+
+        Ref<Node> m_Root;
+        Ref<Node> m_CurrentScene;
+        Vector<Ref<Node> > m_QueuedForDeletion;
+        HashMap<String, Vector<Node *> > m_Groups;
+        HashMap<UUID, Node *> m_UUIDMap;
+
+        Control *m_FocusedControl = nullptr;
+        bool m_Paused = false;
+
+        Ref<Node> m_DeferredSceneChange;
     };
-}
+} // namespace ash
 
-#endif //ASHEN_SCENETREE_H
+#endif // ASHEN_SCENE_TREE_H

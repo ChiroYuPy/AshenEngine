@@ -1425,7 +1425,8 @@ STBIDEF stbi_us *stbi_load_16_from_callbacks(stbi_io_callbacks const *clbk, void
     return stbi__load_and_postprocess_16bit(&s, x, y, channels_in_file, desired_channels);
 }
 
-STBIDEF stbi_uc *stbi_load_from_memory(stbi_uc const *buffer, const int len, int *x, int *y, int *comp, const int req_comp) {
+STBIDEF stbi_uc *stbi_load_from_memory(stbi_uc const *buffer, const int len, int *x, int *y, int *comp,
+                                       const int req_comp) {
     stbi__context s;
     stbi__start_mem(&s, buffer, len);
     return stbi__load_and_postprocess_8bit(&s, x, y, comp, req_comp);
@@ -1472,7 +1473,8 @@ data= stbi__load_and_postprocess_8bit(s, x, y, comp, req_comp);
    return stbi__errpf ("unknown image type", "Image not of any known type, or corrupt");
 }
 
-STBIDEF float *stbi_loadf_from_memory(stbi_uc const *buffer, const int len, int *x, int *y, int *comp, const int req_comp) {
+STBIDEF float *stbi_loadf_from_memory(stbi_uc const *buffer, const int len, int *x, int *y, int *comp,
+                                      const int req_comp) {
     stbi__context s;
     stbi__start_mem(&s, buffer, len);
     return stbi__loadf_main(&s, x, y, comp, req_comp);
@@ -1741,7 +1743,8 @@ static stbi_uc stbi__compute_y(const int r, const int g, const int b) {
 // nothing
 #else
 static unsigned char *
-stbi__convert_format(unsigned char *data, const int img_n, const int req_comp, const unsigned int x, const unsigned int y) {
+stbi__convert_format(unsigned char *data, const int img_n, const int req_comp, const unsigned int x,
+                     const unsigned int y) {
     int i, j;
     unsigned char *good;
 
@@ -1846,7 +1849,8 @@ static stbi__uint16 stbi__compute_y_16(const int r, const int g, const int b) {
 // nothing
 #else
 static stbi__uint16 *
-stbi__convert_format16(stbi__uint16 *data, const int img_n, const int req_comp, const unsigned int x, const unsigned int y) {
+stbi__convert_format16(stbi__uint16 *data, const int img_n, const int req_comp, const unsigned int x,
+                       const unsigned int y) {
     int i, j;
     stbi__uint16 *good;
 
@@ -3771,7 +3775,8 @@ static stbi_uc *stbi__resample_row_generic(stbi_uc *out, stbi_uc *in_near, stbi_
 // this is a reduced-precision calculation of YCbCr-to-RGB introduced
 // to make sure the code produces the same results in both SIMD and scalar
 #define stbi__float2fixed(x)  (((int) ((x) * 4096.0f + 0.5f)) << 8)
-static void stbi__YCbCr_to_RGB_row(stbi_uc *out, const stbi_uc *y, const stbi_uc *pcb, const stbi_uc *pcr, const int count,
+static void stbi__YCbCr_to_RGB_row(stbi_uc *out, const stbi_uc *y, const stbi_uc *pcb, const stbi_uc *pcr,
+                                   const int count,
                                    const int step) {
     int i;
     for (i = 0; i < count; ++i) {
@@ -3806,7 +3811,8 @@ static void stbi__YCbCr_to_RGB_row(stbi_uc *out, const stbi_uc *y, const stbi_uc
 }
 
 #if defined(STBI_SSE2) || defined(STBI_NEON)
-static void stbi__YCbCr_to_RGB_simd(stbi_uc *out, stbi_uc const *y, stbi_uc const *pcb, stbi_uc const *pcr, const int count,
+static void stbi__YCbCr_to_RGB_simd(stbi_uc *out, stbi_uc const *y, stbi_uc const *pcb, stbi_uc const *pcr,
+                                    const int count,
                                     const int step) {
     int i = 0;
 
@@ -4638,7 +4644,8 @@ static int stbi__do_zlib(stbi__zbuf *a, char *obuf, const int olen, const int ex
     return stbi__parse_zlib(a, parse_header);
 }
 
-STBIDEF char *stbi_zlib_decode_malloc_guesssize(const char *buffer, const int len, const int initial_size, int *outlen) {
+STBIDEF char *
+stbi_zlib_decode_malloc_guesssize(const char *buffer, const int len, const int initial_size, int *outlen) {
     stbi__zbuf a;
     char *p = (char *) stbi__malloc(initial_size);
     if (p == NULL) return NULL;
@@ -4657,7 +4664,8 @@ STBIDEF char *stbi_zlib_decode_malloc(char const *buffer, const int len, int *ou
     return stbi_zlib_decode_malloc_guesssize(buffer, len, 16384, outlen);
 }
 
-STBIDEF char *stbi_zlib_decode_malloc_guesssize_headerflag(const char *buffer, const int len, const int initial_size, int *outlen,
+STBIDEF char *stbi_zlib_decode_malloc_guesssize_headerflag(const char *buffer, const int len, const int initial_size,
+                                                           int *outlen,
                                                            const int parse_header) {
     stbi__zbuf a;
     char *p = (char *) stbi__malloc(initial_size);
@@ -4803,7 +4811,8 @@ static void stbi__create_png_alpha_expand8(stbi_uc *dest, stbi_uc *src, const st
 }
 
 // create the png data from post-deflated data
-static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, const stbi__uint32 raw_len, const int out_n, const stbi__uint32 x,
+static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, const stbi__uint32 raw_len, const int out_n,
+                                      const stbi__uint32 x,
                                       const stbi__uint32 y, const int depth, const int color) {
     int bytes = (depth == 16 ? 2 : 1);
     stbi__context *s = a->s;
@@ -4969,7 +4978,8 @@ static int stbi__create_png_image_raw(stbi__png *a, stbi_uc *raw, const stbi__ui
     return 1;
 }
 
-static int stbi__create_png_image(stbi__png *a, stbi_uc *image_data, stbi__uint32 image_data_len, const int out_n, const int depth,
+static int stbi__create_png_image(stbi__png *a, stbi_uc *image_data, stbi__uint32 image_data_len, const int out_n,
+                                  const int depth,
                                   const int color, const int interlaced) {
     int bytes = (depth == 16 ? 2 : 1);
     int out_bytes = out_n * bytes;
@@ -6257,7 +6267,8 @@ static int stbi__psd_decode_rle(stbi__context *s, stbi_uc *p, const int pixelCou
     return 1;
 }
 
-static void *stbi__psd_load(stbi__context *s, int *x, int *y, int *comp, const int req_comp, stbi__result_info *ri, const int bpc) {
+static void *stbi__psd_load(stbi__context *s, int *x, int *y, int *comp, const int req_comp, stbi__result_info *ri,
+                            const int bpc) {
     int pixelCount;
     int channelCount, compression;
     int channel, i;
@@ -7086,7 +7097,8 @@ static void *stbi__load_gif_main_outofmem(stbi__gif *g, stbi_uc *out, int **dela
     return stbi__errpuc("outofmem", "Out of memory");
 }
 
-static void *stbi__load_gif_main(stbi__context *s, int **delays, int *x, int *y, int *z, int *comp, const int req_comp) {
+static void *stbi__load_gif_main(stbi__context *s, int **delays, int *x, int *y, int *z, int *comp,
+                                 const int req_comp) {
     if (stbi__gif_test(s)) {
         int layers = 0;
         stbi_uc *u = 0;

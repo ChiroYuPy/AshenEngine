@@ -22,9 +22,9 @@ namespace ash {
     }
 
     void LayerStack::OnEvent(Event &event) {
-        for (const auto &layer: std::ranges::reverse_view(m_Layers)) {
-            layer->OnEvent(event);
-            if (event.Handled) break;
+        for (const auto &m_Layer: std::ranges::reverse_view(m_Layers)) {
+            m_Layer->OnEvent(event);
+            if (event.handled) break;
         }
     }
 }

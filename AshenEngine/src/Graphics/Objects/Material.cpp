@@ -2,7 +2,6 @@
 #include "Ashen/BuiltIn/BuiltInShader.h"
 
 namespace ash {
-
     // ========== Base Material ==========
 
     Material::Material(std::shared_ptr<ShaderProgram> shader)
@@ -13,43 +12,43 @@ namespace ash {
         m_Shader = std::move(shader);
     }
 
-    void Material::SetFloat(const std::string& name, float value) {
+    void Material::SetFloat(const std::string &name, float value) {
         m_Properties[name] = value;
     }
 
-    void Material::SetInt(const std::string& name, int value) {
+    void Material::SetInt(const std::string &name, int value) {
         m_Properties[name] = value;
     }
 
-    void Material::SetBool(const std::string& name, bool value) {
+    void Material::SetBool(const std::string &name, bool value) {
         m_Properties[name] = value;
     }
 
-    void Material::SetVec2(const std::string& name, const Vec2& value) {
+    void Material::SetVec2(const std::string &name, const Vec2 &value) {
         m_Properties[name] = value;
     }
 
-    void Material::SetVec3(const std::string& name, const Vec3& value) {
+    void Material::SetVec3(const std::string &name, const Vec3 &value) {
         m_Properties[name] = value;
     }
 
-    void Material::SetVec4(const std::string& name, const Vec4& value) {
+    void Material::SetVec4(const std::string &name, const Vec4 &value) {
         m_Properties[name] = value;
     }
 
-    void Material::SetMat3(const std::string& name, const Mat3& value) {
+    void Material::SetMat3(const std::string &name, const Mat3 &value) {
         m_Properties[name] = value;
     }
 
-    void Material::SetMat4(const std::string& name, const Mat4& value) {
+    void Material::SetMat4(const std::string &name, const Mat4 &value) {
         m_Properties[name] = value;
     }
 
-    void Material::SetTexture(const std::string& name, std::shared_ptr<Texture2D> texture) {
+    void Material::SetTexture(const std::string &name, std::shared_ptr<Texture2D> texture) {
         m_Properties[name] = std::move(texture);
     }
 
-    std::optional<float> Material::GetFloat(const std::string& name) const {
+    std::optional<float> Material::GetFloat(const std::string &name) const {
         const auto it = m_Properties.find(name);
         if (it != m_Properties.end() && std::holds_alternative<float>(it->second)) {
             return std::get<float>(it->second);
@@ -57,7 +56,7 @@ namespace ash {
         return std::nullopt;
     }
 
-    std::optional<int> Material::GetInt(const std::string& name) const {
+    std::optional<int> Material::GetInt(const std::string &name) const {
         const auto it = m_Properties.find(name);
         if (it != m_Properties.end() && std::holds_alternative<int>(it->second)) {
             return std::get<int>(it->second);
@@ -65,7 +64,7 @@ namespace ash {
         return std::nullopt;
     }
 
-    std::optional<Vec3> Material::GetVec3(const std::string& name) const {
+    std::optional<Vec3> Material::GetVec3(const std::string &name) const {
         const auto it = m_Properties.find(name);
         if (it != m_Properties.end() && std::holds_alternative<Vec3>(it->second)) {
             return std::get<Vec3>(it->second);
@@ -73,7 +72,7 @@ namespace ash {
         return std::nullopt;
     }
 
-    std::optional<Vec4> Material::GetVec4(const std::string& name) const {
+    std::optional<Vec4> Material::GetVec4(const std::string &name) const {
         const auto it = m_Properties.find(name);
         if (it != m_Properties.end() && std::holds_alternative<Vec4>(it->second)) {
             return std::get<Vec4>(it->second);
@@ -81,7 +80,7 @@ namespace ash {
         return std::nullopt;
     }
 
-    bool Material::HasProperty(const std::string& name) const {
+    bool Material::HasProperty(const std::string &name) const {
         return m_Properties.contains(name);
     }
 
@@ -90,42 +89,34 @@ namespace ash {
         m_TextureUnits.clear();
     }
 
-    void Material::ApplyProperty(const std::string& name, const MaterialValue& value) const {
+    void Material::ApplyProperty(const std::string &name, const MaterialValue &value) const {
         if (!m_Shader) return;
 
         // CORRECTION: Vérifier que l'uniform existe avant de le set
         if (!m_Shader->HasUniform(name)) {
-            return;  // Silencieusement ignorer les uniforms inexistants
+            return; // Silencieusement ignorer les uniforms inexistants
         }
 
-        std::visit([this, &name](auto&& arg) {
+        std::visit([this, &name](auto &&arg) {
             using T = std::decay_t<decltype(arg)>;
 
             if constexpr (std::is_same_v<T, float>) {
                 m_Shader->SetFloat(name, arg);
-            }
-            else if constexpr (std::is_same_v<T, int>) {
+            } else if constexpr (std::is_same_v<T, int>) {
                 m_Shader->SetInt(name, arg);
-            }
-            else if constexpr (std::is_same_v<T, bool>) {
+            } else if constexpr (std::is_same_v<T, bool>) {
                 m_Shader->SetBool(name, arg);
-            }
-            else if constexpr (std::is_same_v<T, Vec2>) {
+            } else if constexpr (std::is_same_v<T, Vec2>) {
                 m_Shader->SetVec2(name, arg);
-            }
-            else if constexpr (std::is_same_v<T, Vec3>) {
+            } else if constexpr (std::is_same_v<T, Vec3>) {
                 m_Shader->SetVec3(name, arg);
-            }
-            else if constexpr (std::is_same_v<T, Vec4>) {
+            } else if constexpr (std::is_same_v<T, Vec4>) {
                 m_Shader->SetVec4(name, arg);
-            }
-            else if constexpr (std::is_same_v<T, Mat3>) {
+            } else if constexpr (std::is_same_v<T, Mat3>) {
                 m_Shader->SetMat3(name, arg);
-            }
-            else if constexpr (std::is_same_v<T, Mat4>) {
+            } else if constexpr (std::is_same_v<T, Mat4>) {
                 m_Shader->SetMat4(name, arg);
-            }
-            else if constexpr (std::is_same_v<T, std::shared_ptr<Texture2D>>) {
+            } else if constexpr (std::is_same_v<T, std::shared_ptr<Texture2D> >) {
                 if (arg) {
                     // Utilise un compteur local à chaque Apply()
                     uint32_t unit = static_cast<uint32_t>(m_TextureUnits.size());
@@ -150,7 +141,7 @@ namespace ash {
         // Réinitialise les unités de texture avant d'appliquer
         ResetTextureUnits();
 
-        for (const auto& [name, value] : m_Properties) {
+        for (const auto &[name, value]: m_Properties) {
             ApplyProperty(name, value);
         }
     }
@@ -180,7 +171,7 @@ namespace ash {
         SetAlbedo(Vec4(1.0f));
     }
 
-    void CanvasItemMaterial::SetAlbedo(const Vec4& color) {
+    void CanvasItemMaterial::SetAlbedo(const Vec4 &color) {
         SetVec4("u_Albedo", color);
     }
 
@@ -212,12 +203,12 @@ namespace ash {
         SetBool("u_UseAlbedoTexture", false);
     }
 
-    void SpatialMaterial::SetAlbedo(const Vec4& color) {
+    void SpatialMaterial::SetAlbedo(const Vec4 &color) {
         SetVec4("u_Albedo", color);
     }
 
     void SpatialMaterial::SetAlbedoTexture(std::shared_ptr<Texture2D> texture) {
-        Material::SetTexture("u_AlbedoTexture", std::move(texture));
+        SetTexture("u_AlbedoTexture", std::move(texture));
         SetBool("u_UseAlbedoTexture", true);
     }
 
@@ -278,12 +269,12 @@ namespace ash {
         SetBool("u_UseAlbedoTexture", false);
     }
 
-    void ToonMaterial::SetAlbedo(const Vec4& color) {
+    void ToonMaterial::SetAlbedo(const Vec4 &color) {
         SetVec4("u_Albedo", color);
     }
 
     void ToonMaterial::SetAlbedoTexture(std::shared_ptr<Texture2D> texture) {
-        Material::SetTexture("u_AlbedoTexture", std::move(texture));
+        SetTexture("u_AlbedoTexture", std::move(texture));
         SetBool("u_UseAlbedoTexture", true);
     }
 
@@ -295,7 +286,7 @@ namespace ash {
         SetFloat("u_OutlineThickness", thickness);
     }
 
-    void ToonMaterial::SetOutlineColor(const Vec3& color) {
+    void ToonMaterial::SetOutlineColor(const Vec3 &color) {
         SetVec3("u_OutlineColor", color);
     }
 
@@ -333,11 +324,11 @@ namespace ash {
         SetBool("u_UseSkybox", false);
     }
 
-    void SkyMaterial::SetSkyColor(const Vec4& color) {
+    void SkyMaterial::SetSkyColor(const Vec4 &color) {
         SetVec4("u_SkyColor", color);
     }
 
-    void SkyMaterial::SetCubemap(const std::shared_ptr<TextureCubeMap>& cubemap) {
+    void SkyMaterial::SetCubemap(const std::shared_ptr<TextureCubeMap> &cubemap) {
         if (cubemap && m_Shader) {
             m_Shader->Bind();
             cubemap->BindToUnit(0);
@@ -352,7 +343,7 @@ namespace ash {
 
     // ========== MaterialFactory ==========
 
-    std::shared_ptr<CanvasItemMaterial> MaterialFactory::CreateCanvasItem(const Vec4& albedo) {
+    std::shared_ptr<CanvasItemMaterial> MaterialFactory::CreateCanvasItem(const Vec4 &albedo) {
         auto material = std::make_shared<CanvasItemMaterial>();
         material->SetAlbedo(albedo);
         return material;
@@ -365,7 +356,7 @@ namespace ash {
     }
 
     std::shared_ptr<SpatialMaterial> MaterialFactory::CreateSpatial(
-        const Vec4& albedo,
+        const Vec4 &albedo,
         const float metallic,
         const float roughness,
         const float specular
@@ -378,16 +369,16 @@ namespace ash {
         return material;
     }
 
-    std::shared_ptr<SpatialMaterial> MaterialFactory::CreateSpatialUnlit(const Vec4& albedo) {
-        auto material = std::make_shared<SpatialMaterial>(
-            BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::SpatialUnlit)
-        );
+    std::shared_ptr<SpatialMaterial> MaterialFactory::CreateSpatialUnlit(const Vec4 &albedo) {
+        auto material = std::make_shared < SpatialMaterial > (
+                            BuiltInShaderManager::Instance().Get(BuiltInShaders::Type::SpatialUnlit)
+                        );
         material->SetAlbedo(albedo);
         return material;
     }
 
     std::shared_ptr<ToonMaterial> MaterialFactory::CreateToon(
-        const Vec4& albedo,
+        const Vec4 &albedo,
         const int toonLevels,
         const float rimAmount
     ) {
@@ -398,7 +389,7 @@ namespace ash {
         return material;
     }
 
-    std::shared_ptr<SkyMaterial> MaterialFactory::CreateSky(const Vec4& color) {
+    std::shared_ptr<SkyMaterial> MaterialFactory::CreateSky(const Vec4 &color) {
         auto material = std::make_shared<SkyMaterial>();
         material->SetSkyColor(color);
         return material;
@@ -409,5 +400,4 @@ namespace ash {
         material->SetCubemap(std::move(cubemap));
         return material;
     }
-
 }

@@ -3,68 +3,65 @@
 
 #include <filesystem>
 #include <array>
-#include "Ashen/GraphicsAPI/Texture.h"
-#include "Ashen/Utils/ImageLoader.h"
-#include "Ashen/Utils/FileSystem.h"
+
+#include "Ashen/Core/Types.h"
 
 namespace ash {
     namespace fs = std::filesystem;
 
+    // Forward declarations
+    class Texture2D;
+    class TextureCubeMap;
+    struct TextureConfig;
+    struct ImageData;
+
     /**
-     * @brief Loads textures from image files and creates Texture objects
+     * @brief Static texture loader - all methods are static
+     * Converts image files to GPU textures
      */
-    class TextureLoader {
+    class TextureLoader final {
     public:
+        // No instantiation
+        TextureLoader() = delete;
+
         /**
-         * @brief Load a 2D texture from file
+         * @brief Load 2D texture from file
          * @param path Path to image file
-         * @param config Texture configuration
-         * @return Texture2D object
+         * @param config Texture configuration (filtering, wrapping, mipmaps)
+         * @return Loaded texture (moved)
          */
-        static Texture2D Load2D(
+        [[nodiscard]] static Texture2D Load2D(
             const fs::path& path,
-            const TextureConfig& config = TextureConfig::Default()
+            const TextureConfig& config
         );
 
         /**
-         * @brief Load a 2D texture from image data
-         */
-        static Texture2D FromImageData(
-            const ImageData& imageData,
-            const TextureConfig& config = TextureConfig::Default()
-        );
-
-        /**
-         * @brief Load a cubemap from 6 face images
-         * @param facesPaths Array of paths for +X, -X, +Y, -Y, +Z, -Z faces
+         * @brief Load cubemap from 6 face images
+         * @param facesPaths Array of paths: [+X, -X, +Y, -Y, +Z, -Z]
          * @param config Texture configuration
+         * @return Loaded cubemap (moved)
          */
-        static TextureCubeMap LoadCubemap(
+        [[nodiscard]] static TextureCubeMap LoadCubemap(
             const std::array<fs::path, 6>& facesPaths,
-            const TextureConfig& config = TextureConfig::Clamped()
+            const TextureConfig& config
         );
 
         /**
          * @brief Find texture file with supported extensions
-         * @param basePath Base path to search
-         * @param textureName Texture name without extension
-         * @return Full path if found, empty path otherwise
+         * Searches for: .png, .jpg, .jpeg, .bmp, .tga, .hdr
          */
-        static fs::path FindTexture(const fs::path& basePath, const std::string& textureName);
-
-        /**
-         * @brief Scan directory for available textures
-         */
-        static Vector<std::string> ScanForTextures(const fs::path& directory);
+        [[nodiscard]] static fs::path FindTexture(
+            const fs::path& basePath,
+            const std::string& textureName
+        );
 
     private:
         /**
-         * @brief Determine texture format from number of channels
+         * @brief Create texture from loaded image data
          */
-        static void GetTextureFormats(
-            int channels,
-            TextureFormat& internalFormat,
-            TextureFormat& format
+        static Texture2D CreateFromImageData(
+            const ImageData& imageData,
+            const TextureConfig& config
         );
     };
 }

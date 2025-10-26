@@ -80,7 +80,7 @@ namespace ash {
             m_BoundsMin = Vec3(0.0f);
             m_BoundsMax = Vec3(0.0f);
             return;
-            }
+        }
 
         const auto layout = CreateLayout(vertexData.attributes);
         const size_t stride = layout.GetStride() / sizeof(float);
@@ -104,32 +104,32 @@ namespace ash {
 
     // ========== MeshRenderer ==========
 
-    void MeshRenderer::Draw(const Mesh& mesh) {
+    void MeshRenderer::Draw(const Mesh &mesh) {
         Renderer::Draw(mesh.GetVAO());
     }
 
-    void MeshRenderer::DrawSubMesh(const Mesh& mesh, const size_t submeshIndex) {
+    void MeshRenderer::DrawSubMesh(const Mesh &mesh, const size_t submeshIndex) {
         if (submeshIndex >= mesh.GetSubMeshCount()) {
             return;
         }
 
-        const auto& submesh = mesh.GetSubMeshes()[submeshIndex];
+        const auto &submesh = mesh.GetSubMeshes()[submeshIndex];
         Renderer::DrawIndexed(mesh.GetVAO(), submesh.indexCount, submesh.indexOffset);
     }
 
-    void MeshRenderer::DrawInstanced(const Mesh& mesh, const uint32_t instanceCount) {
+    void MeshRenderer::DrawInstanced(const Mesh &mesh, const uint32_t instanceCount) {
         Renderer::DrawInstanced(mesh.GetVAO(), instanceCount);
     }
 
-    void MeshRenderer::DrawSubMeshInstanced(const Mesh& mesh, const size_t submeshIndex,
-                                             const uint32_t instanceCount) {
+    void MeshRenderer::DrawSubMeshInstanced(const Mesh &mesh, const size_t submeshIndex,
+                                            const uint32_t instanceCount) {
         if (submeshIndex >= mesh.GetSubMeshCount()) {
             return;
         }
 
-        const auto& submesh = mesh.GetSubMeshes()[submeshIndex];
+        const auto &submesh = mesh.GetSubMeshes()[submeshIndex];
         Renderer::DrawIndexedInstanced(mesh.GetVAO(), submesh.indexCount,
-                                        instanceCount, submesh.indexOffset);
+                                       instanceCount, submesh.indexOffset);
     }
 
     // ========== MeshBuilder ==========

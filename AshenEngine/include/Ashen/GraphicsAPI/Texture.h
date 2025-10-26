@@ -15,7 +15,6 @@
 #include "Ashen/GraphicsAPI/GLObject.h"
 
 namespace ash {
-
     struct TextureConfig {
         TextureWrap wrapS = TextureWrap::Repeat;
         TextureWrap wrapT = TextureWrap::Repeat;
@@ -197,7 +196,13 @@ namespace ash {
 
     class Texture2D final : public Texture {
     public:
-        Texture2D() : Texture(TextureTarget::Texture2D) {
+        Texture2D()
+            : Texture(TextureTarget::Texture2D),
+              m_Width(0),
+              m_Height(0),
+              m_InternalFormat(TextureFormat::RGBA8),
+              m_Format(TextureFormat::RGBA),
+              m_Type(PixelDataType::UnsignedByte) {
         }
 
         void SetData(TextureFormat internalFormat,
@@ -209,6 +214,12 @@ namespace ash {
                          width, height, 0, static_cast<GLenum>(format),
                          static_cast<GLenum>(type), data);
 
+            m_Width = width;
+            m_Height = height;
+            m_InternalFormat = internalFormat;
+            m_Format = format;
+            m_Type = type;
+
             if (m_Config.generateMipmaps && level == 0)
                 GenerateMipmap();
         }
@@ -216,6 +227,16 @@ namespace ash {
         void SetWrap(const TextureWrap s, const TextureWrap t) {
             Texture::SetWrap(s, t, s);
         }
+
+        [[nodiscard]] GLsizei GetWidth() const noexcept { return m_Width; }
+        [[nodiscard]] GLsizei GetHeight() const noexcept { return m_Height; }
+
+    private:
+        GLsizei m_Width;
+        GLsizei m_Height;
+        TextureFormat m_InternalFormat;
+        TextureFormat m_Format;
+        PixelDataType m_Type;
     };
 
     class Texture3D final : public Texture {

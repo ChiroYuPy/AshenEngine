@@ -36,6 +36,6 @@ namespace voxelity {
     void ChunkMesh::draw() const {
         if (IsEmpty()) return;
 
-        ash::Renderer::DrawArraysInstanced(*m_vao, 6, m_instanceCount, 0);
+        ash::Renderer::DrawInstanced(*m_vao, m_instanceCount);
     }
 }

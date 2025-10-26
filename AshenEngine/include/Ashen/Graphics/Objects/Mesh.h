@@ -71,30 +71,35 @@ namespace ash {
     class Mesh {
     public:
         Mesh() = default;
+
         ~Mesh() = default;
 
-        Mesh(const Mesh&) = delete;
-        Mesh& operator=(const Mesh&) = delete;
-        Mesh(Mesh&&) noexcept = default;
-        Mesh& operator=(Mesh&&) noexcept = default;
+        Mesh(const Mesh &) = delete;
+
+        Mesh &operator=(const Mesh &) = delete;
+
+        Mesh(Mesh &&) noexcept = default;
+
+        Mesh &operator=(Mesh &&) noexcept = default;
 
         // ---- Data Management ----
-        void SetData(const VertexData& vertexData, const Vector<uint32_t>& indices);
-        void SetSubMeshes(const Vector<SubMesh>& submeshes);
+        void SetData(const VertexData &vertexData, const Vector<uint32_t> &indices);
+
+        void SetSubMeshes(const Vector<SubMesh> &submeshes);
 
         // ---- Accessors ONLY ----
-        const VertexArray& GetVAO() const { return m_VAO; }
+        const VertexArray &GetVAO() const { return m_VAO; }
         size_t GetVertexCount() const { return m_VertexCount; }
         size_t GetIndexCount() const { return m_IndexCount; }
         VertexAttribute GetAttributes() const { return m_Attributes; }
 
-        const Vector<SubMesh>& GetSubMeshes() const { return m_SubMeshes; }
+        const Vector<SubMesh> &GetSubMeshes() const { return m_SubMeshes; }
         size_t GetSubMeshCount() const { return m_SubMeshes.size(); }
         bool HasSubMeshes() const { return !m_SubMeshes.empty(); }
 
         // ---- Bounding Volume ----
-        const Vec3& GetBoundsMin() const { return m_BoundsMin; }
-        const Vec3& GetBoundsMax() const { return m_BoundsMax; }
+        const Vec3 &GetBoundsMin() const { return m_BoundsMin; }
+        const Vec3 &GetBoundsMax() const { return m_BoundsMax; }
         Vec3 GetBoundsCenter() const { return (m_BoundsMin + m_BoundsMax) * 0.5f; }
         Vec3 GetBoundsExtents() const { return (m_BoundsMax - m_BoundsMin) * 0.5f; }
 
@@ -113,16 +118,20 @@ namespace ash {
         Vec3 m_BoundsMax{0.0f};
 
         static VertexBufferLayout CreateLayout(VertexAttribute attributes);
-        void ComputeBounds(const VertexData& vertexData);
+
+        void ComputeBounds(const VertexData &vertexData);
     };
 
     class MeshRenderer {
     public:
         // ---- Rendering Methods ----
-        static void Draw(const Mesh& mesh);
-        static void DrawSubMesh(const Mesh& mesh, size_t submeshIndex);
-        static void DrawInstanced(const Mesh& mesh, uint32_t instanceCount);
-        static void DrawSubMeshInstanced(const Mesh& mesh, size_t submeshIndex, uint32_t instanceCount);
+        static void Draw(const Mesh &mesh);
+
+        static void DrawSubMesh(const Mesh &mesh, size_t submeshIndex);
+
+        static void DrawInstanced(const Mesh &mesh, uint32_t instanceCount);
+
+        static void DrawSubMeshInstanced(const Mesh &mesh, size_t submeshIndex, uint32_t instanceCount);
     };
 
     /**
@@ -185,16 +194,22 @@ namespace ash {
     /**
      * @brief Predefined mesh generators
      */
-namespace MeshPrimitives {
+    namespace MeshPrimitives {
         // Basic primitives
         Mesh CreateCube(float size = 1.0f);
+
         Mesh CreateSphere(float radius = 1.0f, uint32_t rings = 32, uint32_t segments = 64);
-        Mesh CreatePlane(float width = 1.0f, float height = 1.0f, uint32_t subdivisionsX = 1, uint32_t subdivisionsZ = 1);
+
+        Mesh CreatePlane(float width = 1.0f, float height = 1.0f, uint32_t subdivisionsX = 1,
+                         uint32_t subdivisionsZ = 1);
+
         Mesh CreateQuad(float width = 1.0f, float height = 1.0f);
 
         // Cylinder and capsule
         Mesh CreateCylinder(float radius = 0.5f, float height = 2.0f, uint32_t sides = 32, uint32_t heightSegments = 1);
+
         Mesh CreateCone(float radius = 0.5f, float height = 1.0f, uint32_t sides = 32);
+
         Mesh CreateCapsule(float radius = 0.5f, float height = 2.0f, uint32_t radialSegments = 32, uint32_t rings = 8);
 
         // Torus
@@ -205,25 +220,37 @@ namespace MeshPrimitives {
 
         // Advanced primitives
         Mesh CreateIcosphere(float radius = 1.0f, uint32_t subdivisions = 2);
+
         Mesh CreateTetrahedron(float size = 1.0f);
+
         Mesh CreateOctahedron(float size = 1.0f);
+
         Mesh CreateDodecahedron(float size = 1.0f);
+
         Mesh CreateIcosahedron(float size = 1.0f);
 
         // Procedural
-        Mesh CreateHeightmap(const Vector<float>& heights, uint32_t width, uint32_t depth, float heightScale = 1.0f);
+        Mesh CreateHeightmap(const Vector<float> &heights, uint32_t width, uint32_t depth, float heightScale = 1.0f);
+
         Mesh CreateParametric(
-            std::function<Vec3(float, float)> func,
+            std::function < Vec3(float, float) > func,
             uint32_t uSegments = 32,
             uint32_t vSegments = 32,
-            float uMin = 0.0f, float uMax = 1.0f,
-            float vMin = 0.0f, float vMax = 1.0f
+            
+        float uMin = 0.0f, 
+        float uMax = 1.0f,
+            
+        float vMin = 0.0f, 
+        float vMax = 1.0f
         );
 
         // Text/Debug
         Mesh CreateArrow(float length = 1.0f, float headSize = 0.2f);
+
         Mesh CreateGrid(uint32_t size = 10, float spacing = 1.0f);
+
         Mesh CreateWireCube(float size = 1.0f);
+
         Mesh CreateWireSphere(float radius = 1.0f, uint32_t segments = 16);
     }
 }

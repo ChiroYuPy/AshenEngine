@@ -1,6 +1,7 @@
 #ifndef ASHEN_APPLICATION_H
 #define ASHEN_APPLICATION_H
 
+#include "Logger.h"
 #include "Ashen/Core/Layer.h"
 #include "Ashen/Core/LayerStack.h"
 #include "Ashen/Core/Window.h"
@@ -18,10 +19,11 @@ namespace ash {
     };
 
     struct ApplicationSettings {
-        std::string Name = "Pixl Application";
-        std::string Version = "0.0.1";
+        std::string Name = "Ashen Application";
+        std::string Version = "0.0.0";
         std::string ResourceDirectory = "resources";
         ApplicationCommandLineArgs CommandLineArgs;
+        LogLevel MinLogLevel = LogLevel::Info;
     };
 
     class Application {

@@ -76,7 +76,7 @@ double OpenSimplex2S::noise2_Base(const double xs, const double ys) {
     // Index to point list
     const int a = static_cast<int>(xsi + ysi);
     const int index = (a << 2) | static_cast<int>(xsi - ysi / 2 + 1 - a / 2.0) << 3
-                | static_cast<int>(ysi - xsi / 2 + 1 - a / 2.0) << 4;
+                      | static_cast<int>(ysi - xsi / 2 + 1 - a / 2.0) << 4;
 
     const double ssi = (xsi + ysi) * -0.211324865405187;
     const double xi = xsi + ssi;
@@ -304,7 +304,7 @@ double OpenSimplex2S::noise4_Base(const double xs, const double ys, const double
     const double wi = wsi + ssi;
 
     const int index = ((fastFloor(xs * 4) & 3) << 0) | ((fastFloor(ys * 4) & 3) << 2)
-                | ((fastFloor(zs * 4) & 3) << 4) | ((fastFloor(ws * 4) & 3) << 6);
+                      | ((fastFloor(zs * 4) & 3) << 4) | ((fastFloor(ws * 4) & 3) << 6);
 
     // Point contributions
     for (int i = 0; i < LOOKUP_4D_SIZE[index]; ++i) {

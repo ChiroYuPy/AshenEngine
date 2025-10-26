@@ -29,7 +29,7 @@ namespace ash {
         void SetPosition(const Vec3 &position) { m_Position = position; }
         void Move(const Vec3 &offset) { m_Position += offset; }
 
-        void LookAt(const Vec3& target, const Vec3& worldUp = {0.0f, 1.0f, 0.0f}) {
+        void LookAt(const Vec3 &target, const Vec3 &worldUp = {0.0f, 1.0f, 0.0f}) {
             m_Front = glm::normalize(target - m_Position);
             m_Right = glm::normalize(glm::cross(m_Front, worldUp));
             m_Up = glm::normalize(glm::cross(m_Right, m_Front));

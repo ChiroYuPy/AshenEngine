@@ -22,15 +22,23 @@ file(GLOB_RECURSE ENGINE_HEADERS "include/*.h" "include/*.hpp")
 add_library(AshenEngineLib STATIC
         ${ENGINE_SOURCES}
         ${ENGINE_HEADERS}
-        include/Ashen/Scene/Node.h
-        include/Ashen/Math/Transform.h
-        include/Ashen/Scene/SceneTree.h
-        include/Ashen/Scene/2D/Control.h
-        include/Ashen/Scene/2D/Container.h
+        include/Ashen/Math/Random.h
         src/Scene/Node.cpp
-        include/Ashen/Scene/Property.h
-        include/Ashen/Scene/Component.h
+        include/Ashen/Graphics/UI/UIWidgets.h
+        include/Ashen/Graphics/UI/UIManager.h
+        src/Graphics/UI/UIWidgets.cpp
+        include/Ashen/Scene/Control.h
+        include/Ashen/Scene/SceneTree.h
+        include/Ashen/Graphics/UI/UIServer.h
+        include/Ashen/Graphics/UI/UIContainers.h
+        src/Scene/Control.cpp
+        src/Graphics/UI/UIContainers.cpp
+        src/Graphics/UI/UIServer.cpp
         src/Scene/SceneTree.cpp
+        include/Ashen/Events/EventBus.h
+        include/Ashen/GraphicsAPI/RenderState.h
+        include/Ashen/Utils/Utilities.h
+        include/Ashen/Core/Codes.h
 )
 
 add_library(Ashen::Engine ALIAS AshenEngineLib)

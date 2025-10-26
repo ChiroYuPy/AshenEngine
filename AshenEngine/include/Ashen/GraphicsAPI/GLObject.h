@@ -8,7 +8,9 @@ namespace ash {
     public:
         virtual ~GLObject() = default;
 
-        GLuint ID() const { return m_ID; }
+        [[nodiscard]] GLuint ID() const { return m_ID; }
+
+        [[nodiscard]] bool IsValid() const { return m_ID != 0; }
 
     protected:
         GLuint m_ID = 0;

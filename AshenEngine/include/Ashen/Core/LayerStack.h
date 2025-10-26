@@ -22,7 +22,7 @@ namespace ash {
             auto layer = MakeOwn<T>(std::forward<Args>(args)...);
             T *ptr = layer.get();
             layer->OnAttach();
-            m_Layers.push_back(Move(layer));
+            m_Layers.push_back(MovePtr(layer));
             return ptr;
         }
 
@@ -46,7 +46,7 @@ namespace ash {
         [[nodiscard]] auto rend() const { return m_Layers.rend(); }
 
     private:
-        Vector<Own<Layer>> m_Layers;
+        Vector<Own<Layer> > m_Layers;
     };
 }
 
