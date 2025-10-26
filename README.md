@@ -1,93 +1,79 @@
 # AshenEngine
-*A modern 2D/3D game engine built from scratch for learning, experimentation, and real engine development experience.*
 
-AshenEngine is a personal project focused on understanding how a real game engine works beneath the surface. No shortcuts — the goal is to design a clean, modular and scalable architecture, while exploring rendering, physics, audio, assets, and tooling.
+AshenEngine is an open development 2D/3D game engine project focused on clarity, modularity, and long-term educational value.  
+The goal is to explore and implement modern game engine architecture while providing a clean foundation for future tools and gameplay systems.
 
-This engine is both a playground and an ongoing technical challenge.
-
----
-
-## Features (Work in Progress)
-
-- Cross-platform Game Loop & Windowing
-- 2D & 3D Rendering Architecture
-- Custom Audio System with multiple sound instances
-- Modular Engine Core
-- Scene System & Hierarchy
-- Input Abstraction Layer
-
-Planned:
-- Full ECS architecture
-- PBR rendering
-- Physics integration
-- Editor & tooling suite
-- Resource hot-reloading
+This project is currently under active development.
 
 ---
 
-## Project Goals
+## Key Features
 
-- Build a robust foundation without relying on existing engines
-- Learn modern rendering and engine architecture principles
-- Provide a clean environment for prototyping gameplay and tools
-- Develop an in-house editor over time
+- Cross-platform windowing and game loop
+- Rendering pipeline for both 2D and 3D
+- Audio playback system with multiple sound instances
+- Input abstraction (keyboard, mouse)
+- Scene and transform hierarchy
 
----
+Planned additions include:
 
-## Current Status
-
-AshenEngine is in early development. The public API and structure are still evolving frequently.
-
-What currently works:
-- Window creation & Game runtime
-- Basic 2D/3D rendering pipeline
-- Audio playback with concurrency
-
-In development:
-- Scene system overhaul
-- Tooling support
-- Rendering improvements
+- Complete ECS architecture
+- Physics engine integration
+- Editor and development tooling
+- Asset hot-reloading
+- Advanced rendering (lighting, materials)
 
 ---
 
-## Architecture Overview
+## Status
 
-Core systems include:
+AshenEngine is in an early stage. Systems and APIs may change without notice.
 
-- **Core**: Application runtime, game loop, platform layer
-- **Renderer**: Rendering pipeline, batching, shaders
-- **Assets**: Resource loading & management
-- **Audio**: Playback engine with support for multiple instances
-- **Input**: Unified keyboard/mouse events
-- **Scene**: Entity hierarchy, transforms
+Core systems available:
+- Runtime + platform initialization
+- Basic rendering functionality
+- Audio subsystem foundations
 
-Each module is built to evolve independently.
+In progress:
+- Scene system refactor
+- Renderer improvements
+- Tooling pipeline research
 
 ---
 
-## Roadmap
+## Project Structure
 
-| Task | Status |
-|------|:-----:|
-| Modern 3D rendering | In progress |
-| Full ECS | In progress |
-| Editor tools | Planned |
-| Physics integration | Planned |
-| Exporting finished games | Planned |
+- **Core**: Application, timing, runtime, platform abstraction
+- **Renderer**: Graphics pipeline, batching, shader management
+- **Audio**: Device control and sound instance management
+- **Input**: Event handling and input mapping
+- **Scene**: Entities, transforms, hierarchical organization
+- **Assets**: Resource loading (planned expansion)
+
+Each module is isolated to ensure maintainability and scalability.
+
+---
+
+## Building
+
+Build instructions will be documented once the structure stabilizes.
 
 ---
 
 ## Contributing
 
-This is currently a personal development project, but feedback, suggestions and discussions are welcome.
+While the project is primarily personal at this stage, feedback and discussion are welcome.  
+Issue reports, ideas, or technical suggestions can be shared via the repository once publicly available.
+
+---
+
+## License
+
+To be defined. The project is not yet licensed for redistribution or commercial use.
 
 ---
 
 ## Author
 
-**Ashen** — Developer of AshenEngine  
-Learning, building, breaking, improving — one system at a time.
-
----
-
-*The journey is more important than the destination — and this engine is the proof.*
+Ashen — Engine developer  
+Focused on learning through experimentation and practical implementation.
