@@ -14,6 +14,8 @@ namespace ash {
     public:
         GameLayer();
 
+        void OnAttach() override;
+
         void OnUpdate(float deltaTime) override;
 
         void OnRender() override;

@@ -9,6 +9,7 @@
 #include "Ashen/Events/ApplicationEvent.h"
 #include "Ashen/Graphics/Rendering/Renderer.h"
 #include "Ashen/Resources/ResourceManager.h"
+#include "Ashen/Audio/AudioManager.h"
 
 #include <GLFW/glfw3.h>
 
@@ -16,7 +17,7 @@
 
 namespace ash {
     Application::Application(ApplicationSettings settings)
-        : m_Settings(std::move(settings)), m_Running(false) {
+        : m_Settings(MovePtr(settings)), m_Running(false) {
 
         Logger::Get().SetMinLevel(m_Settings.MinLogLevel);
 
@@ -41,6 +42,8 @@ namespace ash {
 
         Renderer::Init();
         Input::Init(*m_Window);
+
+        AudioManager::Get().Initialize(AudioDevice::Backend::MiniAudio);
 
         Logger::Info() << "Application started: " << m_Settings.Name << " v" << m_Settings.Version;
 
@@ -80,6 +83,10 @@ namespace ash {
         m_Running = false;
     }
 
+    void Application::PushLayer(Own<Layer> layer) {
+        m_LayerStack.PushLayer(MovePtr(layer));
+    }
+
     Vec2 Application::GetFramebufferSize() const {
         return m_Window->GetFramebufferSize();
     }
@@ -99,6 +106,10 @@ namespace ash {
 
     void Application::Shutdown() {
         m_LayerStack.Clear();
+
+        // Arrêter le système audio
+        AudioManager::Get().Shutdown();
+
         AssetLibrary::ClearAll();
         Renderer::Shutdown();
     }
@@ -112,6 +123,10 @@ namespace ash {
 
     void Application::Update(const float deltaTime) const {
         Input::Update();
+
+        // Mettre à jour le système audio
+        AudioManager::Get().Update();
+
         UpdateLayers(deltaTime);
     }
 
@@ -131,22 +146,20 @@ namespace ash {
 
         m_LayerStack.OnEvent(event);
 
-        // dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent &) -> bool {
-        //     Stop();
-        //     return true;
-        // });
+        dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent &) -> bool {
+            Stop();
+            return true;
+        });
     }
 
     void Application::UpdateLayers(const float ts) const {
-        for (auto &layer: m_LayerStack) {
+        for (auto &layer: m_LayerStack)
             layer->OnUpdate(ts);
-        }
     }
 
     void Application::RenderLayers() const {
-        for (auto &layer: m_LayerStack) {
+        for (auto &layer: m_LayerStack)
             layer->OnRender();
-        }
     }
 
     Application *Application::s_Instance = nullptr;

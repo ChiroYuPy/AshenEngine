@@ -13,7 +13,7 @@ struct GLFWwindow;
 
 namespace ash {
     struct WindowProperties {
-        std::string Title;
+        String Title;
         uint32_t Width = 1280;
         uint32_t Height = 720;
         bool IsResizable = true;
@@ -21,7 +21,7 @@ namespace ash {
     };
 
     class Window final {
-        using EventCallbackFn = std::function<void(Event &)>;
+        using EventCallbackFn = Function<void(Event &)>;
 
     public:
         explicit Window(const WindowProperties &props = WindowProperties());
@@ -38,7 +38,7 @@ namespace ash {
 
         [[nodiscard]] bool ShouldClose() const;
 
-        [[nodiscard]] std::string GetTitle() const;
+        [[nodiscard]] String GetTitle() const;
 
         [[nodiscard]] UVec2 GetSizeU() const;
 
@@ -63,7 +63,7 @@ namespace ash {
         Own<GraphicsContext> m_Context;
 
         struct WindowData {
-            std::string Title;
+            String Title;
             UVec2 Size;
             bool VSync;
 

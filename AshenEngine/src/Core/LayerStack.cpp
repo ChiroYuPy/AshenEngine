@@ -7,6 +7,11 @@ namespace ash {
         Clear();
     }
 
+    void LayerStack::PushLayer(Own<Layer> layer) {
+        layer->OnAttach();
+        m_Layers.push_back(MovePtr(layer));
+    }
+
     void LayerStack::PopLayer() {
         if (!m_Layers.empty()) {
             m_Layers.back()->OnDetach();

@@ -19,9 +19,9 @@ namespace ash {
     };
 
     struct ApplicationSettings {
-        std::string Name = "Ashen Application";
-        std::string Version = "0.0.0";
-        std::string ResourceDirectory = "resources";
+        String Name = "Ashen Application";
+        String Version = "0.0.0";
+        String ResourceDirectory = "resources";
         ApplicationCommandLineArgs CommandLineArgs;
         LogLevel MinLogLevel = LogLevel::Info;
     };
@@ -44,11 +44,7 @@ namespace ash {
 
         void Stop();
 
-        template<typename T, typename... Args>
-            requires std::is_base_of_v<Layer, T>
-        T *PushLayer(Args &&... args) {
-            return m_LayerStack.PushLayer<T>(std::forward<Args>(args)...);
-        }
+        void PushLayer(Own<Layer> layer);
 
         void PopLayer() { m_LayerStack.PopLayer(); }
 
@@ -79,7 +75,7 @@ namespace ash {
 
         ApplicationSettings m_Settings;
         LayerStack m_LayerStack;
-        std::unique_ptr<Window> m_Window;
+        Own<Window> m_Window;
         bool m_Running;
 
         static Application *s_Instance;

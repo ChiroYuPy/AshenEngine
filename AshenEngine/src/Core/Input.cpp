@@ -194,9 +194,8 @@ namespace ash {
         glfwSetInputMode(s_Data.window, GLFW_CURSOR, static_cast<int>(mode));
 
         // Reset mouse delta when changing cursor mode
-        if (mode == CursorMode::Disabled || mode == CursorMode::Captured) {
+        if (mode == CursorMode::Captured)
             ResetMouseDelta();
-        }
     }
 
     CursorMode Input::GetCursorMode() {

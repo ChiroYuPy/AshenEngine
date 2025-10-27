@@ -6,7 +6,7 @@ namespace ash {
     TestbedApp::TestbedApp(const ApplicationSettings &settings)
         : Application(settings) {
 
-        PushLayer<GameLayer>();
+        PushLayer(MakeOwn<GameLayer>());
     }
 }
 

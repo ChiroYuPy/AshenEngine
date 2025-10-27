@@ -22,6 +22,7 @@ namespace ash {
         m_Data.Size.x = props.Width;
         m_Data.Size.y = props.Height;
         m_Data.VSync = props.VSync;
+        m_Data.EventCallback = [](Event&) {};
 
         Create();
     }
@@ -222,7 +223,7 @@ namespace ash {
         return glfwWindowShouldClose(m_Handle) != 0;
     }
 
-    std::string Window::GetTitle() const {
+    String Window::GetTitle() const {
         return m_Data.Title;
     }
 

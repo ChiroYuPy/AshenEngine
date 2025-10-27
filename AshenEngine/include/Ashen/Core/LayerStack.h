@@ -16,15 +16,7 @@ namespace ash {
 
         LayerStack &operator=(const LayerStack &) = delete;
 
-        template<typename T, typename... Args>
-            requires std::is_base_of_v<Layer, T>
-        T *PushLayer(Args &&... args) {
-            auto layer = MakeOwn<T>(std::forward<Args>(args)...);
-            T *ptr = layer.get();
-            layer->OnAttach();
-            m_Layers.push_back(MovePtr(layer));
-            return ptr;
-        }
+        void PushLayer(Own<Layer> layer);
 
         void PopLayer();
 
