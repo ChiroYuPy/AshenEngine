@@ -7,7 +7,7 @@ namespace ash {
     // ==================== Node ====================
 
     Node::Node(const String &name)
-        : m_UUID(), m_Name(name) {
+        : m_Name(name) {
     }
 
     void Node::AddChild(const NodeRef &child) {
@@ -17,10 +17,20 @@ namespace ash {
         }
 
         // Remove from previous parent
-        if (const auto prevParent = child->m_Parent.lock())
+        if (const auto prevParent = child->m_Parent.lock()) {
             prevParent->RemoveChild(child);
+        }
 
-        child->m_Parent = shared_from_this();
+        // Safely set parent - find 'this' in m_Children or use shared_from_this
+        try {
+            child->m_Parent = shared_from_this();
+        } catch (const std::bad_weak_ptr&) {
+            // Si shared_from_this échoue, on ne peut pas définir le parent correctement
+            // Cela arrive si le noeud parent n'est pas géré par un shared_ptr
+            Logger::Error() << "Cannot add child: parent node is not managed by shared_ptr";
+            return;
+        }
+
         m_Children.push_back(child);
 
         // Notify scene tree

@@ -45,7 +45,7 @@ namespace ash {
 
         // Camera
         Ref<CameraController> m_CameraController;
-        Ref<PerspectiveCamera> m_Camera;
+        Ref<Camera> m_Camera;
 
         // Meshes
         Ref<Mesh> m_CustomMesh;

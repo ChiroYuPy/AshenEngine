@@ -8,7 +8,7 @@
 namespace ash {
     class CameraController {
     public:
-        explicit CameraController(const Ref<PerspectiveCamera> &camera,
+        explicit CameraController(const Ref<Camera> &camera,
                                   const float moveSpeed = 5.0f,
                                   const float sensitivity = 0.1f)
             : m_camera(camera), m_moveSpeed(moveSpeed),
@@ -114,7 +114,7 @@ namespace ash {
             m_camera->LookAt(target);
         }
 
-        Ref<PerspectiveCamera> m_camera;
+        Ref<Camera> m_camera;
         float m_moveSpeed;
         float m_mouseSensitivity;
         float m_yaw;

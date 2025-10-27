@@ -1,7 +1,7 @@
 #ifndef ASHEN_UI_WIDGETS_H
 #define ASHEN_UI_WIDGETS_H
 
-#include "../../Scene/Control.h"
+#include "Ashen/Scene/Control.h"
 #include "Ashen/GraphicsAPI/Texture.h"
 
 namespace ash {

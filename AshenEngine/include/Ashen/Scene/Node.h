@@ -17,25 +17,18 @@ namespace ash {
         virtual ~Node() = default;
 
         // Lifecycle methods
-        virtual void OnReady() {
-        }
+        virtual void OnReady() {}
 
-        virtual void OnEnterTree() {
-        }
+        virtual void OnEnterTree() {}
 
-        virtual void OnExitTree() {
-        }
+        virtual void OnExitTree() {}
 
-        virtual void OnProcess(float delta) {
-        }
+        virtual void OnProcess(float delta) {}
 
-        virtual void OnPhysicsProcess(float delta) {
-        }
+        virtual void OnPhysicsProcess(float delta) {}
 
-        virtual void OnInput(Event &event) {
-        }
+        virtual void OnInput(Event &event) {}
 
-        // Node tree management
         void AddChild(const NodeRef &child);
 
         void RemoveChild(const NodeRef &child);
@@ -48,7 +41,7 @@ namespace ash {
 
         NodeRef FindChild(const String &name, bool recursive = true) const;
 
-        Vector<NodeRef> GetChildren() const { return m_Children; }
+        const Vector<NodeRef>& GetChildren() const { return m_Children; }
         NodeRef GetParent() const { return m_Parent.lock(); }
 
         NodeRef GetRoot() const;
