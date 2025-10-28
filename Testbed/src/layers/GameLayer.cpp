@@ -6,15 +6,11 @@
 #include "Ashen/Core/Application.h"
 
 namespace ash {
-    GameLayer::GameLayer() {
+    void GameLayer::OnAttach() {
         SetupMeshes();
         SetupCamera();
         SetupMaterials();
         SetupLights();
-    }
-
-    void GameLayer::OnAttach() {
-        AudioManager::Get().PlaySound("resources/sounds/sound.mp3", 0.3f, AudioCategory::Ambient);
     }
 
     void GameLayer::OnUpdate(const float deltaTime) {
@@ -60,8 +56,11 @@ namespace ash {
                 if (m_CameraController->IsActive()) {
                     m_CameraController->SetActive(false);
                     Input::SetCursorMode(CursorMode::Normal);
-                }
-                else Application::Get().Stop();
+                } else Application::Get().Stop();
+                return true;
+            }
+            if (e.GetKeyCode() == KeyCode::P) {
+                AudioManager::Get().PlaySound("resources/sounds/sound.mp3", 1.f, AudioCategory::Ambient);
                 return true;
             }
             return false;
@@ -126,7 +125,7 @@ namespace ash {
             );
 
             Mat4 modelTransform = glm::translate(Mat4(1.0f), pos)
-                             * glm::scale(Mat4(1.0f), Vec3(0.6f));
+                                  * glm::scale(Mat4(1.0f), Vec3(0.6f));
 
             static const Ref<Material> materials[] = {
                 m_SpatialMaterial,
@@ -229,7 +228,7 @@ namespace ash {
     }
 
     void GameLayer::SetupCamera() {
-        m_Camera = MakeRef<PerspectiveCamera>();
+        m_Camera = MakeRef<PerspectiveCamera>(60.f, 1.f, 0.1f, 1000.f);
         m_Camera->SetPosition({0, 15, 25});
         m_Camera->LookAt({0, 0, 0});
         m_CameraController = MakeRef<CameraController>(m_Camera, 8.0f, 0.1f);

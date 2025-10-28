@@ -3,6 +3,7 @@
 
 #include <format>
 #include "Ashen/Events/Event.h"
+#include "Ashen/Core/Codes.h"
 #include "Ashen/Core/Types.h"
 
 namespace ash {

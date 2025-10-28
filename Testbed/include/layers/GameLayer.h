@@ -12,8 +12,6 @@
 namespace ash {
     class GameLayer final : public Layer {
     public:
-        GameLayer();
-
         void OnAttach() override;
 
         void OnUpdate(float deltaTime) override;

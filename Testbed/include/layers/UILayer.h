@@ -3,9 +3,15 @@
 
 #include "Ashen/Core/Layer.h"
 #include "Ashen/Core/Types.h"
-#include "Ashen/Scene/SceneTree.h"
+#include "Ashen/Graphics/Camera/Camera.h"
 
 namespace ash {
+    enum class UIState {
+        MainMenu,
+        GameHUD,
+        PauseMenu
+    };
+
     class UILayer final : public Layer {
     public:
         void OnAttach() override;
@@ -16,9 +22,19 @@ namespace ash {
 
         void OnEvent(Event &event) override;
 
+        void OnDetach() override;
+
+        void SetUIState(UIState state);
+
     private:
-        Own<SceneTree> m_SceneTree;
-        Ref<Node> m_RootNode;
+        void CreateMainMenu();
+
+        void CreateGameHUD();
+
+        void CreatePauseMenu();
+
+        Ref<OrthographicCamera> mCamera;
+        UIState mCurrentState;
     };
 }
 

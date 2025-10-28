@@ -6,6 +6,14 @@
 #include "Ashen/Graphics/Camera/Camera.h"
 
 namespace ash {
+
+    class ICameraController {
+    public:
+        virtual ~ICameraController() = default;
+        virtual void Update(float deltaTime) = 0;
+        virtual void OnEvent(const Event& e) = 0;
+    };
+
     class CameraController {
     public:
         explicit CameraController(const Ref<Camera> &camera,

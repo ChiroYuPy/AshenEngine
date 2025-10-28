@@ -1,6 +1,7 @@
 #ifndef ASHEN_BBOX_H
 #define ASHEN_BBOX_H
 
+#include "Ashen/Core/Types.h"
 #include <glm/glm.hpp>
 #include <vector>
 

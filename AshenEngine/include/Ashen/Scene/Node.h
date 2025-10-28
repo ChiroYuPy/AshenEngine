@@ -2,223 +2,83 @@
 #define ASHEN_NODE_H
 
 #include "Ashen/Core/Types.h"
-#include "Ashen/Core/UUID.h"
-#include "Ashen/Math/Transform.h"
+#include "Ashen/Core/UUID.h"  // ← AJOUTER CETTE LIGNE
+#include "Ashen/Math/Math.h"
 #include "Ashen/Events/Event.h"
+#include <memory>
+#include <vector>
+#include <string>
+#include <functional>
 
 namespace ash {
-    // Base class for all nodes in the scene tree
-    class Node : public std::enable_shared_from_this<Node> {
-    public:
-        using NodeRef = Ref<Node>;
 
-        explicit Node(const String &name = "Node");
+class Node : public std::enable_shared_from_this<Node> {
+public:
+    using NodePtr = std::shared_ptr<Node>;
+    using NodeWeak = std::weak_ptr<Node>;
 
-        virtual ~Node() = default;
+    explicit Node(const String& name = "Node") : m_UUID(), m_Name(name) {}  // ← AJOUTER m_UUID()
+    virtual ~Node() = default;
 
-        // Lifecycle methods
-        virtual void OnReady() {}
+    virtual void OnReady() {}
+    virtual void OnProcess(float delta) {}
+    virtual void OnDraw() {}
+    virtual void OnInput(Event& event) {}
 
-        virtual void OnEnterTree() {}
+    void AddChild(NodePtr child);
+    void RemoveChild(NodePtr child);
+    void RemoveFromParent();
 
-        virtual void OnExitTree() {}
+    NodePtr GetParent() const { return m_Parent.lock(); }
+    const std::vector<NodePtr>& GetChildren() const { return m_Children; }
+    NodePtr FindChild(const String& name, bool recursive = false) const;
 
-        virtual void OnProcess(float delta) {}
+    void SetName(const String& name) { m_Name = name; }
+    String GetName() const { return m_Name; }
 
-        virtual void OnPhysicsProcess(float delta) {}
+    UUID GetUUID() const { return m_UUID; }  // ← AJOUTER CETTE LIGNE
 
-        virtual void OnInput(Event &event) {}
+    void SetVisible(bool visible) { m_Visible = visible; }
+    bool IsVisible() const { return m_Visible; }
+    bool IsVisibleInTree() const;
 
-        void AddChild(const NodeRef &child);
+    void SetProcessEnabled(bool enabled) { m_ProcessEnabled = enabled; }
+    bool IsProcessEnabled() const { return m_ProcessEnabled; }
 
-        void RemoveChild(const NodeRef &child);
+    void SetPosition(const Vec2& pos) { m_Position = pos; m_TransformDirty = true; }
+    Vec2 GetPosition() const { return m_Position; }
+    Vec2 GetGlobalPosition() const;
 
-        void RemoveFromParent();
+    void SetRotation(float rot) { m_Rotation = rot; m_TransformDirty = true; }
+    float GetRotation() const { return m_Rotation; }
 
-        NodeRef GetChild(size_t index) const;
+    void SetScale(const Vec2& scale) { m_Scale = scale; m_TransformDirty = true; }
+    Vec2 GetScale() const { return m_Scale; }
 
-        NodeRef GetChild(const String &name) const;
+    Mat4 GetTransform() const;
+    Mat4 GetGlobalTransform() const;
 
-        NodeRef FindChild(const String &name, bool recursive = true) const;
+protected:
+    UUID m_UUID;  // ← AJOUTER CETTE LIGNE
+    String m_Name;
+    NodeWeak m_Parent;
+    std::vector<NodePtr> m_Children;
 
-        const Vector<NodeRef>& GetChildren() const { return m_Children; }
-        NodeRef GetParent() const { return m_Parent.lock(); }
+    Vec2 m_Position{0.0f};
+    float m_Rotation{0.0f};
+    Vec2 m_Scale{1.0f};
 
-        NodeRef GetRoot() const;
+    mutable Mat4 m_Transform{1.0f};
+    mutable bool m_TransformDirty{true};
 
-        size_t GetChildCount() const { return m_Children.size(); }
+    bool m_Visible{true};
+    bool m_ProcessEnabled{true};
+    bool m_IsReady{false};
 
-        int GetIndex() const;
+    friend class SceneTree;
+    friend class UISystem;  // ← AJOUTER CETTE LIGNE
+};
 
-        bool IsAncestorOf(const NodeRef &node) const;
-
-        bool IsInsideTree() const { return m_IsInsideTree; }
-
-        // Node path and identification
-        String GetName() const { return m_Name; }
-        void SetName(const String &name) { m_Name = name; }
-
-        String GetPath() const;
-
-        UUID GetUUID() const { return m_UUID; }
-
-        // Processing control
-        void SetProcessMode(const bool enabled) { m_ProcessEnabled = enabled; }
-        bool IsProcessing() const { return m_ProcessEnabled; }
-        void SetPhysicsProcessMode(const bool enabled) { m_PhysicsProcessEnabled = enabled; }
-        bool IsPhysicsProcessing() const { return m_PhysicsProcessEnabled; }
-
-        // Visibility and activity
-        void SetVisible(bool visible);
-
-        bool IsVisible() const { return m_Visible; }
-
-        bool IsVisibleInTree() const;
-
-        // Tree traversal
-        void PropagateCall(const String &method, const Function<void(NodeRef)> &callback);
-
-        void QueueFree(); // Mark for deletion at end of frame
-
-        // Debug
-        void PrintTree(int indent = 0) const;
-
-    protected:
-        // Internal update methods (called by scene tree)
-        void _Process(float delta);
-
-        void _PhysicsProcess(float delta);
-
-        void _Input(Event &event);
-
-        void _Ready();
-
-        void _EnterTree();
-
-        void _ExitTree();
-
-        UUID m_UUID;
-        String m_Name;
-        WeakRef<Node> m_Parent;
-        Vector<NodeRef> m_Children;
-
-        bool m_IsInsideTree = false;
-        bool m_IsReady = false;
-        bool m_ProcessEnabled = true;
-        bool m_PhysicsProcessEnabled = true;
-        bool m_Visible = true;
-        bool m_QueuedForDeletion = false;
-
-        friend class SceneTree;
-    };
-
-    // 2D Node with transform
-    class Node2D : public Node {
-    public:
-        explicit Node2D(const String &name = "Node2D");
-
-        // Transform
-        virtual void SetPosition(const Vec2 &position);
-
-        Vec2 GetPosition() const { return m_Position; }
-
-        Vec2 GetGlobalPosition() const;
-
-        void SetRotation(float rotation);
-
-        float GetRotation() const { return m_Rotation; }
-
-        float GetGlobalRotation() const;
-
-        void SetScale(const Vec2 &scale);
-
-        Vec2 GetScale() const { return m_Scale; }
-
-        Vec2 GetGlobalScale() const;
-
-        void SetZIndex(const int zIndex) { m_ZIndex = zIndex; }
-        int GetZIndex() const { return m_ZIndex; }
-
-        // Transform utilities
-        Mat4 GetTransform() const;
-
-        Mat4 GetGlobalTransform() const;
-
-        void LookAt(const Vec2 &target);
-
-        Vec2 ToLocal(const Vec2 &globalPoint) const;
-
-        Vec2 ToGlobal(const Vec2 &localPoint) const;
-
-    protected:
-        void UpdateTransform() const;
-
-        Vec2 m_Position{0.0f};
-        float m_Rotation = 0.0f;
-        Vec2 m_Scale{1.0f};
-        int m_ZIndex = 0;
-
-        mutable Mat4 m_Transform{1.0f};
-        mutable bool m_TransformDirty = true;
-    };
-
-    // 3D Node with transform
-    class Node3D : public Node {
-    public:
-        explicit Node3D(const String &name = "Node3D");
-
-        // Transform
-        void SetPosition(const Vec3 &position);
-
-        Vec3 GetPosition() const { return m_Position; }
-
-        Vec3 GetGlobalPosition() const;
-
-        void SetRotation(const Vec3 &rotation);
-
-        Vec3 GetRotation() const { return m_Rotation; }
-
-        Vec3 GetGlobalRotation() const;
-
-        void SetScale(const Vec3 &scale);
-
-        Vec3 GetScale() const { return m_Scale; }
-
-        Vec3 GetGlobalScale() const;
-
-        // Quaternion rotation
-        void SetQuaternion(const Quat &quat);
-
-        Quat GetQuaternion() const;
-
-        // Transform utilities
-        Mat4 GetTransform() const;
-
-        Mat4 GetGlobalTransform() const;
-
-        void LookAt(const Vec3 &target, const Vec3 &up = Vec3(0, 1, 0));
-
-        Vec3 ToLocal(const Vec3 &globalPoint) const;
-
-        Vec3 ToGlobal(const Vec3 &localPoint) const;
-
-        // Direction vectors
-        Vec3 GetForward() const;
-
-        Vec3 GetRight() const;
-
-        Vec3 GetUp() const;
-
-    protected:
-        void UpdateTransform() const;
-
-        Vec3 m_Position{0.0f};
-        Vec3 m_Rotation{0.0f}; // Euler angles
-        Vec3 m_Scale{1.0f};
-
-        mutable Mat4 m_Transform{1.0f};
-        mutable bool m_TransformDirty = true;
-    };
 } // namespace ash
 
 #endif // ASHEN_NODE_H

@@ -1,14 +1,14 @@
 #include "TestbedApp.h"
 
 #include "layers/GameLayer.h"
+#include "layers/TestLayer.h"
 #include "layers/UILayer.h"
 
 namespace ash {
     TestbedApp::TestbedApp(const ApplicationSettings &settings)
         : Application(settings) {
-
-        PushLayer(MakeOwn<GameLayer>());
-        PushLayer(MakeOwn<UILayer>());
+        // PushLayer(MakeOwn<GameLayer>());
+        PushLayer(MakeOwn<TestLayer>());
     }
 }
 

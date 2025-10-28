@@ -6,6 +6,8 @@ file(GLOB_RECURSE TESTBED_HEADERS "include/*.h")
 add_executable(AshenTestbed
         ${TESTBED_SOURCES}
         ${TESTBED_HEADERS}
+        src/layers/TestLayer.cpp
+        include/layers/TestLayer.h
 )
 
 target_include_directories(AshenTestbed PRIVATE
