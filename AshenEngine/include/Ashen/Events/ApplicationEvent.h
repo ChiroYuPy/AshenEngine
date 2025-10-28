@@ -1,122 +1,60 @@
-#ifndef ASHEN_APPLICATIONEVENT_H
-#define ASHEN_APPLICATIONEVENT_H
+#ifndef ASHEN_APPLICATION_EVENT_H
+#define ASHEN_APPLICATION_EVENT_H
 
-#include <format>
-#include "Ashen/Events/Event.h"
+#include "Event.h"
 
 namespace ash {
-    // =============================================================================
-    // WindowResizeEvent
-    // =============================================================================
-
     class WindowResizeEvent final : public Event {
     public:
-        WindowResizeEvent(const unsigned int width, const unsigned int height) noexcept
-            : m_Width(width), m_Height(height) {
-        }
+        explicit WindowResizeEvent(const u32 width, const u32 height) : mWidth(width), mHeight(height) {}
+        u32 GetWidth()  const noexcept { return mWidth; }
+        u32 GetHeight() const noexcept { return mHeight; }
 
-        [[nodiscard]] unsigned int GetWidth() const noexcept { return m_Width; }
-        [[nodiscard]] unsigned int GetHeight() const noexcept { return m_Height; }
-
-        [[nodiscard]] std::string ToString() const override {
-            return std::format("WindowResizeEvent: {}x{}", m_Width, m_Height);
-        }
-
-        // Static type info
-        static constexpr EventType GetStaticType() noexcept {
-            return EventType::WindowResize;
-        }
-
-        [[nodiscard]] EventType GetType() const noexcept override {
-            return GetStaticType();
-        }
-
-        [[nodiscard]] std::string_view GetName() const noexcept override {
-            return "WindowResize";
-        }
-
-        [[nodiscard]] EventCategory GetCategories() const noexcept override {
-            return EventCategory::Application;
-        }
-
+        static EventType GetStaticType() noexcept { return EventType::WindowResize; }
+        EventType      GetType()     const noexcept override { return EventType::WindowResize; }
+        StringView GetName()   const noexcept override { return "WindowResize"; }
+        EventCategory  GetCategory() const noexcept override { return EventCategory::Application; }
     private:
-        unsigned int m_Width, m_Height;
+        u32 mWidth, mHeight;
     };
-
-    // =============================================================================
-    // WindowCloseEvent
-    // =============================================================================
 
     class WindowCloseEvent final : public Event {
     public:
-        WindowCloseEvent() = default;
-
-        static constexpr EventType GetStaticType() noexcept {
-            return EventType::WindowClose;
-        }
-
-        [[nodiscard]] EventType GetType() const noexcept override {
-            return GetStaticType();
-        }
-
-        [[nodiscard]] std::string_view GetName() const noexcept override {
-            return "WindowClose";
-        }
-
-        [[nodiscard]] EventCategory GetCategories() const noexcept override {
-            return EventCategory::Application;
-        }
+        static EventType GetStaticType() noexcept { return EventType::WindowClose; }
+        EventType      GetType()     const noexcept override { return EventType::WindowClose; }
+        StringView GetName()   const noexcept override { return "WindowClose"; }
+        EventCategory  GetCategory() const noexcept override { return EventCategory::Application; }
     };
-
-    // =============================================================================
-    // WindowFocusEvent
-    // =============================================================================
 
     class WindowFocusEvent final : public Event {
     public:
-        WindowFocusEvent() = default;
-
-        static constexpr EventType GetStaticType() noexcept {
-            return EventType::WindowFocus;
-        }
-
-        [[nodiscard]] EventType GetType() const noexcept override {
-            return GetStaticType();
-        }
-
-        [[nodiscard]] std::string_view GetName() const noexcept override {
-            return "WindowFocus";
-        }
-
-        [[nodiscard]] EventCategory GetCategories() const noexcept override {
-            return EventCategory::Application;
-        }
+        static EventType GetStaticType() noexcept { return EventType::WindowFocus; }
+        EventType      GetType()     const noexcept override { return EventType::WindowFocus; }
+        StringView GetName()   const noexcept override { return "WindowFocus"; }
+        EventCategory  GetCategory() const noexcept override { return EventCategory::Application; }
     };
-
-    // =============================================================================
-    // WindowLostFocusEvent
-    // =============================================================================
 
     class WindowLostFocusEvent final : public Event {
     public:
-        WindowLostFocusEvent() = default;
+        static EventType GetStaticType() noexcept { return EventType::WindowLostFocus; }
+        EventType      GetType()     const noexcept override { return EventType::WindowLostFocus; }
+        StringView GetName()   const noexcept override { return "WindowLostFocus"; }
+        EventCategory  GetCategory() const noexcept override { return EventCategory::Application; }
+    };
 
-        static constexpr EventType GetStaticType() noexcept {
-            return EventType::WindowLostFocus;
-        }
+    class WindowMovedEvent final : public Event {
+    public:
+        explicit WindowMovedEvent(const float x, const float y) : mX(x), mY(y) {}
+        float GetX() const noexcept { return mX; }
+        float GetY() const noexcept { return mY; }
 
-        [[nodiscard]] EventType GetType() const noexcept override {
-            return GetStaticType();
-        }
-
-        [[nodiscard]] std::string_view GetName() const noexcept override {
-            return "WindowLostFocus";
-        }
-
-        [[nodiscard]] EventCategory GetCategories() const noexcept override {
-            return EventCategory::Application;
-        }
+        static EventType GetStaticType() noexcept { return EventType::WindowMoved; }
+        EventType      GetType()     const noexcept override { return EventType::WindowMoved; }
+        StringView GetName()   const noexcept override { return "WindowMoved"; }
+        EventCategory  GetCategory() const noexcept override { return EventCategory::Application; }
+    private:
+        float mX, mY;
     };
 } // namespace ash
 
-#endif //ASHEN_APPLICATIONEVENT_H
+#endif //ASHEN_APPLICATION_EVENT_H

@@ -22,14 +22,14 @@ namespace ash {
               , m_Dirty(true) {
         }
 
-        Transform(const Vec3 &position, const Quat &rotation)
+        Transform(const Vec3 &position, const Quaternion &rotation)
             : m_Position(position)
               , m_Rotation(rotation)
               , m_Scale(1.0f)
               , m_Dirty(true) {
         }
 
-        Transform(const Vec3 &position, const Quat &rotation, const Vec3 &scale)
+        Transform(const Vec3 &position, const Quaternion &rotation, const Vec3 &scale)
             : m_Position(position)
               , m_Rotation(rotation)
               , m_Scale(scale)
@@ -59,13 +59,13 @@ namespace ash {
         }
 
         // ===== Rotation =====
-        void SetRotation(const Quat &rotation) {
+        void SetRotation(const Quaternion &rotation) {
             m_Rotation = rotation;
             m_Dirty = true;
         }
 
         void SetRotation(const Vec3 &eulerAngles) {
-            m_Rotation = Quat(eulerAngles);
+            m_Rotation = Quaternion(eulerAngles);
             m_Dirty = true;
         }
 
@@ -73,13 +73,13 @@ namespace ash {
             SetRotation(Vec3(pitch, yaw, roll));
         }
 
-        const Quat &GetRotation() const { return m_Rotation; }
+        const Quaternion &GetRotation() const { return m_Rotation; }
 
         Vec3 GetEulerAngles() const {
             return glm::eulerAngles(m_Rotation);
         }
 
-        void Rotate(const Quat &rotation) {
+        void Rotate(const Quaternion &rotation) {
             m_Rotation = rotation * m_Rotation;
             m_Dirty = true;
         }
@@ -90,7 +90,7 @@ namespace ash {
 
         void RotateAround(const Vec3 &point, const Vec3 &axis, float angle) {
             const Vec3 offset = m_Position - point;
-            const Quat rotation = glm::angleAxis(angle, axis);
+            const Quaternion rotation = glm::angleAxis(angle, axis);
             m_Position = point + rotation * offset;
             m_Rotation = rotation * m_Rotation;
             m_Dirty = true;
@@ -246,7 +246,7 @@ namespace ash {
         // ===== Reset =====
         void Reset() {
             m_Position = Vec3(0.0f);
-            m_Rotation = Quat(1.0f, 0.0f, 0.0f, 0.0f);
+            m_Rotation = Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
             m_Scale = Vec3(1.0f);
             m_Dirty = true;
         }
@@ -260,7 +260,7 @@ namespace ash {
         }
 
         Vec3 m_Position;
-        Quat m_Rotation;
+        Quaternion m_Rotation;
         Vec3 m_Scale;
 
         mutable Mat4 m_Matrix;

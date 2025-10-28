@@ -3,7 +3,7 @@
 #include "Ashen/Math/Math.h"
 
 namespace ash {
-    enum class KeyCode : int {
+    enum class Key : int {
         // Printable keys
         Space = 32,
         Apostrophe = 39,
@@ -94,9 +94,9 @@ namespace ash {
         Button6 = 6,
         Button7 = 7,
 
-        Left = Button0,
-        Right = Button1,
-        Middle = Button2,
+        ButtonLeft = Button0,
+        ButtonRight = Button1,
+        ButtonMiddle = Button2,
 
         Unknown = LimitMax<int>()
     };

@@ -2,9 +2,9 @@
 #include "Ashen/Core/Window.h"
 #include <GLFW/glfw3.h>
 
-namespace ash {
-    Input::InputData Input::s_Data;
+#include "Ashen/Events/EventDispatcher.h"
 
+namespace ash {
     // ========== Initialization ==========
     void Input::Init(const Window &window) {
         s_Data.window = static_cast<GLFWwindow *>(window.GetHandle());
@@ -96,37 +96,37 @@ namespace ash {
     }
 
     // ========== Keyboard Queries ==========
-    bool Input::IsKeyPressed(KeyCode keycode) {
+    bool Input::IsKeyPressed(Key keycode) {
         if (!IsValidKey(keycode)) return false;
         return s_Data.keys[static_cast<size_t>(keycode)];
     }
 
-    bool Input::IsKeyJustPressed(KeyCode keycode) {
+    bool Input::IsKeyJustPressed(Key keycode) {
         if (!IsValidKey(keycode)) return false;
         return s_Data.keys[static_cast<size_t>(keycode)] &&
                !s_Data.keysPrevious[static_cast<size_t>(keycode)];
     }
 
-    bool Input::IsKeyJustReleased(KeyCode keycode) {
+    bool Input::IsKeyJustReleased(Key keycode) {
         if (!IsValidKey(keycode)) return false;
         return !s_Data.keys[static_cast<size_t>(keycode)] &&
                s_Data.keysPrevious[static_cast<size_t>(keycode)];
     }
 
-    bool Input::IsKeyRepeating(KeyCode keycode) {
+    bool Input::IsKeyRepeating(Key keycode) {
         if (!IsValidKey(keycode)) return false;
         return s_Data.keysRepeating[static_cast<size_t>(keycode)];
     }
 
-    bool Input::AreKeysPressed(std::initializer_list<KeyCode> keycodes) {
-        for (const KeyCode key: keycodes) {
+    bool Input::AreKeysPressed(std::initializer_list<Key> keycodes) {
+        for (const Key key: keycodes) {
             if (!IsKeyPressed(key)) return false;
         }
         return true;
     }
 
-    bool Input::AnyKeyPressed(std::initializer_list<KeyCode> keycodes) {
-        for (const KeyCode key: keycodes) {
+    bool Input::AnyKeyPressed(std::initializer_list<Key> keycodes) {
+        for (const Key key: keycodes) {
             if (IsKeyPressed(key)) return true;
         }
         return false;
@@ -306,16 +306,16 @@ namespace ash {
     }
 
     // ========== Utility Functions ==========
-    String Input::GetKeyName(const KeyCode keycode) {
+    String Input::GetKeyName(const Key keycode) {
         const char *name = glfwGetKeyName(static_cast<int>(keycode), 0);
         return name ? String(name) : "Unknown";
     }
 
     String Input::GetMouseButtonName(const MouseButton button) {
         switch (button) {
-            case MouseButton::Left: return "Left";
-            case MouseButton::Right: return "Right";
-            case MouseButton::Middle: return "Middle";
+            case MouseButton::ButtonLeft: return "Left";
+            case MouseButton::ButtonRight: return "Right";
+            case MouseButton::ButtonMiddle: return "Middle";
             default: return "Button" + std::to_string(static_cast<int>(button));
         }
     }
@@ -328,9 +328,11 @@ namespace ash {
         return s_Data.mouseButtons.any();
     }
 
+    Input::InputData Input::s_Data;
+
     // ========== Event Handlers ==========
     bool Input::OnKeyPressed(const KeyPressedEvent &e) {
-        KeyCode keycode = e.GetKeyCode();
+        Key keycode = e.GetKeyCode();
         if (!IsValidKey(keycode)) return false;
 
         const size_t key = static_cast<size_t>(keycode);
@@ -346,7 +348,7 @@ namespace ash {
     }
 
     bool Input::OnKeyReleased(const KeyReleasedEvent &e) {
-        KeyCode keycode = e.GetKeyCode();
+        Key keycode = e.GetKeyCode();
         if (!IsValidKey(keycode)) return false;
 
         const size_t key = static_cast<size_t>(keycode);
@@ -357,7 +359,7 @@ namespace ash {
     }
 
     bool Input::OnMouseButtonPressed(const MouseButtonPressedEvent &e) {
-        MouseButton button = e.GetButton();
+        MouseButton button = e.GetMouseButton();
         if (!IsValidMouseButton(button)) return false;
 
         s_Data.mouseButtons[static_cast<size_t>(button)] = true;
@@ -365,7 +367,7 @@ namespace ash {
     }
 
     bool Input::OnMouseButtonReleased(const MouseButtonReleasedEvent &e) {
-        MouseButton button = e.GetButton();
+        MouseButton button = e.GetMouseButton();
         if (!IsValidMouseButton(button)) return false;
 
         s_Data.mouseButtons[static_cast<size_t>(button)] = false;
@@ -401,7 +403,7 @@ namespace ash {
         s_Data.mousePositionPrevious = s_Data.mousePosition;
     }
 
-    void Input::UpdateInputHistory(KeyCode keycode) {
+    void Input::UpdateInputHistory(Key keycode) {
         if (!s_Data.historyEnabled) return;
 
         s_Data.keyHistory.push_back(static_cast<int>(keycode));
@@ -410,7 +412,7 @@ namespace ash {
             s_Data.keyHistory.erase(s_Data.keyHistory.begin());
     }
 
-    bool Input::IsValidKey(KeyCode keycode) {
+    bool Input::IsValidKey(Key keycode) {
         const int key = static_cast<int>(keycode);
         return key >= 0 && key < static_cast<int>(MAX_KEYS);
     }

@@ -6,11 +6,12 @@
 #include "Ashen/Events/ApplicationEvent.h"
 #include "Ashen/Graphics/Rendering/Renderer2D.h"
 #include "Ashen/Core/Input.h"
+#include "Ashen/Events/EventDispatcher.h"
 
 namespace ash {
     void UILayer::OnAttach() {
-        // Créer la caméra orthographique avec origin en bas à gauche
-        mCamera = MakeRef<OrthographicCamera>(0.0f, 1280.0f, 0.0f, 720.0f);
+        // Créer la caméra orthographique pour UI avec origin en bas à gauche
+        mCamera = MakeRef<OrthographicCamera>(1280.0f, 720.0f, OrthographicCamera::OriginMode::BottomLeft);
 
         // Initialiser UISystem
         UISystem::Init();
@@ -30,25 +31,25 @@ namespace ash {
         UISystem::EndFrame();
 
         // Tests de changement d'état avec les touches
-        if (Input::IsKeyPressed(KeyCode::F1)) {
+        if (Input::IsKeyPressed(Key::F1)) {
             SetUIState(UIState::MainMenu);
         }
-        if (Input::IsKeyPressed(KeyCode::F2)) {
+        if (Input::IsKeyPressed(Key::F2)) {
             SetUIState(UIState::GameHUD);
         }
-        if (Input::IsKeyPressed(KeyCode::F3)) {
+        if (Input::IsKeyPressed(Key::F3)) {
             SetUIState(UIState::PauseMenu);
         }
     }
 
     void UILayer::OnRender() {
-        // IMPORTANT: BeginScene doit être appelé UNE SEULE FOIS
+        // BeginScene avec la caméra UI (origin en bas à gauche)
         Renderer2D::BeginScene(*mCamera);
 
         // Rendre l'UI
         UISystem::Render();
 
-        // Test de rendu direct
+        // Test de rendu direct - (0,0) est maintenant en bas à gauche
         // Renderer2D::DrawRect(Vec3(10, 10, 0), Vec2(100, 100), Vec4(1.0f, 0.0f, 0.0f, 1.0f));
 
         Renderer2D::EndScene();

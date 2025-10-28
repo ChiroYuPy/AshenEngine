@@ -14,6 +14,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Ashen/Core/Platform.h"
+#include "Ashen/Events/EventDispatcher.h"
 
 namespace ash {
     Application::Application(ApplicationSettings settings)

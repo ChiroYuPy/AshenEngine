@@ -31,37 +31,50 @@ namespace ash {
         Destroy();
     }
 
-    void Window::Create() {
-        if (s_GLFWWindowCount == 0) {
-            if (!glfwInit())
-                Logger::Error("Failed to initialize GLFW!");
-            glfwSetErrorCallback(GLFWErrorCallback);
-        }
-
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-
-        m_Handle = glfwCreateWindow(m_Data.Size.x, m_Data.Size.y, m_Data.Title.c_str(), nullptr, nullptr);
-        ++s_GLFWWindowCount;
-
-        m_Context = MakeOwn<GraphicsContext>(m_Handle);
-        m_Context->Init();
-
-        glfwSetWindowUserPointer(m_Handle, &m_Data);
-        glfwSwapInterval(m_Data.VSync ? 1 : 0); // Vsync
-
-        SetupCallbacks();
+    void Window::Update() const {
+        m_Context->SwapBuffers();
     }
 
-    void Window::Destroy() {
-        if (!m_Handle) return;
+    void Window::PollEvents() const {
+        glfwPollEvents();
+    }
 
-        glfwDestroyWindow(m_Handle);
-        --s_GLFWWindowCount;
+    void Window::SetEventCallback(const EventCallbackFn &callback) {
+        m_Data.EventCallback = callback;
+    }
 
-        if (s_GLFWWindowCount == 0)
-            glfwTerminate();
+    glm::vec2 Window::GetFramebufferSize() const {
+        int width, height;
+        glfwGetFramebufferSize(m_Handle, &width, &height);
+        return {width, height};
+    }
 
-        m_Handle = nullptr;
+    bool Window::ShouldClose() const {
+        return glfwWindowShouldClose(m_Handle) != 0;
+    }
+
+    String Window::GetTitle() const {
+        return m_Data.Title;
+    }
+
+    UVec2 Window::GetSizeU() const {
+        return {m_Data.Size.x, m_Data.Size.y};
+    }
+
+    Vec2 Window::GetSizeF() const {
+        return {m_Data.Size.x, m_Data.Size.y};
+    }
+
+    uint32_t Window::GetWidth() const {
+        return m_Data.Size.x;
+    }
+
+    uint32_t Window::GetHeight() const {
+        return m_Data.Size.y;
+    }
+
+    float Window::GetAspectRatio() const {
+        return static_cast<float>(m_Data.Size.x) / static_cast<float>(m_Data.Size.y);
     }
 
     void *Window::GetHandle() const {
@@ -119,17 +132,17 @@ namespace ash {
 
             switch (action) {
                 case GLFW_PRESS: {
-                    KeyPressedEvent event(static_cast<KeyCode>(key), false);
+                    KeyPressedEvent event(static_cast<Key>(key), false);
                     data.EventCallback(event);
                     break;
                 }
                 case GLFW_RELEASE: {
-                    KeyReleasedEvent event(static_cast<KeyCode>(key));
+                    KeyReleasedEvent event(static_cast<Key>(key));
                     data.EventCallback(event);
                     break;
                 }
                 case GLFW_REPEAT: {
-                    KeyPressedEvent event(static_cast<KeyCode>(key), true);
+                    KeyPressedEvent event(static_cast<Key>(key), true);
                     data.EventCallback(event);
                     break;
                 }
@@ -142,7 +155,7 @@ namespace ash {
             if (!up) return;
             const WindowData &data = *static_cast<WindowData *>(up);
 
-            KeyTypedEvent event(static_cast<KeyCode>(keycode));
+            KeyTypedEvent event(static_cast<Key>(keycode));
             data.EventCallback(event);
         });
 
@@ -201,49 +214,36 @@ namespace ash {
         });
     }
 
-    void Window::Update() const {
-        m_Context->SwapBuffers();
+    void Window::Create() {
+        if (s_GLFWWindowCount == 0) {
+            if (!glfwInit())
+                Logger::Error("Failed to initialize GLFW!");
+            glfwSetErrorCallback(GLFWErrorCallback);
+        }
+
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+
+        m_Handle = glfwCreateWindow(m_Data.Size.x, m_Data.Size.y, m_Data.Title.c_str(), nullptr, nullptr);
+        ++s_GLFWWindowCount;
+
+        m_Context = MakeOwn<GraphicsContext>(m_Handle);
+        m_Context->Init();
+
+        glfwSetWindowUserPointer(m_Handle, &m_Data);
+        glfwSwapInterval(m_Data.VSync ? 1 : 0); // Vsync
+
+        SetupCallbacks();
     }
 
-    void Window::PollEvents() const {
-        glfwPollEvents();
-    }
+    void Window::Destroy() {
+        if (!m_Handle) return;
 
-    void Window::SetEventCallback(const EventCallbackFn &callback) {
-        m_Data.EventCallback = callback;
-    }
+        glfwDestroyWindow(m_Handle);
+        --s_GLFWWindowCount;
 
-    glm::vec2 Window::GetFramebufferSize() const {
-        int width, height;
-        glfwGetFramebufferSize(m_Handle, &width, &height);
-        return {width, height};
-    }
+        if (s_GLFWWindowCount == 0)
+            glfwTerminate();
 
-    bool Window::ShouldClose() const {
-        return glfwWindowShouldClose(m_Handle) != 0;
-    }
-
-    String Window::GetTitle() const {
-        return m_Data.Title;
-    }
-
-    UVec2 Window::GetSizeU() const {
-        return {m_Data.Size.x, m_Data.Size.y};
-    }
-
-    Vec2 Window::GetSizeF() const {
-        return {m_Data.Size.x, m_Data.Size.y};
-    }
-
-    uint32_t Window::GetWidth() const {
-        return m_Data.Size.x;
-    }
-
-    uint32_t Window::GetHeight() const {
-        return m_Data.Size.y;
-    }
-
-    float Window::GetAspectRatio() const {
-        return static_cast<float>(m_Data.Size.x) / static_cast<float>(m_Data.Size.y);
+        m_Handle = nullptr;
     }
 }

@@ -4,6 +4,10 @@
 #include "Ashen/Resources/ResourceManager.h"
 #include "Ashen/Audio/AudioManager.h"
 #include "Ashen/Core/Application.h"
+#include "Ashen/Core/Input.h"
+#include "Ashen/Events/EventDispatcher.h"
+#include "Ashen/Graphics/Camera/FPSCameraController.h"
+#include "Ashen/Graphics/Camera/OrbitCameraController.h"
 
 namespace ash {
     void GameLayer::OnAttach() {
@@ -14,7 +18,7 @@ namespace ash {
     }
 
     void GameLayer::OnUpdate(const float deltaTime) {
-        m_CameraController->OnUpdate(deltaTime);
+        m_CameraController->Update(deltaTime);
         m_Time += deltaTime;
 
         AudioManager::Get().SetListenerPosition(m_Camera->GetPosition());
@@ -52,14 +56,14 @@ namespace ash {
         EventDispatcher dispatcher(event);
 
         dispatcher.Dispatch<KeyPressedEvent>([this](const KeyPressedEvent &e) {
-            if (e.GetKeyCode() == KeyCode::Escape) {
-                if (m_CameraController->IsActive()) {
-                    m_CameraController->SetActive(false);
+            if (e.GetKeyCode() == Key::Escape) {
+                if (m_CameraController->IsEnabled()) {
+                    m_CameraController->SetEnabled(false);
                     Input::SetCursorMode(CursorMode::Normal);
                 } else Application::Get().Stop();
                 return true;
             }
-            if (e.GetKeyCode() == KeyCode::P) {
+            if (e.GetKeyCode() == Key::P) {
                 AudioManager::Get().PlaySound("resources/sounds/sound.mp3", 1.f, AudioCategory::Ambient);
                 return true;
             }
@@ -67,9 +71,9 @@ namespace ash {
         });
 
         dispatcher.Dispatch<MouseButtonPressedEvent>([this](const MouseButtonPressedEvent &e) {
-            if (e.GetButton() == MouseButton::Left) {
-                if (!m_CameraController->IsActive()) {
-                    m_CameraController->SetActive(true);
+            if (e.GetMouseButton() == MouseButton::ButtonLeft) {
+                if (!m_CameraController->IsEnabled()) {
+                    m_CameraController->SetEnabled(true);
                     Input::SetCursorMode(CursorMode::Captured);
                 }
                 return true;
@@ -82,15 +86,7 @@ namespace ash {
             return false;
         });
 
-        dispatcher.Dispatch<MouseMovedEvent>([this](const MouseMovedEvent &e) {
-            m_CameraController->OnMouseMove(e.GetX(), e.GetY());
-            return false;
-        });
-
-        dispatcher.Dispatch<MouseScrolledEvent>([this](const MouseScrolledEvent &e) {
-            m_CameraController->OnMouseScroll(e.GetYOffset());
-            return false;
-        });
+        m_CameraController->OnEvent(event);
     }
 
     void GameLayer::RenderSpatialZone() const {
@@ -228,10 +224,12 @@ namespace ash {
     }
 
     void GameLayer::SetupCamera() {
-        m_Camera = MakeRef<PerspectiveCamera>(60.f, 1.f, 0.1f, 1000.f);
-        m_Camera->SetPosition({0, 15, 25});
-        m_Camera->LookAt({0, 0, 0});
-        m_CameraController = MakeRef<CameraController>(m_Camera, 8.0f, 0.1f);
+        auto persp = MakeRef<PerspectiveCamera>(60.f, 1.f, 0.1f, 1000.f);
+        persp->SetPosition({0, 15, 25});
+        persp->LookAt({0, 0, 0});
+        m_Camera = persp;
+        m_CameraController = FPSCameraController::Create(*persp, 0.1f, 8.f);
+        // m_CameraController = OrbitCameraController::Create(*persp);
     }
 
     void GameLayer::SetupMaterials() {

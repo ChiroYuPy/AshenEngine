@@ -3,6 +3,7 @@
 #include "Ashen/Graphics/Rendering/Renderer2D.h"
 #include "Ashen/Core/Logger.h"
 #include "Ashen/Events/ApplicationEvent.h"
+#include "Ashen/Events/EventDispatcher.h"
 
 namespace ash {
     void TestLayer::OnAttach() {

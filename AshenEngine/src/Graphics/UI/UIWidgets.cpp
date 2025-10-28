@@ -3,6 +3,7 @@
 #include "Ashen/Graphics/Rendering/Renderer2D.h"
 #include "Ashen/Events/MouseEvent.h"
 #include "Ashen/Core/Input.h"
+#include "Ashen/Events/EventDispatcher.h"
 
 namespace ash {
 
@@ -64,7 +65,7 @@ void Button::OnInput(Event& event) {
     EventDispatcher dispatcher(event);
 
     dispatcher.Dispatch<MouseButtonPressedEvent>([this](const MouseButtonPressedEvent& e) {
-        if (e.GetButton() == MouseButton::Left && IsHovered()) {
+        if (e.GetMouseButton() == MouseButton::ButtonLeft && IsHovered()) {
             m_Pressed = true;
             return true;
         }
@@ -72,7 +73,7 @@ void Button::OnInput(Event& event) {
     });
 
     dispatcher.Dispatch<MouseButtonReleasedEvent>([this](const MouseButtonReleasedEvent& e) {
-        if (e.GetButton() == MouseButton::Left && m_Pressed) {
+        if (e.GetMouseButton() == MouseButton::ButtonLeft && m_Pressed) {
             m_Pressed = false;
             if (IsHovered() && OnPressed) {
                 OnPressed();

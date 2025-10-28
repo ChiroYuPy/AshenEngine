@@ -50,7 +50,7 @@ namespace ash {
     using Mat4x3 = glm::mat4x3;
 
     // ========== Quaternion ==========
-    using Quat = glm::quat;
+    using Quaternion = glm::quat;
 
     // ========== Constants ==========
     namespace Constants {
@@ -381,47 +381,47 @@ namespace ash {
     }
 
     // ========== Quaternion Operations ==========
-    inline Quat QuatFromEuler(const float pitch, const float yaw, const float roll) noexcept {
+    inline Quaternion QuatFromEuler(const float pitch, const float yaw, const float roll) noexcept {
         return {Vec3(pitch, yaw, roll)};
     }
 
-    inline Quat QuatFromEuler(const Vec3 &euler) noexcept {
+    inline Quaternion QuatFromEuler(const Vec3 &euler) noexcept {
         return {euler};
     }
 
-    inline Vec3 QuatToEuler(const Quat &q) noexcept {
+    inline Vec3 QuatToEuler(const Quaternion &q) noexcept {
         return glm::eulerAngles(q);
     }
 
-    inline Mat4 QuatToMat4(const Quat &q) noexcept {
+    inline Mat4 QuatToMat4(const Quaternion &q) noexcept {
         return glm::mat4_cast(q);
     }
 
-    inline Mat3 QuatToMat3(const Quat &q) noexcept {
+    inline Mat3 QuatToMat3(const Quaternion &q) noexcept {
         return glm::mat3_cast(q);
     }
 
-    inline Quat QuatFromAxisAngle(const Vec3 &axis, const float angleRad) noexcept {
+    inline Quaternion QuatFromAxisAngle(const Vec3 &axis, const float angleRad) noexcept {
         return glm::angleAxis(angleRad, axis);
     }
 
-    inline Quat QuatLookRotation(const Vec3 &forward, const Vec3 &up = Vec3(0, 1, 0)) noexcept {
+    inline Quaternion QuatLookRotation(const Vec3 &forward, const Vec3 &up = Vec3(0, 1, 0)) noexcept {
         return glm::quatLookAt(forward, up);
     }
 
-    inline Quat QuatSlerp(const Quat &a, const Quat &b, const float t) noexcept {
+    inline Quaternion QuatSlerp(const Quaternion &a, const Quaternion &b, const float t) noexcept {
         return glm::slerp(a, b, t);
     }
 
-    inline Quat QuatNormalize(const Quat &q) noexcept {
+    inline Quaternion QuatNormalize(const Quaternion &q) noexcept {
         return glm::normalize(q);
     }
 
-    inline Quat QuatInverse(const Quat &q) noexcept {
+    inline Quaternion QuatInverse(const Quaternion &q) noexcept {
         return glm::inverse(q);
     }
 
-    inline float QuatDot(const Quat &a, const Quat &b) noexcept {
+    inline float QuatDot(const Quaternion &a, const Quaternion &b) noexcept {
         return glm::dot(a, b);
     }
 
@@ -446,7 +446,7 @@ namespace ash {
         return glm::value_ptr(vec);
     }
 
-    inline const float *ValuePtr(const Quat &quat) noexcept {
+    inline const float *ValuePtr(const Quaternion &quat) noexcept {
         return glm::value_ptr(quat);
     }
 

@@ -5,6 +5,7 @@
 #include <array>
 #include <glad/glad.h>
 
+#include "Ashen/Core/Codes.h"
 #include "Ashen/Events/Event.h"
 #include "Ashen/Events/KeyEvent.h"
 #include "Ashen/Events/MouseEvent.h"
@@ -57,22 +58,22 @@ namespace ash {
         static void Update(); // Call once per frame
 
         // ========== Keyboard Queries ==========
-        static bool IsKeyPressed(KeyCode keycode);
+        static bool IsKeyPressed(Key keycode);
 
-        static bool IsKeyJustPressed(KeyCode keycode);
+        static bool IsKeyJustPressed(Key keycode);
 
-        static bool IsKeyJustReleased(KeyCode keycode);
+        static bool IsKeyJustReleased(Key keycode);
 
-        static bool IsKeyDown(const KeyCode keycode) { return IsKeyPressed(keycode); }
-        static bool IsKeyUp(const KeyCode keycode) { return !IsKeyPressed(keycode); }
+        static bool IsKeyDown(const Key keycode) { return IsKeyPressed(keycode); }
+        static bool IsKeyUp(const Key keycode) { return !IsKeyPressed(keycode); }
 
         // Get key repeat status
-        static bool IsKeyRepeating(KeyCode keycode);
+        static bool IsKeyRepeating(Key keycode);
 
         // Multi-key queries
-        static bool AreKeysPressed(std::initializer_list<KeyCode> keycodes);
+        static bool AreKeysPressed(std::initializer_list<Key> keycodes);
 
-        static bool AnyKeyPressed(std::initializer_list<KeyCode> keycodes);
+        static bool AnyKeyPressed(std::initializer_list<Key> keycodes);
 
         // ========== Mouse Button Queries ==========
         static bool IsMouseButtonPressed(MouseButton button);
@@ -153,7 +154,7 @@ namespace ash {
         static const Vector<int> &GetKeyHistory();
 
         // ========== Utility Functions ==========
-        static String GetKeyName(KeyCode keycode);
+        static String GetKeyName(Key keycode);
 
         static String GetMouseButtonName(MouseButton button);
 
@@ -220,9 +221,9 @@ namespace ash {
         // ========== Internal Utilities ==========
         static void UpdateMouseDelta();
 
-        static void UpdateInputHistory(KeyCode keycode);
+        static void UpdateInputHistory(Key keycode);
 
-        static bool IsValidKey(KeyCode keycode);
+        static bool IsValidKey(Key keycode);
 
         static bool IsValidMouseButton(MouseButton button);
     };
