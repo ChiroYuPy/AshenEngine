@@ -8,8 +8,10 @@ namespace ash {
     }
 
     void LayerStack::PushLayer(Own<Layer> layer) {
-        layer->OnAttach();
-        m_Layers.push_back(MovePtr(layer));
+        if (layer) {
+            layer->OnAttach();
+            m_Layers.push_back(MovePtr(layer));
+        }
     }
 
     void LayerStack::PopLayer() {
@@ -20,16 +22,9 @@ namespace ash {
     }
 
     void LayerStack::Clear() {
-        for (const auto &layer: m_Layers)
-            layer->OnDetach();
+        for (auto& layer : m_Layers)
+            if (layer) layer->OnDetach();
 
         m_Layers.clear();
-    }
-
-    void LayerStack::OnEvent(Event &event) {
-        for (const auto &m_Layer: std::ranges::reverse_view(m_Layers)) {
-            m_Layer->OnEvent(event);
-            if (event.Handled) break;
-        }
     }
 }

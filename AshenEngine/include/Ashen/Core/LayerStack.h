@@ -6,39 +6,33 @@
 #include "Ashen/Events/Event.h"
 
 namespace ash {
-    class LayerStack {
+    class LayerStack final {
     public:
         LayerStack() = default;
-
         ~LayerStack();
 
-        LayerStack(const LayerStack &) = delete;
-
-        LayerStack &operator=(const LayerStack &) = delete;
+        LayerStack(const LayerStack&) = delete;
+        LayerStack& operator=(const LayerStack&) = delete;
 
         void PushLayer(Own<Layer> layer);
-
         void PopLayer();
-
         void Clear();
 
-        void OnEvent(Event &event);
+        size_t Size() const noexcept { return m_Layers.size(); }
+        bool Empty() const noexcept { return m_Layers.empty(); }
 
-        [[nodiscard]] size_t Size() const { return m_Layers.size(); }
-        [[nodiscard]] bool Empty() const { return m_Layers.empty(); }
+        auto begin() noexcept { return m_Layers.begin(); }
+        auto end() noexcept { return m_Layers.end(); }
+        auto begin() const noexcept { return m_Layers.begin(); }
+        auto end() const noexcept { return m_Layers.end(); }
 
-        auto begin() { return m_Layers.begin(); }
-        auto end() { return m_Layers.end(); }
-        [[nodiscard]] auto begin() const { return m_Layers.begin(); }
-        [[nodiscard]] auto end() const { return m_Layers.end(); }
-
-        auto rbegin() { return m_Layers.rbegin(); }
-        auto rend() { return m_Layers.rend(); }
-        [[nodiscard]] auto rbegin() const { return m_Layers.rbegin(); }
-        [[nodiscard]] auto rend() const { return m_Layers.rend(); }
+        auto rbegin() noexcept { return m_Layers.rbegin(); }
+        auto rend() noexcept { return m_Layers.rend(); }
+        auto rbegin() const noexcept { return m_Layers.rbegin(); }
+        auto rend() const noexcept { return m_Layers.rend(); }
 
     private:
-        Vector<Own<Layer> > m_Layers;
+        Vector<Own<Layer>> m_Layers;
     };
 }
 

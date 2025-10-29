@@ -1,6 +1,6 @@
 #include "Ashen/Core/Application.h"
 
-#include <iostream>
+#include <ranges>
 #include <utility>
 
 #include "Ashen/Core/Window.h"
@@ -145,7 +145,7 @@ namespace ash {
             return false;
         });
 
-        m_LayerStack.OnEvent(event);
+        HandleEventsLayers(event);
 
         dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent &) -> bool {
             Stop();
@@ -154,13 +154,21 @@ namespace ash {
     }
 
     void Application::UpdateLayers(const float ts) const {
-        for (auto &layer: m_LayerStack)
-            layer->OnUpdate(ts);
+        for (auto& layerPtr : m_LayerStack)
+            if (layerPtr) layerPtr->OnUpdate(ts);
     }
 
     void Application::RenderLayers() const {
-        for (auto &layer: m_LayerStack)
-            layer->OnRender();
+        for (auto& layerPtr : m_LayerStack)
+            if (layerPtr) layerPtr->OnRender();
+    }
+
+    void Application::HandleEventsLayers(Event& event) const {
+        for (auto& layerPtr : std::ranges::reverse_view(m_LayerStack)) {
+            if (layerPtr && !event.Handled)
+                layerPtr->OnEvent(event);
+            if (event.Handled) break;
+        }
     }
 
     Application *Application::s_Instance = nullptr;

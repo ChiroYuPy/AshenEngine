@@ -73,6 +73,8 @@ namespace ash {
 
         void RenderLayers() const;
 
+        void HandleEventsLayers(Event &event) const;
+
         ApplicationSettings m_Settings;
         LayerStack m_LayerStack;
         Own<Window> m_Window;
