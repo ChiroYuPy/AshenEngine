@@ -6,8 +6,8 @@
 #include "Ashen/Core/Application.h"
 #include "Ashen/Core/Input.h"
 #include "Ashen/Events/EventDispatcher.h"
-#include "Ashen/Graphics/Camera/FPSCameraController.h"
-#include "Ashen/Graphics/Camera/OrbitCameraController.h"
+#include "Ashen/Graphics/CameraControllers/FPSCameraController.h"
+#include "Ashen/Graphics/CameraControllers/OrbitCameraController.h"
 
 namespace ash {
     void GameLayer::OnAttach() {
@@ -205,7 +205,7 @@ namespace ash {
                         * glm::rotate(Mat4(1.0f), m_Time + i, Vec3(1, 1, 0))
                         * glm::scale(Mat4(1.0f), Vec3(0.6f));
 
-            Ref<Material> mat = (i == 0) ? m_UnlitMaterial : (i == 1) ? m_UnlitYellowMaterial : m_UnlitCyanMaterial;
+            Ref<Material> mat = i == 0 ? m_UnlitMaterial : i == 1 ? m_UnlitYellowMaterial : m_UnlitCyanMaterial;
             Renderer3D::Submit(m_SphereMesh, mat, transform);
         }
     }
@@ -224,12 +224,14 @@ namespace ash {
     }
 
     void GameLayer::SetupCamera() {
-        auto persp = MakeRef<PerspectiveCamera>(60.f, 1.f, 0.1f, 1000.f);
-        persp->SetPosition({0, 15, 25});
-        persp->LookAt({0, 0, 0});
-        m_Camera = persp;
-        m_CameraController = FPSCameraController::Create(*persp, 0.1f, 8.f);
-        // m_CameraController = OrbitCameraController::Create(*persp);
+        const auto perspectiveCamera = MakeRef<PerspectiveCamera>(60.f, 1.f, 0.1f, 1000.f);
+        m_Camera = perspectiveCamera;
+
+        m_CameraController = FPSCameraController::Create(*perspectiveCamera, 0.1f, 8.f); // need perspectiveCamera specifically
+        m_CameraController = OrbitCameraController::Create(*m_Camera);
+
+        m_Camera->SetPosition({0, 15, 25});
+        m_Camera->LookAt({0, 0, 0});
     }
 
     void GameLayer::SetupMaterials() {

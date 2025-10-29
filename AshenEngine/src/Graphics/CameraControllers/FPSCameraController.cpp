@@ -1,4 +1,4 @@
-#include "Ashen/Graphics/Camera/FPSCameraController.h"
+#include "../../../include/Ashen/Graphics/CameraControllers/FPSCameraController.h"
 
 #include "Ashen/Events/EventDispatcher.h"
 

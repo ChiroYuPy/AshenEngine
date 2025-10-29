@@ -1,4 +1,4 @@
-#include "Ashen/Graphics/Camera/OrbitCameraController.h"
+#include "../../../include/Ashen/Graphics/CameraControllers/OrbitCameraController.h"
 
 #include "Ashen/Core/Input.h"
 #include "Ashen/Events/EventDispatcher.h"

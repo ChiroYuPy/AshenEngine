@@ -23,15 +23,6 @@ file(GLOB_RECURSE ENGINE_HEADERS "include/*.h" "include/*.hpp")
 add_library(AshenEngineLib STATIC
         ${ENGINE_SOURCES}
         ${ENGINE_HEADERS}
-        include/Ashen/Graphics/Camera/Frustum.h
-        src/Graphics/Camera/Frustum.cpp
-        include/Ashen/Events/EventDispatcher.h
-        include/Ashen/Graphics/Camera/Camera2DController.h
-        src/Graphics/Camera/Camera2DController.cpp
-        src/Graphics/Camera/OrbitCameraController.cpp
-        src/Graphics/Camera/FPSCameraController.cpp
-        include/Ashen/Graphics/Camera/OrbitCameraController.h
-        include/Ashen/Graphics/Camera/FPSCameraController.h
 )
 
 add_library(Ashen::Engine ALIAS AshenEngineLib)

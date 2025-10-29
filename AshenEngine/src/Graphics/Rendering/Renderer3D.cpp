@@ -1,7 +1,7 @@
 #include "Ashen/Graphics/Rendering/Renderer3D.h"
 
 #include "Ashen/Core/Logger.h"
-#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/Graphics/Cameras/Camera.h"
 #include "Ashen/Graphics/Objects/Mesh.h"
 #include "Ashen/Graphics/Objects/Material.h"
 #include "Ashen/GraphicsAPI/RenderCommand.h"

@@ -1,7 +1,7 @@
 #ifndef ASHEN_CAMERA_CONTROLLER_H
 #define ASHEN_CAMERA_CONTROLLER_H
 
-#include "Camera.h"
+#include "../Cameras/Camera.h"
 #include "Ashen/Events/Event.h"
 
 namespace ash {

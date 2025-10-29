@@ -3,7 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Ashen/Graphics/Rendering/Renderer.h"
-#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/Graphics/Cameras/Camera.h"
 #include "Ashen/GraphicsAPI/Buffer.h"
 #include "Ashen/GraphicsAPI/VertexArray.h"
 #include "Ashen/GraphicsAPI/Shader.h"

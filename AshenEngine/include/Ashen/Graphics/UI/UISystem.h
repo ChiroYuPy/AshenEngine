@@ -3,7 +3,7 @@
 
 #include "Ashen/Scene/Control.h"
 #include "Ashen/Scene/Node.h"
-#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/Graphics/Cameras/Camera.h"
 #include "Ashen/Math/BBox.h"
 #include "Ashen/Events/Event.h"
 #include <memory>

@@ -1,7 +1,7 @@
 #ifndef VOXELITY_WORLDRENDERLAYER_H
 #define VOXELITY_WORLDRENDERLAYER_H
 
-#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/Graphics/Cameras/Camera.h"
 #include "Ashen/Graphics/Skybox/SkyboxCubeMap.h"
 #include "Ashen/Core/Types.h"
 

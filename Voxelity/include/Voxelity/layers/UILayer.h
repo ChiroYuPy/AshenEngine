@@ -2,7 +2,7 @@
 #define VOXELITY_UILAYER_H
 
 #include "Ashen/Core/Layer.h"
-#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/Graphics/Cameras/Camera.h"
 #include "Ashen/GraphicsAPI/Texture.h"
 
 namespace voxelity {

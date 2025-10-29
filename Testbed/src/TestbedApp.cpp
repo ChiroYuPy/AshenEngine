@@ -1,7 +1,7 @@
 #include "TestbedApp.h"
 
 #include "layers/GameLayer.h"
-#include "layers/TestLayer.h"
+#include "layers/Renderer2DTestLayer.h"
 #include "layers/UILayer.h"
 
 namespace ash {

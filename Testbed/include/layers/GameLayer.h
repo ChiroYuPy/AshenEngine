@@ -3,8 +3,8 @@
 
 #include "Ashen/Core/Layer.h"
 #include "Ashen/Core/Types.h"
-#include "Ashen/Graphics/Camera/Camera.h"
-#include "Ashen/Graphics/Camera/CameraController.h"
+#include "Ashen/Graphics/Cameras/Camera.h"
+#include "../../../AshenEngine/include/Ashen/Graphics/CameraControllers/CameraController.h"
 #include "Ashen/Graphics/Objects/Material.h"
 #include "Ashen/Graphics/Objects/Mesh.h"
 #include "Ashen/Graphics/Rendering/Renderer3D.h"

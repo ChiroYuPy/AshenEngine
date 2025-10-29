@@ -2,7 +2,7 @@
 #define VOXELITY_PLAYERCONTROLLER_H
 
 #include "Ashen/Core/Types.h"
-#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/Graphics/Cameras/Camera.h"
 #include "Ashen/Events/Event.h"
 
 namespace voxelity {

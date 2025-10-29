@@ -1,4 +1,4 @@
-#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/Graphics/Cameras/Camera.h"
 
 namespace ash {
     Mat4 Camera::GetViewMatrix() const {

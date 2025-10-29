@@ -1,4 +1,4 @@
-#include "Ashen/Graphics/Camera/Camera2DController.h"
+#include "../../../include/Ashen/Graphics/CameraControllers/Camera2DController.h"
 
 #include "Ashen/Events/EventDispatcher.h"
 

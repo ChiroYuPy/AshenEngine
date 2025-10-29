@@ -25,7 +25,7 @@
 #include "Ashen/Math/BBox.h"
 
 // Graphics
-#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/Graphics/Cameras/Camera.h"
 #include "Ashen/Graphics/Rendering/Renderer.h"
 #include "Ashen/Graphics/Rendering/Renderer2D.h"
 #include "Ashen/Graphics/Rendering/Renderer3D.h"

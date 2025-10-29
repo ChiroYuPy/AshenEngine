@@ -6,22 +6,19 @@
 namespace ash {
     class Layer {
     public:
+        explicit Layer(String name = "Layer") : m_Name(MovePtr(name)) {}
         virtual ~Layer() = default;
 
-        virtual void OnAttach() {
-        }
+        virtual void OnAttach() {}
+        virtual void OnDetach() {}
+        virtual void OnUpdate(float ts) {}
+        virtual void OnRender() {}
+        virtual void OnEvent(Event &event) {}
 
-        virtual void OnDetach() {
-        }
+        String GetName() const { return m_Name; }
 
-        virtual void OnUpdate(const float ts) {
-        }
-
-        virtual void OnRender() {
-        }
-
-        virtual void OnEvent(Event &event) {
-        }
+    protected:
+        String m_Name;
     };
 }
 

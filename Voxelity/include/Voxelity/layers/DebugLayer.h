@@ -3,7 +3,7 @@
 
 #include "Ashen/Core/Layer.h"
 #include "Ashen/Core/Types.h"
-#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/Graphics/Cameras/Camera.h"
 
 namespace voxelity {
     class DebugLayer final : public ash::Layer {

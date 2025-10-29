@@ -1,14 +1,18 @@
-#ifndef ASHEN_TESTLAYER_H
-#define ASHEN_TESTLAYER_H
+#ifndef ASHEN_SCENETESTLAYER_H
+#define ASHEN_SCENETESTLAYER_H
 
 #include "Ashen/Core/Layer.h"
 #include "Ashen/Core/Types.h"
-#include "Ashen/Graphics/Camera/Camera.h"
+#include "Ashen/ECS/Scene.h"
 
 namespace ash {
-    class TestLayer final : public Layer {
+    class SceneTestLayer final : public Layer {
     public:
+        explicit SceneTestLayer();
+
         void OnAttach() override;
+
+        void OnDetach() override;
 
         void OnUpdate(float deltaTime) override;
 
@@ -17,8 +21,8 @@ namespace ash {
         void OnEvent(Event &event) override;
 
     private:
-        Ref<OrthographicCamera> mCamera;
+        Own<Scene> m_Scene;
     };
 }
 
-#endif //ASHEN_TESTLAYER_H
+#endif //ASHEN_SCENETESTLAYER_H
