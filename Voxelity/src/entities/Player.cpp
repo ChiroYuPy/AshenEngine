@@ -90,7 +90,7 @@ namespace voxelity {
         const glm::vec3 interpolatedPos = getInterpolatedPosition(alpha);
 
         constexpr float eyeHeight = 0.85f;
-        const float eyeY = interpolatedPos.y - (boundingBoxSize.y * 0.5f) + (boundingBoxSize.y * eyeHeight);
+        const float eyeY = interpolatedPos.y - boundingBoxSize.y * 0.5f + boundingBoxSize.y * eyeHeight;
         const auto cameraPos = glm::vec3(interpolatedPos.x, eyeY, interpolatedPos.z);
         m_camera->SetPosition(cameraPos);
     }

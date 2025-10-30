@@ -1,17 +1,19 @@
 #ifndef ASHEN_FPSCAMERACONTROLLER_H
 #define ASHEN_FPSCAMERACONTROLLER_H
 
-#include "CameraController.h"
+#include "Ashen/Graphics/CameraControllers/CameraController.h"
 #include "Ashen/Events/KeyEvent.h"
 #include "Ashen/Events/MouseEvent.h"
 
 namespace ash {
     class FPSCameraController final : public CameraController {
     public:
-        static Ref<FPSCameraController> Create(PerspectiveCamera& camera, float sensitivity = 0.1f, float moveSpeed = 5.0f);
+        static Ref<FPSCameraController> Create(PerspectiveCamera &camera, float sensitivity = 0.1f,
+                                               float moveSpeed = 5.0f);
 
         void Update(float deltaTime) override;
-        void OnEvent(Event& event) override;
+
+        void OnEvent(Event &event) override;
 
         void SetSensitivity(const float sensitivity) { m_Sensitivity = sensitivity; }
         void SetMoveSpeed(const float speed) { m_MoveSpeed = speed; }
@@ -19,10 +21,11 @@ namespace ash {
 
         float GetYaw() const { return m_Yaw; }
         float GetPitch() const { return m_Pitch; }
+
         void SetOrientation(float yaw, float pitch);
 
     private:
-        explicit FPSCameraController(PerspectiveCamera& camera, float sensitivity, float moveSpeed);
+        explicit FPSCameraController(PerspectiveCamera &camera, float sensitivity, float moveSpeed);
 
         float m_Yaw = -90.0f;
         float m_Pitch = 0.0f;
@@ -41,10 +44,13 @@ namespace ash {
         bool m_FirstMouse = true;
         Vec2 m_LastMousePos{0.0f};
 
-        void UpdateCameraOrientation();
+        void UpdateCameraOrientation() const;
+
         void HandleKeyPressed(const KeyPressedEvent &keyEvent);
+
         void HandleKeyReleased(const KeyReleasedEvent &keyEvent);
-        void HandleMouseMovedEvent(const MouseMovedEvent& mouseMoved);
+
+        void HandleMouseMovedEvent(const MouseMovedEvent &mouseMoved);
     };
 }
 

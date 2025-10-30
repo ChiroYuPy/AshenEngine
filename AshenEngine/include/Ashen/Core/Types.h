@@ -1,7 +1,6 @@
 #ifndef ASHEN_TYPES_H
 #define ASHEN_TYPES_H
 
-#include <cstdint>
 #include <cstddef>
 #include <memory>
 #include <vector>
@@ -18,9 +17,9 @@
 #include <functional>
 #include <span>
 #include <type_traits>
+#include <format>
 
 namespace ash {
-    // ========== Primitive Types ==========
     using i8 = int8_t;
     using i16 = int16_t;
     using i32 = int32_t;
@@ -37,11 +36,14 @@ namespace ash {
     using byte = unsigned char;
     using Size = std::size_t;
 
-    // ========== String Types ==========
     using String = std::string;
     using StringView = std::string_view;
 
-    // ========== Smart Pointers ==========
+    template<typename... Args>
+    std::string Format(const std::string_view fmt, Args &&... args) {
+        return std::vformat(fmt, std::make_format_args(args...));
+    }
+
     template<typename T>
     using Ref = std::shared_ptr<T>;
 
@@ -51,7 +53,6 @@ namespace ash {
     template<typename T>
     using WeakRef = std::weak_ptr<T>;
 
-    // Smart pointer creation with perfect forwarding
     template<typename T, typename... Args>
     [[nodiscard]] constexpr Ref<T> MakeRef(Args &&... args) {
         return std::make_shared<T>(std::forward<Args>(args)...);
@@ -62,7 +63,6 @@ namespace ash {
         return std::make_unique<T>(std::forward<Args>(args)...);
     }
 
-    // Smart pointer utilities
     template<typename T>
     constexpr T *RawPtr(const Ref<T> &ptr) noexcept {
         return ptr.get();
@@ -78,7 +78,6 @@ namespace ash {
         return std::move(ptr);
     }
 
-    // ========== Container Types ==========
     template<typename T>
     using Vector = std::vector<T>;
 
@@ -106,7 +105,6 @@ namespace ash {
     template<typename T1, typename T2>
     using Pair = std::pair<T1, T2>;
 
-    // ========== Optional & Variant ==========
     template<typename T>
     using Optional = std::optional<T>;
 
@@ -116,7 +114,6 @@ namespace ash {
     template<typename T>
     using Function = std::function<T>;
 
-    // ========== Type Traits Helpers ==========
     template<typename T>
     using RemoveRef = std::remove_reference_t<T>;
 
@@ -141,7 +138,6 @@ namespace ash {
     template<typename T>
     inline constexpr bool IsFloating = std::is_floating_point_v<T>;
 
-    // ========== Callback Types ==========
     template<typename... Args>
     using Callback = Function<void(Args...)>;
 
@@ -150,6 +146,6 @@ namespace ash {
 
     template<typename T, typename R>
     using Mapper = Function<R(const T &)>;
-} // namespace ash
+}
 
 #endif // ASHEN_TYPES_H

@@ -10,16 +10,14 @@
 #include "Ashen/Graphics/Rendering/Renderer.h"
 #include "Ashen/Resources/ResourceManager.h"
 #include "Ashen/Audio/AudioManager.h"
+#include "Ashen/Events/EventDispatcher.h"
+#include "Ashen/Core/Platform.h"
 
 #include <GLFW/glfw3.h>
-
-#include "Ashen/Core/Platform.h"
-#include "Ashen/Events/EventDispatcher.h"
 
 namespace ash {
     Application::Application(ApplicationSettings settings)
         : m_Settings(MovePtr(settings)), m_Running(false) {
-
         Logger::Get().SetMinLevel(m_Settings.MinLogLevel);
 
         if (s_Instance) {
@@ -37,6 +35,8 @@ namespace ash {
             OnEvent(e);
         });
 
+        m_NodeGraph = MakeOwn<NodeGraph>();
+
         ResourcePaths::Instance().SetWorkingDirectory(m_Settings.ResourceDirectory);
         AssetLibrary::Initialize();
         AssetLibrary::PreloadCommon();
@@ -47,14 +47,14 @@ namespace ash {
         AudioManager::Get().Initialize(AudioDevice::Backend::MiniAudio);
 
         Logger::Info() << "Application started: " << m_Settings.Name << " v" << m_Settings.Version;
-
         Logger::Debug() << "=== System Info ===";
         Logger::Debug() << "Platform:          " << Platform::GetPlatformName();
         Logger::Debug() << "Architecture:      " << (Platform::Is64Bit() ? "64-bit" : "32-bit");
         Logger::Debug() << "CPU:               " << Platform::GetCPUName();
         Logger::Debug() << "Cores:             " << Platform::GetCPUCoreCount();
         Logger::Debug() << "RAM:               " << Platform::GetTotalRAM() / (1024 * 1024) << " MB";
-        Logger::Debug() << "GPU:               " << Platform::GetGPUName() << " (Vendor: " << Platform::GetGPUVendor() << ")";
+        Logger::Debug() << "GPU:               " << Platform::GetGPUName() << " (Vendor: " << Platform::GetGPUVendor()
+                << ")";
         Logger::Debug() << "Endianness:        " << (Platform::GetEndianness() == Platform::Endianness::Little
                                                          ? "Little"
                                                          : "Big");
@@ -68,6 +68,8 @@ namespace ash {
     void Application::Run() {
         m_Running = true;
         float lastFrameTime = GetTime();
+
+        m_NodeGraph->Ready();
 
         SendDefaultEvents();
 
@@ -106,34 +108,54 @@ namespace ash {
     }
 
     void Application::Shutdown() {
+        Logger::Info("Shutting down application...");
+
+        if (m_NodeGraph) {
+            m_NodeGraph->Clear();
+        }
+
         m_LayerStack.Clear();
 
-        // Arrêter le système audio
         AudioManager::Get().Shutdown();
 
         AssetLibrary::ClearAll();
+
+        Input::Shutdown();
+
         Renderer::Shutdown();
+
+        Logger::Info("Application shut down successfully");
     }
 
     void Application::Tick(const float deltaTime) const {
         m_Window->PollEvents();
+
         Update(deltaTime);
+
         Render();
+
         m_Window->Update();
     }
 
     void Application::Update(const float deltaTime) const {
         Input::Update();
 
-        // Mettre à jour le système audio
         AudioManager::Get().Update();
+
+        if (m_NodeGraph)
+            m_NodeGraph->Process(deltaTime);
 
         UpdateLayers(deltaTime);
     }
 
     void Application::Render() const {
         Renderer::BeginFrame();
+
+        if (m_NodeGraph)
+            m_NodeGraph->Draw();
+
         RenderLayers();
+
         Renderer::EndFrame();
     }
 
@@ -145,7 +167,11 @@ namespace ash {
             return false;
         });
 
-        HandleEventsLayers(event);
+        if (m_NodeGraph && !event.IsHandled())
+            m_NodeGraph->DispatchEvent(event);
+
+        if (!event.IsHandled())
+            HandleEventsLayers(event);
 
         dispatcher.Dispatch<WindowCloseEvent>([this](WindowCloseEvent &) -> bool {
             Stop();
@@ -154,20 +180,24 @@ namespace ash {
     }
 
     void Application::UpdateLayers(const float ts) const {
-        for (auto& layerPtr : m_LayerStack)
-            if (layerPtr) layerPtr->OnUpdate(ts);
+        for (auto &layerPtr: m_LayerStack)
+            if (layerPtr)
+                layerPtr->OnUpdate(ts);
     }
 
     void Application::RenderLayers() const {
-        for (auto& layerPtr : m_LayerStack)
-            if (layerPtr) layerPtr->OnRender();
+        for (auto &layerPtr: m_LayerStack)
+            if (layerPtr)
+                layerPtr->OnRender();
     }
 
-    void Application::HandleEventsLayers(Event& event) const {
-        for (auto& layerPtr : std::ranges::reverse_view(m_LayerStack)) {
-            if (layerPtr && !event.Handled)
+    void Application::HandleEventsLayers(Event &event) const {
+        for (auto &layerPtr: std::ranges::reverse_view(m_LayerStack)) {
+            if (layerPtr && !event.IsHandled())
                 layerPtr->OnEvent(event);
-            if (event.Handled) break;
+
+            if (event.IsHandled())
+                break;
         }
     }
 

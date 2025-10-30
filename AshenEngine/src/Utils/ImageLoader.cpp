@@ -29,12 +29,12 @@ namespace ash {
         return data;
     }
 
-    bool ImageLoader::IsSupportedFormat(const std::string &extension) {
+    bool ImageLoader::IsSupportedFormat(const String &extension) {
         const auto &supported = GetSupportedExtensions();
         return std::ranges::find(supported, extension) != supported.end();
     }
 
-    Vector<std::string> ImageLoader::GetSupportedExtensions() {
+    Vector<String> ImageLoader::GetSupportedExtensions() {
         return {".png", ".jpg", ".jpeg", ".bmp", ".tga"};
     }
 }

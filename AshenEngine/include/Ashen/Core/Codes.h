@@ -1,10 +1,10 @@
 #ifndef ASHEN_CODES_H
 #define ASHEN_CODES_H
+
 #include "Ashen/Math/Math.h"
 
 namespace ash {
     enum class Key : int {
-        // Printable keys
         Space = 32,
         Apostrophe = 39,
         Comma = 44,
@@ -29,7 +29,6 @@ namespace ash {
         RightBracket = 93,
         GraveAccent = 96,
 
-        // Function keys
         Escape = 256,
         Enter = 257,
         Tab = 258,
@@ -57,7 +56,6 @@ namespace ash {
         F5 = 294, F6 = 295, F7 = 296, F8 = 297,
         F9 = 298, F10 = 299, F11 = 300, F12 = 301,
 
-        // Keypad
         KP0 = 320, KP1 = 321, KP2 = 322, KP3 = 323,
         KP4 = 324, KP5 = 325, KP6 = 326, KP7 = 327,
         KP8 = 328, KP9 = 329,
@@ -70,7 +68,6 @@ namespace ash {
         KPEnter = 335,
         KPEqual = 336,
 
-        // Modifiers
         LeftShift = 340,
         LeftControl = 341,
         LeftAlt = 342,
@@ -94,9 +91,9 @@ namespace ash {
         Button6 = 6,
         Button7 = 7,
 
-        ButtonLeft = Button0,
-        ButtonRight = Button1,
-        ButtonMiddle = Button2,
+        Left = Button0,
+        Right = Button1,
+        Middle = Button2,
 
         Unknown = LimitMax<int>()
     };

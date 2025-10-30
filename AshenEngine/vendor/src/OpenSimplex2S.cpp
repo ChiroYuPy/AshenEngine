@@ -25,7 +25,7 @@ OpenSimplex2S::OpenSimplex2S(long seed) {
         seed = seed * 6364136223846793005L + 1442695040888963407L;
         int r = static_cast<int>((seed + 31) % (i + 1));
         if (r < 0) {
-            r += (i + 1);
+            r += i + 1;
         }
         perm[i] = source[r];
         permGrad2[i] = GRADIENTS_2D[perm[i]];
@@ -75,7 +75,7 @@ double OpenSimplex2S::noise2_Base(const double xs, const double ys) {
 
     // Index to point list
     const int a = static_cast<int>(xsi + ysi);
-    const int index = (a << 2) | static_cast<int>(xsi - ysi / 2 + 1 - a / 2.0) << 3
+    const int index = a << 2 | static_cast<int>(xsi - ysi / 2 + 1 - a / 2.0) << 3
                       | static_cast<int>(ysi - xsi / 2 + 1 - a / 2.0) << 4;
 
     const double ssi = (xsi + ysi) * -0.211324865405187;
@@ -93,8 +93,8 @@ double OpenSimplex2S::noise2_Base(const double xs, const double ys) {
             continue;
         }
 
-        const int pxm = (xsb + c.xsv) & PMASK;
-        const int pym = (ysb + c.ysv) & PMASK;
+        const int pxm = xsb + c.xsv & PMASK;
+        const int pym = ysb + c.ysv & PMASK;
         const Grad2 grad = permGrad2[perm[pxm] ^ pym];
         const double extrapolation = grad.dx * dx + grad.dy * dy;
 
@@ -115,7 +115,7 @@ double OpenSimplex2S::noise3_Classic(const double x, const double y, const doubl
     // Re-orient the cubic lattices via rotation, to produce the expected look on cardinal planar
     // slices. If texturing skybox that don't tend to have cardinal plane faces, you could even
     // remove this. Orthonormal rotation. Not a skew transform.
-    const double r = (2.0 / 3.0) * (x + y + z);
+    const double r = 2.0 / 3.0 * (x + y + z);
     const double xr = r - x;
     const double yr = r - y;
     const double zr = r - z;
@@ -188,7 +188,7 @@ double OpenSimplex2S::noise3_BCC(const double xr, const double yr, const double 
     const int xht = static_cast<int>(xri + 0.5);
     const int yht = static_cast<int>(yri + 0.5);
     const int zht = static_cast<int>(zri + 0.5);
-    const int index = (xht << 0) | (yht << 1) | (zht << 2);
+    const int index = xht << 0 | yht << 1 | zht << 2;
 
     // Point contributions
     double value = 0;
@@ -201,9 +201,9 @@ double OpenSimplex2S::noise3_BCC(const double xr, const double yr, const double 
         if (attn < 0) {
             c = c->nextOnFailure;
         } else {
-            const int pxm = (xrb + c->xrv) & PMASK;
-            const int pym = (yrb + c->yrv) & PMASK;
-            const int pzm = (zrb + c->zrv) & PMASK;
+            const int pxm = xrb + c->xrv & PMASK;
+            const int pym = yrb + c->yrv & PMASK;
+            const int pzm = zrb + c->zrv & PMASK;
             const Grad3 grad = permGrad3[perm[perm[pxm] ^ pym] ^ pzm];
             const double extrapolation = grad.dx * dxr + grad.dy * dyr + grad.dz * dzr;
 
@@ -303,8 +303,8 @@ double OpenSimplex2S::noise4_Base(const double xs, const double ys, const double
     const double zi = zsi + ssi;
     const double wi = wsi + ssi;
 
-    const int index = ((fastFloor(xs * 4) & 3) << 0) | ((fastFloor(ys * 4) & 3) << 2)
-                      | ((fastFloor(zs * 4) & 3) << 4) | ((fastFloor(ws * 4) & 3) << 6);
+    const int index = (fastFloor(xs * 4) & 3) << 0 | (fastFloor(ys * 4) & 3) << 2
+                      | (fastFloor(zs * 4) & 3) << 4 | (fastFloor(ws * 4) & 3) << 6;
 
     // Point contributions
     for (int i = 0; i < LOOKUP_4D_SIZE[index]; ++i) {
@@ -317,10 +317,10 @@ double OpenSimplex2S::noise4_Base(const double xs, const double ys, const double
         if (attn > 0) {
             attn *= attn;
 
-            const int pxm = (xsb + c.xsv) & PMASK;
-            const int pym = (ysb + c.ysv) & PMASK;
-            const int pzm = (zsb + c.zsv) & PMASK;
-            const int pwm = (wsb + c.wsv) & PMASK;
+            const int pxm = xsb + c.xsv & PMASK;
+            const int pym = ysb + c.ysv & PMASK;
+            const int pzm = zsb + c.zsv & PMASK;
+            const int pwm = wsb + c.wsv & PMASK;
             const Grad4 grad = permGrad4[perm[perm[perm[pxm] ^ pym] ^ pzm] ^ pwm];
             const double extrapolation = grad.dx * dx + grad.dy * dy + grad.dz * dz + grad.dw * dw;
 
@@ -412,9 +412,9 @@ void OpenSimplex2S::initLatticePoints() {
 
     for (int i = 0; i < 8; i++) {
         int i1, j1, k1, i2, j2, k2;
-        i1 = (i >> 0) & 1;
-        j1 = (i >> 1) & 1;
-        k1 = (i >> 2) & 1;
+        i1 = i >> 0 & 1;
+        j1 = i >> 1 & 1;
+        k1 = i >> 2 & 1;
         i2 = i1 ^ 1;
         j2 = j1 ^ 1;
         k2 = k1 ^ 1;
@@ -771,10 +771,10 @@ void OpenSimplex2S::initLatticePoints() {
 
     LatticePoint4D latticePoints[256];
     for (int i = 0; i < 256; i++) {
-        int cx = ((i >> 0) & 3) - 1;
-        int cy = ((i >> 2) & 3) - 1;
-        int cz = ((i >> 4) & 3) - 1;
-        int cw = ((i >> 6) & 3) - 1;
+        int cx = (i >> 0 & 3) - 1;
+        int cy = (i >> 2 & 3) - 1;
+        int cz = (i >> 4 & 3) - 1;
+        int cw = (i >> 6 & 3) - 1;
         latticePoints[i] = {cx, cy, cz, cw};
     }
     for (unsigned int i = 0; i < 256; i++) {

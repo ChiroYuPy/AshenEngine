@@ -1,8 +1,6 @@
 #ifndef ASHEN_RENDERER2D_H
 #define ASHEN_RENDERER2D_H
 
-#include <array>
-
 #include <glm/glm.hpp>
 
 #include "Ashen/GraphicsAPI/Buffer.h"
@@ -53,33 +51,23 @@ namespace ash {
 
         static void DrawQuad(const Mat4 &transform, const Vec4 &color);
 
-        static void DrawQuad(const Vec2 &position, const Vec2 &size,
-                             const Ref<Texture2D> &texture,
+        static void DrawQuad(const Vec2 &position, const Vec2 &size, const Ref<Texture2D> &texture,
                              const Vec4 &tintColor = Vec4(1.0f));
 
-        static void DrawQuad(const Vec3 &position, const Vec2 &size,
-                             const Ref<Texture2D> &texture,
+        static void DrawQuad(const Vec3 &position, const Vec2 &size, const Ref<Texture2D> &texture,
                              const Vec4 &tintColor = Vec4(1.0f));
 
-        static void DrawQuad(const Mat4 &transform,
-                             const Ref<Texture2D> &texture,
-                             const Vec4 &tintColor = Vec4(1.0f));
+        static void DrawQuad(const Mat4 &transform, const Ref<Texture2D> &texture, const Vec4 &tintColor = Vec4(1.0f));
 
-        static void DrawRotatedQuad(const Vec2 &position, const Vec2 &size,
-                                    float rotation, const Vec4 &color);
+        static void DrawRotatedQuad(const Vec2 &position, const Vec2 &size, float rotation, const Vec4 &color);
 
-        static void DrawRotatedQuad(const Vec3 &position, const Vec2 &size,
-                                    float rotation, const Vec4 &color);
+        static void DrawRotatedQuad(const Vec3 &position, const Vec2 &size, float rotation, const Vec4 &color);
 
-        static void DrawRotatedQuad(const Vec2 &position, const Vec2 &size,
-                                    float rotation,
-                                    const Ref<Texture2D> &texture,
-                                    const Vec4 &tintColor = Vec4(1.0f));
+        static void DrawRotatedQuad(const Vec2 &position, const Vec2 &size, float rotation,
+                                    const Ref<Texture2D> &texture, const Vec4 &tintColor = Vec4(1.0f));
 
-        static void DrawRotatedQuad(const Vec3 &position, const Vec2 &size,
-                                    float rotation,
-                                    const Ref<Texture2D> &texture,
-                                    const Vec4 &tintColor = Vec4(1.0f));
+        static void DrawRotatedQuad(const Vec3 &position, const Vec2 &size, float rotation,
+                                    const Ref<Texture2D> &texture, const Vec4 &tintColor = Vec4(1.0f));
 
         static void DrawLine(const Vec2 &p0, const Vec2 &p1, const Vec4 &color);
 
@@ -91,14 +79,13 @@ namespace ash {
 
         static void DrawRect(const Mat4 &transform, const Vec4 &color);
 
-        static void DrawCircle(const Vec2 &center, float radius, const Vec4 &color,
-                               float thickness = 1.0f, float fade = 0.005f);
+        static void DrawCircle(const Vec2 &center, float radius, const Vec4 &color, float thickness = 1.0f,
+                               float fade = 0.005f);
 
-        static void DrawCircle(const Vec3 &center, float radius, const Vec4 &color,
-                               float thickness = 1.0f, float fade = 0.005f);
+        static void DrawCircle(const Vec3 &center, float radius, const Vec4 &color, float thickness = 1.0f,
+                               float fade = 0.005f);
 
-        static void DrawCircle(const Mat4 &transform, const Vec4 &color,
-                               float thickness = 1.0f, float fade = 0.005f);
+        static void DrawCircle(const Mat4 &transform, const Vec4 &color, float thickness = 1.0f, float fade = 0.005f);
 
         static void DrawFilledCircle(const Vec2 &center, float radius, const Vec4 &color);
 

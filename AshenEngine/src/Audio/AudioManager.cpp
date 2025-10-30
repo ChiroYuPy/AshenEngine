@@ -3,13 +3,12 @@
 #include "Ashen/Core/Logger.h"
 
 namespace ash {
-
-    AudioManager* AudioManager::s_Instance = nullptr;
+    AudioManager *AudioManager::s_Instance = nullptr;
 
     AudioManager::AudioManager() {
-        if (s_Instance) {
+        if (s_Instance)
             Logger::Warn("AudioManager instance already exists!");
-        }
+
         s_Instance = this;
     }
 
@@ -42,28 +41,21 @@ namespace ash {
 
         Logger::Info("Shutting down AudioManager...");
 
-        // Arrêter toutes les sources
         StopAll();
 
-        // Nettoyer les sources temporaires
         m_TempSources.clear();
 
-        // Nettoyer les sources persistantes
         m_Sources.clear();
 
-        // Nettoyer la musique
         m_CurrentMusic.reset();
 
-        // Arrêter le device
         m_Device->Shutdown();
         m_Device.reset();
 
         Logger::Info("AudioManager shut down");
     }
 
-    // === API SIMPLE ===
-
-    void AudioManager::PlaySound(const std::string& filepath, const float volume, const AudioCategory category) {
+    void AudioManager::PlaySound(const String &filepath, const float volume, const AudioCategory category) {
         if (!m_Device || !m_Device->IsInitialized()) {
             Logger::Warn("Cannot play sound: audio device not initialized");
             return;
@@ -75,7 +67,7 @@ namespace ash {
         config.Loop = false;
         config.Spatial = false;
 
-        auto source = m_Device->CreateSource(filepath, config);
+        const auto source = m_Device->CreateSource(filepath, config);
         if (source) {
             source->SetCategory(category);
             source->Play();
@@ -83,8 +75,8 @@ namespace ash {
         }
     }
 
-    void AudioManager::PlaySoundAtPosition(const std::string& filepath, const Vec3& position,
-                                          const float volume, const AudioCategory category) {
+    void AudioManager::PlaySoundAtPosition(const String &filepath, const Vec3 &position,
+                                           const float volume, const AudioCategory category) {
         if (!m_Device || !m_Device->IsInitialized()) {
             Logger::Warn("Cannot play sound: audio device not initialized");
             return;
@@ -97,7 +89,7 @@ namespace ash {
         config.Spatial = true;
         config.Position = position;
 
-        auto source = m_Device->CreateSource(filepath, config);
+        const auto source = m_Device->CreateSource(filepath, config);
         if (source) {
             source->SetCategory(category);
             source->Play();
@@ -105,16 +97,14 @@ namespace ash {
         }
     }
 
-    void AudioManager::PlayMusic(const std::string& filepath, const float volume, const bool loop) {
+    void AudioManager::PlayMusic(const String &filepath, const float volume, const bool loop) {
         if (!m_Device || !m_Device->IsInitialized()) {
             Logger::Warn("Cannot play music: audio device not initialized");
             return;
         }
 
-        // Arrêter la musique actuelle si elle existe
-        if (m_CurrentMusic) {
+        if (m_CurrentMusic)
             m_CurrentMusic->Stop();
-        }
 
         AudioSourceConfig config;
         config.Type = AudioSourceType::Streaming;
@@ -126,9 +116,9 @@ namespace ash {
         if (m_CurrentMusic) {
             m_CurrentMusic->SetCategory(AudioCategory::Music);
             m_CurrentMusic->Play();
-            Logger::Info("Playing music: {}", filepath);
+            Logger::Info(Format("Playing music: {}", filepath));
         } else {
-            Logger::Error("Failed to load music: {}", filepath);
+            Logger::Error(Format("Failed to load music: {}", filepath));
         }
     }
 
@@ -139,46 +129,41 @@ namespace ash {
         }
     }
 
-    void AudioManager::PauseMusic() {
-        if (m_CurrentMusic) {
+    void AudioManager::PauseMusic() const {
+        if (m_CurrentMusic)
             m_CurrentMusic->Pause();
-        }
     }
 
-    void AudioManager::ResumeMusic() {
-        if (m_CurrentMusic) {
+    void AudioManager::ResumeMusic() const {
+        if (m_CurrentMusic)
             m_CurrentMusic->Resume();
-        }
     }
 
-    void AudioManager::SetMusicVolume(const float volume) {
-        if (m_CurrentMusic) {
+    void AudioManager::SetMusicVolume(const float volume) const {
+        if (m_CurrentMusic)
             m_CurrentMusic->SetVolume(volume);
-        }
     }
 
     bool AudioManager::IsMusicPlaying() const {
         return m_CurrentMusic && m_CurrentMusic->IsPlaying();
     }
 
-    // === API AVANCÉE ===
-
-    Ref<AudioSource> AudioManager::CreateAudioSource(const std::string& filepath, 
-                                                     const AudioSourceConfig& config) {
+    Ref<AudioSource> AudioManager::CreateAudioSource(const String &filepath,
+                                                     const AudioSourceConfig &config) {
         if (!m_Device || !m_Device->IsInitialized()) {
             Logger::Warn("Cannot create audio source: audio device not initialized");
             return nullptr;
         }
 
         auto source = m_Device->CreateSource(filepath, config);
-        if (source) {
+        if (source)
             m_Sources[source->GetHandle()] = source;
-        }
+
         return source;
     }
 
     void AudioManager::DestroyAudioSource(const AudioSourceHandle handle) {
-        auto it = m_Sources.find(handle);
+        const auto it = m_Sources.find(handle);
         if (it != m_Sources.end()) {
             it->second->Stop();
             m_Device->DestroySource(handle);
@@ -187,59 +172,49 @@ namespace ash {
     }
 
     Ref<AudioSource> AudioManager::GetAudioSource(const AudioSourceHandle handle) {
-        auto it = m_Sources.find(handle);
-        return (it != m_Sources.end()) ? it->second : nullptr;
+        const auto it = m_Sources.find(handle);
+        return it != m_Sources.end() ? it->second : nullptr;
     }
 
-    // Listener
-
-    void AudioManager::SetListenerPosition(const Vec3& position) {
-        if (m_Device) {
+    void AudioManager::SetListenerPosition(const Vec3 &position) const {
+        if (m_Device)
             m_Device->SetListenerPosition(position);
-        }
     }
 
-    void AudioManager::SetListenerVelocity(const Vec3& velocity) {
-        if (m_Device) {
+    void AudioManager::SetListenerVelocity(const Vec3 &velocity) const {
+        if (m_Device)
             m_Device->SetListenerVelocity(velocity);
-        }
     }
 
-    void AudioManager::SetListenerOrientation(const Vec3& forward, const Vec3& up) {
-        if (m_Device) {
+    void AudioManager::SetListenerOrientation(const Vec3 &forward, const Vec3 &up) const {
+        if (m_Device)
             m_Device->SetListenerOrientation(forward, up);
-        }
     }
 
-    // Volumes
-
-    void AudioManager::SetMasterVolume(const float volume) {
-        if (m_Device) {
+    void AudioManager::SetMasterVolume(const float volume) const {
+        if (m_Device)
             m_Device->SetMasterVolume(volume);
-        }
     }
 
     float AudioManager::GetMasterVolume() const {
         return m_Device ? m_Device->GetMasterVolume() : 1.0f;
     }
 
-    void AudioManager::SetCategoryVolume(const AudioCategory category, const float volume) {
-        if (m_Device) {
+    void AudioManager::SetCategoryVolume(const AudioCategory category, const float volume) const {
+        if (m_Device)
             m_Device->SetCategoryVolume(category, volume);
-        }
     }
 
     float AudioManager::GetCategoryVolume(const AudioCategory category) const {
         return m_Device ? m_Device->GetCategoryVolume(category) : 1.0f;
     }
 
-    void AudioManager::MuteCategory(const AudioCategory category, const bool mute) {
-        if (m_Device) {
+    void AudioManager::MuteCategory(const AudioCategory category, const bool mute) const {
+        if (m_Device)
             m_Device->MuteCategory(category, mute);
-        }
     }
 
-    void AudioManager::UnmuteCategory(const AudioCategory category) {
+    void AudioManager::UnmuteCategory(const AudioCategory category) const {
         MuteCategory(category, false);
     }
 
@@ -247,54 +222,41 @@ namespace ash {
         return m_Device ? m_Device->IsCategoryMuted(category) : false;
     }
 
-    // Contrôles globaux
-
-    void AudioManager::PauseAll() {
-        if (m_Device) {
+    void AudioManager::PauseAll() const {
+        if (m_Device)
             m_Device->PauseAll();
-        }
     }
 
-    void AudioManager::ResumeAll() {
-        if (m_Device) {
+    void AudioManager::ResumeAll() const {
+        if (m_Device)
             m_Device->ResumeAll();
-        }
     }
 
     void AudioManager::StopAll() {
-        if (m_Device) {
+        if (m_Device)
             m_Device->StopAll();
-        }
 
-        // Nettoyer aussi les sources temporaires
         m_TempSources.clear();
     }
-
-    // Update
 
     void AudioManager::Update() {
         if (!m_Device) return;
 
         m_Device->Update();
 
-        // Nettoyer les sources temporaires terminées
         CleanupFinishedSources();
     }
 
     void AudioManager::CleanupFinishedSources() {
         auto it = m_TempSources.begin();
         while (it != m_TempSources.end()) {
-            if ((*it)->IsStopped() && !(*it)->IsLooping()) {
+            if ((*it)->IsStopped() && !(*it)->IsLooping())
                 it = m_TempSources.erase(it);
-            } else {
-                ++it;
-            }
+            else ++it;
         }
     }
 
-    // Singleton
-
-    AudioManager& AudioManager::Get() {
+    AudioManager &AudioManager::Get() {
         if (!s_Instance) {
             Logger::Error("AudioManager not initialized!");
             static AudioManager dummy;
@@ -303,23 +265,18 @@ namespace ash {
         return *s_Instance;
     }
 
-    // Informations
-
     AudioDeviceInfo AudioManager::GetDeviceInfo() const {
         return m_Device ? m_Device->GetDeviceInfo() : AudioDeviceInfo{};
     }
-
-    // Factory
 
     Own<AudioDevice> AudioDevice::Create(const Backend backend) {
         switch (backend) {
             case Backend::MiniAudio:
                 return MakeOwn<MiniAudioDevice>();
-            
+
             default:
                 Logger::Error("Unknown audio backend");
                 return nullptr;
         }
     }
-
-} // namespace ash
+}

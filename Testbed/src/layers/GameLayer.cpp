@@ -71,7 +71,7 @@ namespace ash {
         });
 
         dispatcher.Dispatch<MouseButtonPressedEvent>([this](const MouseButtonPressedEvent &e) {
-            if (e.GetMouseButton() == MouseButton::ButtonLeft) {
+            if (e.GetMouseButton() == MouseButton::Left) {
                 if (!m_CameraController->IsEnabled()) {
                     m_CameraController->SetEnabled(true);
                     Input::SetCursorMode(CursorMode::Captured);
@@ -112,7 +112,7 @@ namespace ash {
 
         constexpr int nbSphere = 32;
         for (int i = 0; i < nbSphere; ++i) {
-            const float angle = m_Time * 0.5f + (i * glm::two_pi<float>() / static_cast<float>(nbSphere));
+            const float angle = m_Time * 0.5f + i * glm::two_pi<float>() / static_cast<float>(nbSphere);
             constexpr float radius = 6.0f;
             Vec3 pos(
                 zoneX + std::cos(angle) * radius,
@@ -156,7 +156,7 @@ namespace ash {
         Renderer3D::Submit(m_CubeMesh, m_ToonRedMaterial, transform);
 
         for (int i = 0; i < 3; ++i) {
-            const float angle = -m_Time * 0.7f + (i * glm::two_pi<float>() / 3.0f);
+            const float angle = -m_Time * 0.7f + i * glm::two_pi<float>() / 3.0f;
             constexpr float radius = 6.0f;
             Vec3 pos(
                 zoneX + std::cos(angle) * radius,
@@ -167,7 +167,7 @@ namespace ash {
             transform = glm::translate(Mat4(1.0f), pos)
                         * glm::scale(Mat4(1.0f), Vec3(0.6f));
 
-            Ref<Material> mat = (i % 2 == 0) ? m_ToonMaterial : m_ToonRedMaterial;
+            Ref<Material> mat = i % 2 == 0 ? m_ToonMaterial : m_ToonRedMaterial;
             Renderer3D::Submit(m_SphereMesh, mat, transform);
         }
     }

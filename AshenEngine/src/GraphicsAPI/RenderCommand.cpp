@@ -2,7 +2,6 @@
 #include "Ashen/GraphicsAPI/GLEnums.h"
 
 namespace ash {
-    // ---- Clear ----
     void RenderCommand::Clear(ClearBuffer buffers) {
         glClear(static_cast<GLbitfield>(buffers));
     }
@@ -15,10 +14,8 @@ namespace ash {
         glClearColor(r, g, b, a);
     }
 
-    // ---- Viewport / Scissor ----
     void RenderCommand::SetViewport(const uint32_t x, const uint32_t y, const uint32_t width, const uint32_t height) {
-        glViewport(static_cast<GLint>(x), static_cast<GLint>(y),
-                   static_cast<GLsizei>(width), static_cast<GLsizei>(height));
+        glViewport(static_cast<GLint>(x), static_cast<GLint>(y), static_cast<GLsizei>(width), static_cast<GLsizei>(height));
     }
 
     void RenderCommand::SetViewport(const uint32_t width, const uint32_t height) {
@@ -40,11 +37,9 @@ namespace ash {
     }
 
     void RenderCommand::SetScissor(const uint32_t x, const uint32_t y, const uint32_t width, const uint32_t height) {
-        glScissor(static_cast<GLint>(x), static_cast<GLint>(y),
-                  static_cast<GLsizei>(width), static_cast<GLsizei>(height));
+        glScissor(static_cast<GLint>(x), static_cast<GLint>(y), static_cast<GLsizei>(width), static_cast<GLsizei>(height));
     }
 
-    // ---- Depth ----
     void RenderCommand::EnableDepthTest() {
         if (!s_DepthEnabled) {
             s_DepthEnabled = true;
@@ -70,7 +65,6 @@ namespace ash {
         }
     }
 
-    // ---- Blending ----
     void RenderCommand::EnableBlending() {
         if (!s_BlendEnabled) {
             s_BlendEnabled = true;
@@ -89,10 +83,8 @@ namespace ash {
         glBlendFunc(static_cast<GLenum>(src), static_cast<GLenum>(dst));
     }
 
-    void RenderCommand::SetBlendFuncSeparate(BlendFactor srcRGB, BlendFactor dstRGB,
-                                             BlendFactor srcAlpha, BlendFactor dstAlpha) {
-        glBlendFuncSeparate(static_cast<GLenum>(srcRGB), static_cast<GLenum>(dstRGB),
-                            static_cast<GLenum>(srcAlpha), static_cast<GLenum>(dstAlpha));
+    void RenderCommand::SetBlendFuncSeparate(BlendFactor srcRGB, BlendFactor dstRGB, BlendFactor srcAlpha, BlendFactor dstAlpha) {
+        glBlendFuncSeparate(static_cast<GLenum>(srcRGB), static_cast<GLenum>(dstRGB), static_cast<GLenum>(srcAlpha), static_cast<GLenum>(dstAlpha));
     }
 
     void RenderCommand::SetBlendOp(BlendEquation op) {
@@ -103,7 +95,6 @@ namespace ash {
         glBlendColor(color.r, color.g, color.b, color.a);
     }
 
-    // ---- Culling ----
     void RenderCommand::EnableCulling() {
         if (!s_CullingEnabled) {
             s_CullingEnabled = true;
@@ -126,7 +117,6 @@ namespace ash {
         glFrontFace(static_cast<GLenum>(orientation));
     }
 
-    // ---- Polygon ----
     void RenderCommand::SetPolygonMode(CullFaceMode faces, PolygonMode mode) {
         glPolygonMode(static_cast<GLenum>(faces), static_cast<GLenum>(mode));
     }
@@ -155,7 +145,6 @@ namespace ash {
         glLineWidth(width);
     }
 
-    // ---- Stencil ----
     void RenderCommand::EnableStencil() {
         if (!s_StencilEnabled) {
             s_StencilEnabled = true;
@@ -182,13 +171,11 @@ namespace ash {
         glStencilMask(mask);
     }
 
-    // ---- Color Mask ----
     void RenderCommand::SetColorMask(const bool r, const bool g, const bool b, const bool a) {
         glColorMask(r ? GL_TRUE : GL_FALSE, g ? GL_TRUE : GL_FALSE,
                     b ? GL_TRUE : GL_FALSE, a ? GL_TRUE : GL_FALSE);
     }
 
-    // ---- Multisample ----
     void RenderCommand::EnableMultisample() {
         if (!s_MultisampleEnabled) {
             s_MultisampleEnabled = true;
@@ -203,7 +190,6 @@ namespace ash {
         }
     }
 
-    // ---- Drawing ----
     void RenderCommand::DrawArrays(PrimitiveType mode, const int first, const int count) {
         glDrawArrays(static_cast<GLenum>(mode), first, count);
     }
@@ -212,21 +198,18 @@ namespace ash {
         glDrawElements(static_cast<GLenum>(mode), count, static_cast<GLenum>(type), indices);
     }
 
-    void RenderCommand::DrawArraysInstanced(PrimitiveType mode, const int first, const int count,
-                                            const int instanceCount) {
+    void RenderCommand::DrawArraysInstanced(PrimitiveType mode, const int first, const int count, const int instanceCount) {
         glDrawArraysInstanced(static_cast<GLenum>(mode), first, count, instanceCount);
     }
 
-    void RenderCommand::DrawElementsInstanced(PrimitiveType mode, const int count, IndexType type, const void *indices,
-                                              const int instanceCount) {
+    void RenderCommand::DrawElementsInstanced(PrimitiveType mode, const int count, IndexType type, const void *indices, const int instanceCount) {
         glDrawElementsInstanced(static_cast<GLenum>(mode), count, static_cast<GLenum>(type), indices, instanceCount);
     }
 
-    // ---- Queries ----
     bool RenderCommand::IsDepthTestEnabled() { return s_DepthEnabled; }
     bool RenderCommand::IsBlendingEnabled() { return s_BlendEnabled; }
     bool RenderCommand::IsCullingEnabled() { return s_CullingEnabled; }
     bool RenderCommand::IsStencilEnabled() { return s_StencilEnabled; }
     bool RenderCommand::IsWireframeEnabled() { return s_Wireframe; }
     bool RenderCommand::IsScissorEnabled() { return s_ScissorEnabled; }
-} // namespace ash
+}

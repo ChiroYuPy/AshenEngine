@@ -1,79 +1,102 @@
-#include "../../../include/Ashen/Graphics/CameraControllers/FPSCameraController.h"
+#include "Ashen/Graphics/CameraControllers/FPSCameraController.h"
 
 #include "Ashen/Events/EventDispatcher.h"
 
 namespace ash {
-        Ref<FPSCameraController> FPSCameraController::Create(PerspectiveCamera& camera, const float sensitivity, const float moveSpeed) {
+    Ref<FPSCameraController> FPSCameraController::Create(PerspectiveCamera &camera, const float sensitivity,
+                                                         const float moveSpeed) {
         return Ref<FPSCameraController>(new FPSCameraController(camera, sensitivity, moveSpeed));
     }
 
-    FPSCameraController::FPSCameraController(PerspectiveCamera& camera, const float sensitivity, const float moveSpeed)
+    FPSCameraController::FPSCameraController(PerspectiveCamera &camera, const float sensitivity, const float moveSpeed)
         : CameraController(camera), m_Sensitivity(sensitivity), m_MoveSpeed(moveSpeed) {
         UpdateCameraOrientation();
     }
 
-    void FPSCameraController::OnEvent(Event& event) {
-            if (!m_Enabled) return;
+    void FPSCameraController::OnEvent(Event &event) {
+        if (!m_Enabled) return;
 
-            EventDispatcher dispatcher(event);
+        EventDispatcher dispatcher(event);
 
-            dispatcher.Dispatch<KeyPressedEvent>([this](const KeyPressedEvent& e) {
-                HandleKeyPressed(e);
-                return false;
-            });
+        dispatcher.Dispatch<KeyPressedEvent>([this](const KeyPressedEvent &e) {
+            HandleKeyPressed(e);
+            return false;
+        });
 
-            dispatcher.Dispatch<KeyReleasedEvent>([this](const KeyReleasedEvent& e) {
-                HandleKeyReleased(e);
-                return false;
-            });
+        dispatcher.Dispatch<KeyReleasedEvent>([this](const KeyReleasedEvent &e) {
+            HandleKeyReleased(e);
+            return false;
+        });
 
-            dispatcher.Dispatch<MouseMovedEvent>([this](const MouseMovedEvent& e) {
-                HandleMouseMovedEvent(e);
-                return false;
-            });
+        dispatcher.Dispatch<MouseMovedEvent>([this](const MouseMovedEvent &e) {
+            HandleMouseMovedEvent(e);
+            return false;
+        });
     }
 
-    void FPSCameraController::HandleKeyPressed(const KeyPressedEvent& keyEvent) {
+    void FPSCameraController::HandleKeyPressed(const KeyPressedEvent &keyEvent) {
         switch (keyEvent.GetKeyCode()) {
-            case Key::W: case Key::Up:
-                m_ForwardPressed = true; break;
-            case Key::S: case Key::Down:
-                m_BackwardPressed = true; break;
-            case Key::A: case Key::Left:
-                m_LeftPressed = true; break;
-            case Key::D: case Key::Right:
-                m_RightPressed = true; break;
+            case Key::W:
+            case Key::Up:
+                m_ForwardPressed = true;
+                break;
+            case Key::S:
+            case Key::Down:
+                m_BackwardPressed = true;
+                break;
+            case Key::A:
+            case Key::Left:
+                m_LeftPressed = true;
+                break;
+            case Key::D:
+            case Key::Right:
+                m_RightPressed = true;
+                break;
             case Key::Space:
-                m_UpPressed = true; break;
+                m_UpPressed = true;
+                break;
             case Key::LeftControl:
-                m_DownPressed = true; break;
+                m_DownPressed = true;
+                break;
             case Key::LeftShift:
-                m_SprintPressed = true; break;
+                m_SprintPressed = true;
+                break;
             default: break;
         }
     }
 
-    void FPSCameraController::HandleKeyReleased(const KeyReleasedEvent& keyEvent) {
+    void FPSCameraController::HandleKeyReleased(const KeyReleasedEvent &keyEvent) {
         switch (keyEvent.GetKeyCode()) {
-            case Key::W: case Key::Up:
-                m_ForwardPressed = false; break;
-            case Key::S: case Key::Down:
-                m_BackwardPressed = false; break;
-            case Key::A: case Key::Left:
-                m_LeftPressed = false; break;
-            case Key::D: case Key::Right:
-                m_RightPressed = false; break;
+            case Key::W:
+            case Key::Up:
+                m_ForwardPressed = false;
+                break;
+            case Key::S:
+            case Key::Down:
+                m_BackwardPressed = false;
+                break;
+            case Key::A:
+            case Key::Left:
+                m_LeftPressed = false;
+                break;
+            case Key::D:
+            case Key::Right:
+                m_RightPressed = false;
+                break;
             case Key::Space:
-                m_UpPressed = false; break;
+                m_UpPressed = false;
+                break;
             case Key::LeftControl:
-                m_DownPressed = false; break;
+                m_DownPressed = false;
+                break;
             case Key::LeftShift:
-                m_SprintPressed = false; break;
+                m_SprintPressed = false;
+                break;
             default: break;
         }
     }
 
-    void FPSCameraController::HandleMouseMovedEvent(const MouseMovedEvent& mouseMoved) {
+    void FPSCameraController::HandleMouseMovedEvent(const MouseMovedEvent &mouseMoved) {
         const Vec2 currentMousePos = {mouseMoved.GetX(), mouseMoved.GetY()};
 
         if (m_FirstMouse) {
@@ -97,12 +120,12 @@ namespace ash {
         if (!m_Enabled) return;
 
         Vec3 movement{0.0f};
-        if (m_ForwardPressed)  movement += m_Camera.GetFront();
+        if (m_ForwardPressed) movement += m_Camera.GetFront();
         if (m_BackwardPressed) movement -= m_Camera.GetFront();
-        if (m_LeftPressed)     movement -= m_Camera.GetRight();
-        if (m_RightPressed)    movement += m_Camera.GetRight();
-        if (m_UpPressed)       movement += Vec3(0, 1, 0);
-        if (m_DownPressed)     movement -= Vec3(0, 1, 0);
+        if (m_LeftPressed) movement -= m_Camera.GetRight();
+        if (m_RightPressed) movement += m_Camera.GetRight();
+        if (m_UpPressed) movement += Vec3(0, 1, 0);
+        if (m_DownPressed) movement -= Vec3(0, 1, 0);
 
         if (glm::length(movement) > 0.0f) {
             movement = glm::normalize(movement);
@@ -118,8 +141,8 @@ namespace ash {
         UpdateCameraOrientation();
     }
 
-    void FPSCameraController::UpdateCameraOrientation() {
-        auto* perspCamera = dynamic_cast<PerspectiveCamera*>(&m_Camera);
+    void FPSCameraController::UpdateCameraOrientation() const {
+        auto *perspCamera = dynamic_cast<PerspectiveCamera *>(&m_Camera);
         if (!perspCamera) return;
 
         const Quaternion qYaw = glm::angleAxis(glm::radians(m_Yaw), Vec3(0, 1, 0));

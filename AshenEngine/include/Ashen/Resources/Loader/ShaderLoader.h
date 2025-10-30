@@ -26,8 +26,8 @@ namespace ash {
          * @return Compiled and linked shader program (moved)
          */
         [[nodiscard]] static ShaderProgram Load(
-            const fs::path& vertPath,
-            const fs::path& fragPath
+            const fs::path &vertPath,
+            const fs::path &fragPath
         );
 
         /**
@@ -38,9 +38,9 @@ namespace ash {
          * @return Compiled and linked shader program (moved)
          */
         [[nodiscard]] static ShaderProgram LoadWithGeometry(
-            const fs::path& vertPath,
-            const fs::path& fragPath,
-            const fs::path& geomPath
+            const fs::path &vertPath,
+            const fs::path &fragPath,
+            const fs::path &geomPath
         );
 
         /**
@@ -50,8 +50,8 @@ namespace ash {
          * @return Compiled and linked shader program (moved)
          */
         [[nodiscard]] static ShaderProgram FromSources(
-            const std::string& vertSource,
-            const std::string& fragSource
+            const std::string &vertSource,
+            const std::string &fragSource
         );
     };
 }

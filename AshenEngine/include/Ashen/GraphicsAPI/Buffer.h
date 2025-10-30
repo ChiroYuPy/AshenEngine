@@ -1,9 +1,6 @@
 #ifndef ASHEN_BUFFER_H
 #define ASHEN_BUFFER_H
 
-#include <span>
-#include <stdexcept>
-
 #include <glad/glad.h>
 
 #include "Ashen/Core/Types.h"
@@ -113,7 +110,7 @@ namespace ash {
         }
 
         template<typename T>
-        void UploadData(const std::span<const T> &data) {
+        void UploadData(const Span<const T> &data) {
             Bind();
             glBufferData(static_cast<GLenum>(m_Target), data.size_bytes(),
                          data.data(), static_cast<GLenum>(m_Config.usage));
@@ -121,7 +118,7 @@ namespace ash {
         }
 
         template<typename T>
-        void UpdateData(const std::span<const T> &data, const size_t offset = 0) {
+        void UpdateData(const Span<const T> &data, const size_t offset = 0) {
             assert(offset + data.size_bytes() <= m_Size && "Buffer overflow in UpdateData!");
             Bind();
             glBufferSubData(static_cast<GLenum>(m_Target), static_cast<GLintptr>(offset),
@@ -136,7 +133,7 @@ namespace ash {
         }
 
         template<typename T>
-        void SetData(const std::span<const T> &data) {
+        void SetData(const Span<const T> &data) {
             UploadData(data);
             m_Count = data.size();
         }
@@ -147,14 +144,14 @@ namespace ash {
         }
 
         template<typename T>
-        void Update(const std::span<const T> &data, size_t offset = 0) {
+        void Update(const Span<const T> &data, size_t offset = 0) {
             UpdateData(data, offset);
         }
 
         [[nodiscard]] size_t GetCount() const { return m_Count; }
 
         template<typename T>
-        static Ref<VertexBuffer> Create(const std::span<const T> &data,
+        static Ref<VertexBuffer> Create(const Span<const T> &data,
                                         const BufferConfig &config = BufferConfig::Static()) {
             auto vbo = MakeRef<VertexBuffer>(config);
             vbo->SetData(data);
@@ -169,12 +166,12 @@ namespace ash {
         }
 
         template<typename T>
-        static Ref<VertexBuffer> CreateDynamic(const std::span<const T> &data) {
+        static Ref<VertexBuffer> CreateDynamic(const Span<const T> &data) {
             return Create(data, BufferConfig::Dynamic());
         }
 
         template<typename T>
-        static Ref<VertexBuffer> CreateStream(const std::span<const T> &data) {
+        static Ref<VertexBuffer> CreateStream(const Span<const T> &data) {
             return Create(data, BufferConfig::Stream());
         }
 
@@ -190,7 +187,7 @@ namespace ash {
         }
 
         template<typename T = uint32_t>
-        void SetData(const std::span<const T> &data) {
+        void SetData(const Span<const T> &data) {
             static_assert(std::is_same_v<T, uint8_t> ||
                           std::is_same_v<T, uint16_t> ||
                           std::is_same_v<T, uint32_t>,
@@ -213,7 +210,7 @@ namespace ash {
         }
 
         template<typename T = uint32_t>
-        void Update(const std::span<const T> &data, size_t offset = 0) {
+        void Update(const Span<const T> &data, size_t offset = 0) {
             UpdateData(data, offset);
         }
 
@@ -221,7 +218,7 @@ namespace ash {
         [[nodiscard]] IndexType GetIndexType() const { return m_IndexType; }
 
         template<typename T = uint32_t>
-        static Ref<IndexBuffer> Create(const std::span<const T> &data,
+        static Ref<IndexBuffer> Create(const Span<const T> &data,
                                        const BufferConfig &config = BufferConfig::Static()) {
             static_assert(std::is_same_v<T, uint8_t> ||
                           std::is_same_v<T, uint16_t> ||
@@ -250,7 +247,7 @@ namespace ash {
         }
 
         template<typename T = uint32_t>
-        static Ref<IndexBuffer> CreateDynamic(const std::span<const T> &data) {
+        static Ref<IndexBuffer> CreateDynamic(const Span<const T> &data) {
             return Create(data, BufferConfig::Dynamic());
         }
 
@@ -266,23 +263,23 @@ namespace ash {
         }
 
         template<typename T>
-        void SetData(const std::span<const T> &data) {
+        void SetData(const Span<const T> &data) {
             UploadData(data);
         }
 
         template<typename T>
         void SetData(const T &data) {
-            SetData(std::span<const T>(&data, 1));
+            SetData(Span<const T>(&data, 1));
         }
 
         template<typename T>
-        void Update(const std::span<const T> &data, size_t offset = 0) {
+        void Update(const Span<const T> &data, size_t offset = 0) {
             UpdateData(data, offset);
         }
 
         template<typename T>
         void Update(const T &data, size_t offset = 0) {
-            Update(std::span<const T>(&data, 1), offset);
+            Update(Span<const T>(&data, 1), offset);
         }
 
         void Allocate(const size_t size) {
@@ -298,7 +295,7 @@ namespace ash {
         }
 
         template<typename T>
-        static Ref<UniformBuffer> Create(const std::span<const T> &data,
+        static Ref<UniformBuffer> Create(const Span<const T> &data,
                                          const BufferConfig &config = BufferConfig::Dynamic()) {
             auto ubo = MakeRef<UniformBuffer>(config);
             ubo->SetData(data);
@@ -320,12 +317,12 @@ namespace ash {
         }
 
         template<typename T>
-        void SetData(const std::span<const T> &data) {
+        void SetData(const Span<const T> &data) {
             UploadData(data);
         }
 
         template<typename T>
-        void Update(const std::span<const T> &data, size_t offset = 0) {
+        void Update(const Span<const T> &data, size_t offset = 0) {
             UpdateData(data, offset);
         }
 
@@ -334,7 +331,7 @@ namespace ash {
         }
 
         template<typename T>
-        static Ref<ShaderStorageBuffer> Create(const std::span<const T> &data,
+        static Ref<ShaderStorageBuffer> Create(const Span<const T> &data,
                                                const BufferConfig &config = BufferConfig::Dynamic()) {
             auto ssbo = MakeRef<ShaderStorageBuffer>(config);
             ssbo->SetData(data);

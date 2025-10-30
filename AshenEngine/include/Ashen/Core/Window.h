@@ -1,13 +1,10 @@
 #ifndef ASHEN_GLFWWINDOW_H
 #define ASHEN_GLFWWINDOW_H
 
-#include <functional>
-#include <string>
-
-#include "Types.h"
+#include "Ashen/Core/Types.h"
+#include "Ashen/Math/Math.h"
 #include "Ashen/Events/Event.h"
 #include "Ashen/GraphicsAPI/GraphicsContext.h"
-#include "Ashen/Math/Math.h"
 
 struct GLFWwindow;
 

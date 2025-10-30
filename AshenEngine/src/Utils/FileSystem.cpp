@@ -6,7 +6,7 @@
 #include <algorithm>
 
 namespace ash {
-    std::string FileSystem::ReadFileAsString(const fs::path &filepath) {
+    String FileSystem::ReadFileAsString(const fs::path &filepath) {
         std::ifstream file(filepath);
         if (!file.is_open())
             throw std::runtime_error("Failed to open file: " + filepath.string());
@@ -27,7 +27,7 @@ namespace ash {
     // Fonction helper pour filtrer les fichiers selon les extensions
     template<typename Iterator>
     static Vector<fs::path> CollectFiles(const Iterator &begin, const Iterator &end,
-                                         const Vector<std::string> &extensions) {
+                                         const Vector<String> &extensions) {
         Vector<fs::path> files;
         for (auto it = begin; it != end; ++it) {
             if (!it->is_regular_file()) continue;
@@ -36,7 +36,7 @@ namespace ash {
                 files.push_back(it->path());
             } else {
                 const auto ext = it->path().extension().string();
-                if (std::any_of(extensions.begin(), extensions.end(), [&ext](const std::string &validExt) {
+                if (std::any_of(extensions.begin(), extensions.end(), [&ext](const String &validExt) {
                     return ext == validExt;
                 })) {
                     files.push_back(it->path());
@@ -48,7 +48,7 @@ namespace ash {
 
     Vector<fs::path> FileSystem::ScanDirectory(
         const fs::path &dir,
-        const Vector<std::string> &extensions,
+        const Vector<String> &extensions,
         const bool recursive
     ) {
         if (!Exists(dir) || !IsDirectory(dir))

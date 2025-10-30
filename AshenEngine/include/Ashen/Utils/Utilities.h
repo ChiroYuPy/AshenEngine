@@ -304,7 +304,7 @@ namespace ash {
     namespace MathUtils {
         template<typename T>
         constexpr bool IsPowerOfTwo(T value) {
-            return value > 0 && (value & (value - 1)) == 0;
+            return value > 0 && (value & value - 1) == 0;
         }
 
         template<typename T>
@@ -321,7 +321,7 @@ namespace ash {
 
         template<typename T>
         constexpr T AlignUp(T value, T alignment) {
-            return (value + alignment - 1) & ~(alignment - 1);
+            return value + alignment - 1 & ~(alignment - 1);
         }
 
         template<typename T>
@@ -331,11 +331,11 @@ namespace ash {
 
         inline u32 HashCombine(u32 seed, u32 value) {
             // Based on boost::hash_combine
-            return seed ^ (value + 0x9e3779b9 + (seed << 6) + (seed >> 2));
+            return seed ^ value + 0x9e3779b9 + (seed << 6) + (seed >> 2);
         }
 
         inline u64 HashCombine(u64 seed, u64 value) {
-            return seed ^ (value + 0x9e3779b97f4a7c15ULL + (seed << 6) + (seed >> 2));
+            return seed ^ value + 0x9e3779b97f4a7c15ULL + (seed << 6) + (seed >> 2);
         }
     }
 
@@ -376,12 +376,12 @@ namespace ash {
 
         template<typename T>
         constexpr bool IsBitSet(T value, int bit) {
-            return (value & (T(1) << bit)) != 0;
+            return (value & T(1) << bit) != 0;
         }
 
         template<typename T>
         constexpr T SetBit(T value, int bit) {
-            return value | (T(1) << bit);
+            return value | T(1) << bit;
         }
 
         template<typename T>
@@ -391,7 +391,7 @@ namespace ash {
 
         template<typename T>
         constexpr T ToggleBit(T value, int bit) {
-            return value ^ (T(1) << bit);
+            return value ^ T(1) << bit;
         }
     }
 
@@ -399,9 +399,9 @@ namespace ash {
     namespace ColorUtils {
         inline Vec4 FromRGBA32(u32 rgba) {
             return Vec4(
-                ((rgba >> 24) & 0xFF) / 255.0f,
-                ((rgba >> 16) & 0xFF) / 255.0f,
-                ((rgba >> 8) & 0xFF) / 255.0f,
+                (rgba >> 24 & 0xFF) / 255.0f,
+                (rgba >> 16 & 0xFF) / 255.0f,
+                (rgba >> 8 & 0xFF) / 255.0f,
                 (rgba & 0xFF) / 255.0f
             );
         }
@@ -416,8 +416,8 @@ namespace ash {
 
         inline Vec4 FromHex(u32 hex) {
             return Vec4(
-                ((hex >> 16) & 0xFF) / 255.0f,
-                ((hex >> 8) & 0xFF) / 255.0f,
+                (hex >> 16 & 0xFF) / 255.0f,
+                (hex >> 8 & 0xFF) / 255.0f,
                 (hex & 0xFF) / 255.0f,
                 1.0f
             );
@@ -617,6 +617,6 @@ namespace ash {
                 /* Logger::Error("Verification failed: {} at {}:{}", message, __FILE__, __LINE__); */ \
             } \
         } while(0)
-} // namespace ash
+}
 
 #endif // ASHEN_UTILITIES_H

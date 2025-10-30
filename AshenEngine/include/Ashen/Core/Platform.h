@@ -1,11 +1,9 @@
 #ifndef ASHEN_PLATFORM_H
 #define ASHEN_PLATFORM_H
 
-#include <string>
-#include <cstdint>
+#include "Ashen/Core/Types.h"
 
 namespace ash::Platform {
-    // ----- Platform detection -----
     bool IsWindows();
 
     bool IsLinux();
@@ -16,26 +14,22 @@ namespace ash::Platform {
 
     bool Is64Bit();
 
-    std::string GetPlatformName();
+    String GetPlatformName();
 
-    // ----- ANSI colors -----
     void EnableAnsiColors();
 
-    // ----- CPU info -----
     unsigned int GetCPUCoreCount();
 
-    std::string GetCPUName();
+    String GetCPUName();
 
-    // ----- RAM info -----
-    size_t GetTotalRAM(); // octets
-    size_t GetAvailableRAM(); // octets
+    Size GetTotalRAM();
 
-    // ----- GPU info (minimal, via OpenGL) -----
-    std::string GetGPUName();
+    Size GetAvailableRAM();
 
-    std::string GetGPUVendor();
+    String GetGPUName();
 
-    // ----- Endianness -----
+    String GetGPUVendor();
+
     enum class Endianness { Little, Big };
 
     Endianness GetEndianness();

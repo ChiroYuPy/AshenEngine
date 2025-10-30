@@ -1,11 +1,7 @@
 #ifndef VOXELITY_TEXTUREATLASSYSTEM_H
 #define VOXELITY_TEXTUREATLASSYSTEM_H
 
-#include <array>
 #include <ranges>
-#include <vector>
-#include <unordered_map>
-#include <string>
 
 #include "Ashen/GraphicsAPI/Texture.h"
 #include "Ashen/Core/Types.h"
@@ -167,7 +163,7 @@ namespace ash {
         }
 
         bool AddSolidColor(const std::string &name, const glm::vec4 &color) {
-            std::vector<unsigned char> data(m_config.tileSize * m_config.tileSize * 4);
+            Vector<unsigned char> data(m_config.tileSize * m_config.tileSize * 4);
 
             for (size_t i = 0; i < data.size(); i += 4) {
                 data[i + 0] = static_cast<unsigned char>(color.r * 255);
@@ -212,7 +208,7 @@ namespace ash {
     private:
         Config m_config;
         Texture2D m_texture;
-        std::vector<unsigned char> m_pixels;
+        Vector<unsigned char> m_pixels;
 
         uint32_t m_tilesPerRow;
         uint32_t m_tilesPerCol;
@@ -302,7 +298,7 @@ namespace ash {
         }
 
         bool AddSolidColor(const std::string &name, const glm::vec4 &color) {
-            std::vector<unsigned char> data(m_config.layerWidth * m_config.layerHeight * 4);
+            Vector<unsigned char> data(m_config.layerWidth * m_config.layerHeight * 4);
 
             for (size_t i = 0; i < data.size(); i += 4) {
                 data[i + 0] = static_cast<unsigned char>(color.r * 255);

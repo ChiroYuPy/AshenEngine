@@ -1,8 +1,6 @@
 #include "Ashen/Core/Window.h"
 
-#include <iostream>
-
-#include <../../vendor/include/glad/glad.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "Ashen/Core/Logger.h"
@@ -14,7 +12,7 @@ namespace ash {
     static uint8_t s_GLFWWindowCount = 0;
 
     static void GLFWErrorCallback(int error, const char *description) {
-        Logger::Error("GLFW Error ({0}): {1}", error, description);
+        Logger::Error(Format("GLFW Error ({0}): {1}", error, description));
     }
 
     Window::Window(const WindowProperties &props) {
@@ -22,7 +20,8 @@ namespace ash {
         m_Data.Size.x = props.Width;
         m_Data.Size.y = props.Height;
         m_Data.VSync = props.VSync;
-        m_Data.EventCallback = [](Event&) {};
+        m_Data.EventCallback = [](Event &) {
+        };
 
         Create();
     }
@@ -87,7 +86,6 @@ namespace ash {
             return;
         }
 
-        // Window resize callback
         glfwSetWindowSizeCallback(m_Handle, [](GLFWwindow *window, const int width, const int height) {
             void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
@@ -99,7 +97,6 @@ namespace ash {
             data.EventCallback(event);
         });
 
-        // Window close callback
         glfwSetWindowCloseCallback(m_Handle, [](GLFWwindow *window) {
             void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
@@ -109,7 +106,6 @@ namespace ash {
             data.EventCallback(event);
         });
 
-        // Window focus callback
         glfwSetWindowFocusCallback(m_Handle, [](GLFWwindow *window, const int focused) {
             void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
@@ -124,7 +120,6 @@ namespace ash {
             }
         });
 
-        // Key callback
         glfwSetKeyCallback(m_Handle, [](GLFWwindow *window, const int key, int scancode, const int action, int mods) {
             void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
@@ -149,7 +144,6 @@ namespace ash {
             }
         });
 
-        // Char callback (for text input)
         glfwSetCharCallback(m_Handle, [](GLFWwindow *window, const unsigned int keycode) {
             void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
@@ -159,7 +153,6 @@ namespace ash {
             data.EventCallback(event);
         });
 
-        // Mouse button callback
         glfwSetMouseButtonCallback(m_Handle, [](GLFWwindow *window, const int button, const int action, int mods) {
             void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
@@ -179,7 +172,6 @@ namespace ash {
             }
         });
 
-        // Mouse scroll callback
         glfwSetScrollCallback(m_Handle, [](GLFWwindow *window, const double xOffset, const double yOffset) {
             void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
@@ -189,7 +181,6 @@ namespace ash {
             data.EventCallback(event);
         });
 
-        // Mouse position callback
         glfwSetCursorPosCallback(m_Handle, [](GLFWwindow *window, const double xPos, const double yPos) {
             void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
@@ -199,13 +190,11 @@ namespace ash {
             data.EventCallback(event);
         });
 
-        // Framebuffer size callback (if you care about framebuffer vs window size)
         glfwSetFramebufferSizeCallback(m_Handle, [](GLFWwindow *window, const int width, const int height) {
             void *up = glfwGetWindowUserPointer(window);
             if (!up) return;
             WindowData &data = *static_cast<WindowData *>(up);
 
-            // keep stored size in sync if you want, and emit event if needed
             data.Size.x = width;
             data.Size.y = height;
 

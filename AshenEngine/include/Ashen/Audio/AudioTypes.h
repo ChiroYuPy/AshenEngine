@@ -5,7 +5,6 @@
 #include "Ashen/Math/Math.h"
 
 namespace ash {
-
     enum class AudioFormat {
         Unknown,
         WAV,
@@ -21,8 +20,8 @@ namespace ash {
     };
 
     enum class AudioSourceType {
-        Static,    // Chargé entièrement en mémoire (effets sonores)
-        Streaming  // Streamé depuis le disque (musique)
+        Static,
+        Streaming
     };
 
     struct AudioSourceConfig {
@@ -30,7 +29,7 @@ namespace ash {
         bool Loop = false;
         float Volume = 1.0f;
         float Pitch = 1.0f;
-        bool Spatial = false;  // Son 3D ou 2D
+        bool Spatial = false;
         Vec3 Position = Vec3(0.0f);
         Vec3 Velocity = Vec3(0.0f);
         float MinDistance = 1.0f;
@@ -52,11 +51,9 @@ namespace ash {
         bool IsDefault;
     };
 
-    // Handle opaque pour les sources audio
     using AudioSourceHandle = uint32_t;
     constexpr AudioSourceHandle INVALID_AUDIO_SOURCE = 0;
 
-    // Catégories audio pour le mixage
     enum class AudioCategory {
         Master,
         Music,
@@ -72,7 +69,6 @@ namespace ash {
         float Volume = 1.0f;
         bool Muted = false;
     };
-
-} // namespace ash
+}
 
 #endif // ASHEN_AUDIOTYPES_H

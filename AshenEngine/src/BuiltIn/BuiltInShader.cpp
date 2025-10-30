@@ -12,9 +12,7 @@ namespace ash {
         return config;
     }
 
-    // ========== SHADERS 2D (Inchangés - Corrects) ==========
-
-    std::string BuiltInShaders::GetCanvasItemVertexShader() {
+    String BuiltInShaders::GetCanvasItemVertexShader() {
         return R"(
 #version 410 core
 
@@ -35,7 +33,7 @@ void main() {
 )";
     }
 
-    std::string BuiltInShaders::GetCanvasItemColorFragmentShader() {
+    String BuiltInShaders::GetCanvasItemColorFragmentShader() {
         return R"(
 #version 410 core
 
@@ -49,7 +47,7 @@ void main() {
 )";
     }
 
-    std::string BuiltInShaders::GetCanvasItemTexturedFragmentShader() {
+    String BuiltInShaders::GetCanvasItemTexturedFragmentShader() {
         return R"(
 #version 410 core
 
@@ -67,9 +65,7 @@ void main() {
 )";
     }
 
-    // ========== SPATIAL VERTEX SHADER - CORRIGÉ ==========
-
-    std::string BuiltInShaders::GetSpatialVertexShader() {
+    String BuiltInShaders::GetSpatialVertexShader() {
         return R"(
 #version 410 core
 
@@ -86,12 +82,9 @@ out vec3 v_Normal;
 out vec2 v_TexCoord;
 
 void main() {
-    // ✅ Position en world space
     vec4 worldPos = u_Model * vec4(a_Position, 1.0);
     v_FragPos = worldPos.xyz;
 
-    // ✅ CORRECTION: Normal matrix correcte
-    // Ne PAS normaliser ici car on perd l'échelle non-uniforme
     mat3 normalMatrix = mat3(transpose(inverse(u_Model)));
     v_Normal = normalMatrix * a_Normal;
 
@@ -102,9 +95,7 @@ void main() {
 )";
     }
 
-    // ========== SPATIAL FRAGMENT SHADER - CORRIGÉ ==========
-
-    std::string BuiltInShaders::GetSpatialFragmentShader() {
+    String BuiltInShaders::GetSpatialFragmentShader() {
         return R"(
 #version 410 core
 
@@ -139,7 +130,6 @@ uniform float u_PointLightRanges[4];
 
 out vec4 FragColor;
 
-// ✅ CORRECTION: Blinn-Phong amélioré
 vec3 CalculateDirectionalLight(vec3 normal, vec3 viewDir, vec3 albedo) {
     vec3 lightDir = normalize(-u_LightDirection);
 
@@ -151,31 +141,25 @@ vec3 CalculateDirectionalLight(vec3 normal, vec3 viewDir, vec3 albedo) {
     vec3 halfwayDir = normalize(lightDir + viewDir);
     float NdotH = max(dot(normal, halfwayDir), 0.0);
 
-    // ✅ CORRECTION: Utiliser roughness pour calculer shininess
     // Roughness 0 = shininess 256, Roughness 1 = shininess 1
     float shininess = mix(256.0, 1.0, u_Roughness);
     float spec = pow(NdotH, shininess);
 
-    // ✅ Normalisation énergétique pour Blinn-Phong
     float normalization = (shininess + 8.0) / (8.0 * 3.14159265359);
     vec3 specular = spec * normalization * u_Specular * u_LightColor * u_LightEnergy;
 
     return (diffuse + specular) * albedo;
 }
 
-// ✅ CORRECTION: Atténuation physiquement plausible
 vec3 CalculatePointLight(int index, vec3 normal, vec3 viewDir, vec3 albedo) {
     vec3 lightDir = u_PointLightPositions[index] - v_FragPos;
     float distance = length(lightDir);
     lightDir = normalize(lightDir);
 
-    // ✅ CORRECTION: Atténuation inverse carrée avec smooth cutoff
     float range = u_PointLightRanges[index];
 
-    // Atténuation physique (inverse square)
     float attenuation = 1.0 / (distance * distance + 1.0);
 
-    // Smooth cutoff pour éviter les discontinuités
     float windowFactor = pow(max(1.0 - pow(distance / range, 4.0), 0.0), 2.0);
     attenuation *= windowFactor;
 
@@ -204,7 +188,6 @@ void main() {
         albedo *= texColor.rgb;
     }
 
-    // ✅ CORRECTION: Normaliser la normale dans le fragment shader
     vec3 normal = normalize(v_Normal);
     vec3 viewDir = normalize(u_CameraPos - v_FragPos);
 
@@ -221,13 +204,10 @@ void main() {
 
     vec3 result = ambient + lighting;
 
-    // ✅ CORRECTION: Tone mapping Reinhard amélioré
-    // Préserve mieux les couleurs
     float luminance = dot(result, vec3(0.2126, 0.7152, 0.0722));
     float mappedLuminance = luminance / (1.0 + luminance);
     vec3 toneMapped = result * (mappedLuminance / max(luminance, 0.001));
 
-    // ✅ Gamma correction (sRGB)
     toneMapped = pow(toneMapped, vec3(1.0 / 2.2));
 
     FragColor = vec4(toneMapped, u_Albedo.a);
@@ -235,13 +215,11 @@ void main() {
 )";
     }
 
-    // ========== SPATIAL UNLIT - CORRIGÉ ==========
-
-    std::string BuiltInShaders::GetSpatialUnlitVertexShader() {
+    String BuiltInShaders::GetSpatialUnlitVertexShader() {
         return GetCanvasItemVertexShader();
     }
 
-    std::string BuiltInShaders::GetSpatialUnlitFragmentShader() {
+    String BuiltInShaders::GetSpatialUnlitFragmentShader() {
         return R"(
 #version 410 core
 
@@ -260,7 +238,6 @@ void main() {
         color *= texture(u_AlbedoTexture, v_TexCoord);
     }
 
-    // ✅ CORRECTION: Gamma correction pour cohérence avec les autres shaders
     color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
 
     FragColor = color;
@@ -268,13 +245,11 @@ void main() {
 )";
     }
 
-    // ========== TOON SHADER - CORRIGÉ ==========
-
-    std::string BuiltInShaders::GetToonVertexShader() {
+    String BuiltInShaders::GetToonVertexShader() {
         return GetSpatialVertexShader();
     }
 
-    std::string BuiltInShaders::GetToonFragmentShader() {
+    String BuiltInShaders::GetToonFragmentShader() {
         return R"(
 #version 410 core
 
@@ -304,14 +279,12 @@ uniform float u_LightEnergy = 1.0;
 
 out vec4 FragColor;
 
-// ✅ CORRECTION: Quantification améliorée avec antialiasing
 float ToonShade(float intensity) {
-    // Quantifier en niveaux discrets
+
     float levels = float(u_ToonLevels);
     float level = floor(intensity * levels);
     float quantized = level / levels;
 
-    // ✅ Ajouter un léger antialiasing pour éviter les artifacts
     float threshold = 0.5 / levels;
     float fract_part = fract(intensity * levels);
     float smoothed = smoothstep(0.5 - threshold, 0.5 + threshold, fract_part);
@@ -329,44 +302,34 @@ void main() {
     vec3 lightDir = normalize(-u_LightDirection);
     vec3 viewDir = normalize(u_CameraPos - v_FragPos);
 
-    // ✅ Diffuse lighting avec toon shading
     float NdotL = max(dot(normal, lightDir), 0.0);
     float toonDiffuse = ToonShade(NdotL);
     vec3 diffuse = toonDiffuse * u_LightColor * u_LightEnergy;
 
-    // ✅ CORRECTION: Specular highlight style toon
     vec3 halfVector = normalize(lightDir + viewDir);
     float NdotH = max(dot(normal, halfVector), 0.0);
     float specularIntensity = pow(NdotH, u_SpecularGlossiness);
 
-    // ✅ Seuil plus net pour l'effet toon
     float toonSpecular = step(0.5, specularIntensity);
 
-    // ✅ Antialiasing sur le specular
     float specularEdge = 0.01;
     toonSpecular = smoothstep(0.5 - specularEdge, 0.5 + specularEdge, specularIntensity);
 
     vec3 specular = toonSpecular * u_LightColor * u_LightEnergy * 0.5;
 
-    // ✅ CORRECTION: Rim lighting amélioré
     float rimDot = 1.0 - max(dot(viewDir, normal), 0.0);
 
-    // ✅ Rim dépend de l'éclairage (n'apparaît que côté éclairé)
     float rimIntensity = rimDot * pow(NdotL, 0.5);
 
-    // ✅ Quantification du rim pour style toon
     rimIntensity = smoothstep(u_RimAmount - u_RimThreshold, u_RimAmount + u_RimThreshold, rimIntensity);
 
     vec3 rim = rimIntensity * u_LightColor * u_LightEnergy * 0.5;
 
-    // ✅ CORRECTION: Combinaison finale
     vec3 lighting = u_AmbientLight + diffuse + specular + rim;
     vec3 result = albedo * lighting;
 
-    // ✅ Clamper pour éviter les valeurs > 1 (style toon)
     result = clamp(result, 0.0, 1.0);
 
-    // ✅ Gamma correction
     result = pow(result, vec3(1.0 / 2.2));
 
     FragColor = vec4(result, u_Albedo.a);
@@ -374,9 +337,7 @@ void main() {
 )";
     }
 
-    // ========== SKY SHADER - CORRIGÉ ==========
-
-    std::string BuiltInShaders::GetSkyVertexShader() {
+    String BuiltInShaders::GetSkyVertexShader() {
         return R"(
 #version 410 core
 
@@ -390,17 +351,15 @@ out vec3 v_TexCoord;
 void main() {
     v_TexCoord = a_Position;
 
-    // ✅ CORRECTION: Enlever la translation de la vue
     mat4 viewNoTranslation = mat4(mat3(u_View));
     vec4 pos = u_Proj * viewNoTranslation * vec4(a_Position, 1.0);
 
-    // ✅ Forcer z = w pour que le skybox soit toujours au fond
     gl_Position = pos.xyww;
 }
 )";
     }
 
-    std::string BuiltInShaders::GetSkyFragmentShader() {
+    String BuiltInShaders::GetSkyFragmentShader() {
         return R"(
 #version 410 core
 
@@ -414,23 +373,18 @@ out vec4 FragColor;
 
 void main() {
     if (u_UseSkybox) {
-        // ✅ CORRECTION: Gamma correction pour la cubemap
         vec3 skyboxColor = texture(u_Skybox, v_TexCoord).rgb;
         skyboxColor = pow(skyboxColor, vec3(1.0 / 2.2));
         FragColor = vec4(skyboxColor, 1.0);
     } else {
-        // ✅ CORRECTION: Gradient du ciel plus réaliste
-        // Utiliser Y normalisé entre -1 et 1
         float t = v_TexCoord.y * 0.5 + 0.5;  // Map [-1,1] -> [0,1]
-        t = pow(t, 0.7);  // Courbe non-linéaire pour plus de réalisme
+        t = pow(t, 0.7);
 
-        // Couleur horizon (plus clair) vers zenith (couleur du ciel)
         vec3 horizonColor = vec3(0.9, 0.95, 1.0);
         vec3 zenithColor = u_SkyColor.rgb;
 
         vec3 skyColor = mix(horizonColor, zenithColor, t);
 
-        // ✅ Gamma correction
         skyColor = pow(skyColor, vec3(1.0 / 2.2));
 
         FragColor = vec4(skyColor, 1.0);
@@ -439,9 +393,7 @@ void main() {
 )";
     }
 
-    // ========== API Publique ==========
-
-    std::pair<std::string, std::string> BuiltInShaders::GetSource(const Type type) {
+    std::pair<String, String> BuiltInShaders::GetSource(const Type type) {
         switch (type) {
             case Type::CanvasItem:
                 return {GetCanvasItemVertexShader(), GetCanvasItemColorFragmentShader()};
@@ -466,7 +418,7 @@ void main() {
         return ShaderProgram::FromSources(vertSource, fragSource, GetBuiltInShaderConfig());
     }
 
-    std::string BuiltInShaders::GetTypeName(const Type type) {
+    String BuiltInShaders::GetTypeName(const Type type) {
         switch (type) {
             case Type::CanvasItem: return "CanvasItem";
             case Type::CanvasItemTextured: return "CanvasItemTextured";
@@ -483,12 +435,12 @@ void main() {
                static_cast<int>(type) < static_cast<int>(Type::MAX_TYPES);
     }
 
-    std::shared_ptr<ShaderProgram> BuiltInShaderManager::Get(const BuiltInShaders::Type type) {
+    Ref<ShaderProgram> BuiltInShaderManager::Get(const BuiltInShaders::Type type) {
         const auto it = m_Shaders.find(type);
         if (it != m_Shaders.end())
             return it->second;
 
-        auto shader = std::make_shared<ShaderProgram>(BuiltInShaders::Create(type));
+        auto shader = MakeRef<ShaderProgram>(BuiltInShaders::Create(type));
         m_Shaders[type] = shader;
 
         Logger::Trace() << "Created built-in shader: " << BuiltInShaders::GetTypeName(type);

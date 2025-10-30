@@ -8,25 +8,20 @@
 
 namespace ash {
     struct Renderer3D::SceneData {
-        // Camera
         const Camera *camera = nullptr;
         Mat4 viewMatrix{};
         Mat4 projectionMatrix{};
         Mat4 viewProjectionMatrix{};
         Vec3 cameraPosition{};
 
-        // Render queue
         Vector<RenderObject> renderQueue;
 
-        // Lighting
         DirectionalLight directionalLight;
         Vector<PointLight> pointLights;
         bool hasDirectionalLight = false;
 
-        // Environment
         SceneEnvironment environment;
 
-        // Stats
         RenderStats stats;
 
         void Reset() {
@@ -38,10 +33,10 @@ namespace ash {
         }
     };
 
-    std::unique_ptr<Renderer3D::SceneData> Renderer3D::s_Data = nullptr;
+    Own<Renderer3D::SceneData> Renderer3D::s_Data = nullptr;
 
     void Renderer3D::Init() {
-        s_Data = std::make_unique<SceneData>();
+        s_Data = MakeOwn<SceneData>();
         Logger::Info("Renderer3D initialized");
     }
 
@@ -61,7 +56,6 @@ namespace ash {
         s_Data->viewProjectionMatrix = s_Data->projectionMatrix * s_Data->viewMatrix;
         s_Data->cameraPosition = camera.GetPosition();
 
-        // Setup render state
         RenderCommand::EnableDepthTest();
         RenderCommand::SetDepthFunc(DepthFunc::Less);
         RenderCommand::EnableCulling();
@@ -78,8 +72,8 @@ namespace ash {
     }
 
     void Renderer3D::Submit(
-        const std::shared_ptr<Mesh> &mesh,
-        const std::shared_ptr<Material> &material,
+        const Ref<Mesh> &mesh,
+        const Ref<Material> &material,
         const Mat4 &transform
     ) {
         RenderObject obj;
@@ -90,8 +84,8 @@ namespace ash {
     }
 
     void Renderer3D::DrawImmediate(
-        const std::shared_ptr<Mesh> &mesh,
-        const std::shared_ptr<Material> &material,
+        const Ref<Mesh> &mesh,
+        const Ref<Material> &material,
         const Mat4 &transform
     ) {
         if (!mesh || !material) return;
@@ -101,25 +95,19 @@ namespace ash {
 
         shader->Bind();
 
-        // Setup transformation matrices (tous les shaders en ont besoin)
         shader->SetMat4("u_Model", transform);
         shader->SetMat4("u_View", s_Data->viewMatrix);
         shader->SetMat4("u_Proj", s_Data->projectionMatrix);
 
-        // CORRECTION: Vérifier si le shader a besoin de lighting
-        // On vérifie la présence d'un uniform clé au lieu de tous les tester
         const bool needsLighting = shader->HasUniform("u_CameraPos");
 
         if (needsLighting)
             SetupLighting(shader);
 
-        // Apply material properties
         material->Apply();
 
-        // Draw mesh
         MeshRenderer::Draw(*mesh);
 
-        // Update stats
         s_Data->stats.drawCalls++;
         s_Data->stats.triangles += mesh->GetIndexCount() / 3;
         s_Data->stats.vertices += mesh->GetVertexCount();
@@ -149,7 +137,7 @@ namespace ash {
         s_Data->environment = env;
     }
 
-    void Renderer3D::SetSkybox(const std::shared_ptr<TextureCubeMap> &skybox) {
+    void Renderer3D::SetSkybox(const Ref<TextureCubeMap> &skybox) {
         s_Data->environment.skybox = skybox;
     }
 
@@ -176,32 +164,25 @@ namespace ash {
         s_Data->renderQueue.clear();
     }
 
-    void Renderer3D::SetupLighting(const std::shared_ptr<ShaderProgram> &shader) {
-        // CORRECTION: Ne set les uniforms QUE s'ils existent dans le shader
-
-        // Camera position (utilisé par PBR et Toon)
+    void Renderer3D::SetupLighting(const Ref<ShaderProgram> &shader) {
         if (shader->HasUniform("u_CameraPos"))
             shader->SetVec3("u_CameraPos", s_Data->cameraPosition);
 
-        // Ambient light
         if (shader->HasUniform("u_AmbientLight"))
             shader->SetVec3("u_AmbientLight", s_Data->environment.ambientColor);
 
-        // Directional light
         if (shader->HasUniform("u_LightDirection")) {
             if (s_Data->hasDirectionalLight) {
                 shader->SetVec3("u_LightDirection", s_Data->directionalLight.direction);
                 shader->SetVec3("u_LightColor", s_Data->directionalLight.color);
                 shader->SetFloat("u_LightEnergy", s_Data->directionalLight.intensity);
             } else {
-                // Default sun-like light
                 shader->SetVec3("u_LightDirection", Vec3(-0.5f, -1.0f, -0.3f));
                 shader->SetVec3("u_LightColor", Vec3(1.0f));
                 shader->SetFloat("u_LightEnergy", 1.0f);
             }
         }
 
-        // Point lights (seulement pour les shaders PBR qui les supportent)
         if (shader->HasUniform("u_PointLightCount")) {
             const int pointLightCount = std::min(static_cast<int>(s_Data->pointLights.size()), 4);
             shader->SetInt("u_PointLightCount", pointLightCount);
@@ -209,19 +190,16 @@ namespace ash {
             for (int i = 0; i < pointLightCount; ++i) {
                 const auto &light = s_Data->pointLights[i];
 
-                // Construire les noms d'uniforms une seule fois
-                const std::string posUniform = "u_PointLightPositions[" + std::to_string(i) + "]";
-                const std::string colorUniform = "u_PointLightColors[" + std::to_string(i) + "]";
-                const std::string energyUniform = "u_PointLightEnergies[" + std::to_string(i) + "]";
-                const std::string rangeUniform = "u_PointLightRanges[" + std::to_string(i) + "]";
+                const String posUniform = "u_PointLightPositions[" + std::to_string(i) + "]";
+                const String colorUniform = "u_PointLightColors[" + std::to_string(i) + "]";
+                const String energyUniform = "u_PointLightEnergies[" + std::to_string(i) + "]";
+                const String rangeUniform = "u_PointLightRanges[" + std::to_string(i) + "]";
 
-                // Set seulement si l'uniform existe
                 if (shader->HasUniform(posUniform)) {
                     shader->SetVec3(posUniform, light.position);
                     shader->SetVec3(colorUniform, light.color);
                     shader->SetFloat(energyUniform, light.intensity);
 
-                    // Calculate range from intensity
                     const float range = std::sqrt(light.intensity) * 10.0f;
                     shader->SetFloat(rangeUniform, range);
                 }

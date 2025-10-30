@@ -1,9 +1,7 @@
 #ifndef ASHEN_TEXTURE_H
 #define ASHEN_TEXTURE_H
 
-#include <array>
 #include <stdexcept>
-#include <string>
 #include <optional>
 
 #include <stb_image.h>
@@ -290,8 +288,8 @@ namespace ash {
                 if (!data)
                     throw std::runtime_error("Failed to load cubemap face: " + facesPaths[i]);
 
-                const TextureFormat format = (channels == 3) ? TextureFormat::RGB8 : TextureFormat::RGBA8;
-                const TextureFormat dataFormat = (channels == 3) ? TextureFormat::RGB : TextureFormat::RGBA;
+                const TextureFormat format = channels == 3 ? TextureFormat::RGB8 : TextureFormat::RGBA8;
+                const TextureFormat dataFormat = channels == 3 ? TextureFormat::RGB : TextureFormat::RGBA;
 
                 cubemap->SetFace(faces[i], format, width, height, dataFormat,
                                  PixelDataType::UnsignedByte, data);

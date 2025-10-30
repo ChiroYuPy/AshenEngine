@@ -67,7 +67,7 @@ namespace voxelity {
         const glm::vec3 cameraPos = m_playerController.getCamera()->GetPosition();
         const glm::vec3 cameraDir = m_playerController.getCamera()->GetFront();
 
-        if (event.GetMouseButton() == ash::MouseButton::ButtonLeft) {
+        if (event.GetMouseButton() == ash::MouseButton::Left) {
             if (m_playerController.isActive()) {
                 // Casser un bloc
                 if (m_worldInteractor.BreakBlock(cameraPos, cameraDir)) {
@@ -84,7 +84,7 @@ namespace voxelity {
             }
         }
 
-        if (event.GetMouseButton() == ash::MouseButton::ButtonRight && m_playerController.isActive()) {
+        if (event.GetMouseButton() == ash::MouseButton::Right && m_playerController.isActive()) {
             // Placer un bloc
             if (m_worldInteractor.PlaceBlock(cameraPos, cameraDir)) {
                 ash::Logger::Info() << "Block placed!";

@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <optional>
 
-#include <../../../vendor/include/glad.h>
+#include <glad/glad.h>
 
 #include "Ashen/GraphicsAPI/Texture.h"
 #include "Ashen/Core/Types.h"

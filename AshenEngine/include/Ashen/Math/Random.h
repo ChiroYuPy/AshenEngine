@@ -37,7 +37,7 @@ namespace ash {
         }
 
         template<typename T>
-        static T Choice(const std::vector<T> &vec) {
+        static T Choice(const Vector<T> &vec) {
             if (vec.empty()) throw std::runtime_error("Random::Choice: container is empty");
             size_t idx = Int<size_t>(0, vec.size() - 1);
             return vec[idx];

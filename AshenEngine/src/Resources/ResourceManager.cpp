@@ -12,33 +12,32 @@
 #include "Ashen/Utils/FileSystem.h"
 
 namespace ash {
-
     // ========== ResourcePaths ==========
 
-    ResourcePaths& ResourcePaths::Instance() {
+    ResourcePaths &ResourcePaths::Instance() {
         static ResourcePaths instance;
         return instance;
     }
 
-    void ResourcePaths::SetWorkingDirectory(const fs::path& dir) {
+    void ResourcePaths::SetWorkingDirectory(const fs::path &dir) {
         std::lock_guard lock(m_Mutex);
         m_Root = FileSystem::GetAbsolutePath(dir);
         Logger::Debug() << "Resource root set to: " << m_Root.string();
     }
 
-    fs::path ResourcePaths::GetPath(const std::string& filename) const {
+    fs::path ResourcePaths::GetPath(const String &filename) const {
         std::lock_guard lock(m_Mutex);
         return m_Root / filename;
     }
 
-    const fs::path& ResourcePaths::Root() const {
+    const fs::path &ResourcePaths::Root() const {
         std::lock_guard lock(m_Mutex);
         return m_Root;
     }
 
     // ========== ShaderManager ==========
 
-    ShaderManager& ShaderManager::Instance() {
+    ShaderManager &ShaderManager::Instance() {
         static ShaderManager instance;
         return instance;
     }
@@ -47,17 +46,23 @@ namespace ash {
         // Map to BuiltInShaders enum
         BuiltInShaders::Type builtInType;
         switch (type) {
-            case BuiltIn::CanvasItem: builtInType = BuiltInShaders::Type::CanvasItem; break;
-            case BuiltIn::CanvasItemTextured: builtInType = BuiltInShaders::Type::CanvasItemTextured; break;
-            case BuiltIn::Spatial: builtInType = BuiltInShaders::Type::Spatial; break;
-            case BuiltIn::SpatialUnlit: builtInType = BuiltInShaders::Type::SpatialUnlit; break;
-            case BuiltIn::Toon: builtInType = BuiltInShaders::Type::Toon; break;
-            case BuiltIn::Sky: builtInType = BuiltInShaders::Type::Sky; break;
+            case BuiltIn::CanvasItem: builtInType = BuiltInShaders::Type::CanvasItem;
+                break;
+            case BuiltIn::CanvasItemTextured: builtInType = BuiltInShaders::Type::CanvasItemTextured;
+                break;
+            case BuiltIn::Spatial: builtInType = BuiltInShaders::Type::Spatial;
+                break;
+            case BuiltIn::SpatialUnlit: builtInType = BuiltInShaders::Type::SpatialUnlit;
+                break;
+            case BuiltIn::Toon: builtInType = BuiltInShaders::Type::Toon;
+                break;
+            case BuiltIn::Sky: builtInType = BuiltInShaders::Type::Sky;
+                break;
             default:
                 throw std::invalid_argument("Invalid built-in shader type");
         }
 
-        const std::string id = "__builtin_" + BuiltInShaders::GetTypeName(builtInType);
+        const String id = "__builtin_" + BuiltInShaders::GetTypeName(builtInType);
 
         // Check cache
         {
@@ -75,7 +80,7 @@ namespace ash {
         return shader;
     }
 
-    Ref<ShaderProgram> ShaderManager::Load(const std::string& id) {
+    Ref<ShaderProgram> ShaderManager::Load(const String &id) {
         const auto vertPath = ResourcePaths::Instance().GetPath(id + ".vert");
         const auto fragPath = ResourcePaths::Instance().GetPath(id + ".frag");
 
@@ -103,12 +108,12 @@ namespace ash {
 
     // ========== TextureManager ==========
 
-    TextureManager& TextureManager::Instance() {
+    TextureManager &TextureManager::Instance() {
         static TextureManager instance;
         return instance;
     }
 
-    Ref<Texture2D> TextureManager::Load(const std::string& id) {
+    Ref<Texture2D> TextureManager::Load(const String &id) {
         const fs::path basePath = ResourcePaths::Instance().Root();
         const fs::path texPath = TextureLoader::FindTexture(basePath, id);
 
@@ -127,12 +132,12 @@ namespace ash {
 
     // ========== MeshManager ==========
 
-    MeshManager& MeshManager::Instance() {
+    MeshManager &MeshManager::Instance() {
         static MeshManager instance;
         return instance;
     }
 
-    Ref<Mesh> MeshManager::Load(const std::string& id) {
+    Ref<Mesh> MeshManager::Load(const String &id) {
         const fs::path basePath = ResourcePaths::Instance().Root();
 
         // Try .obj extension
@@ -151,7 +156,7 @@ namespace ash {
     }
 
     Ref<Mesh> MeshManager::GetCube() {
-        const std::string id = "__primitive_cube";
+        const String id = "__primitive_cube";
 
         std::lock_guard lock(m_Mutex);
         auto it = m_Resources.find(id);
@@ -165,7 +170,7 @@ namespace ash {
     }
 
     Ref<Mesh> MeshManager::GetSphere() {
-        const std::string id = "__primitive_sphere";
+        const String id = "__primitive_sphere";
 
         std::lock_guard lock(m_Mutex);
         auto it = m_Resources.find(id);
@@ -179,7 +184,7 @@ namespace ash {
     }
 
     Ref<Mesh> MeshManager::GetPlane() {
-        const std::string id = "__primitive_plane";
+        const String id = "__primitive_plane";
 
         std::lock_guard lock(m_Mutex);
         auto it = m_Resources.find(id);
@@ -193,7 +198,7 @@ namespace ash {
     }
 
     Ref<Mesh> MeshManager::GetQuad() {
-        const std::string id = "__primitive_quad";
+        const String id = "__primitive_quad";
 
         std::lock_guard lock(m_Mutex);
         auto it = m_Resources.find(id);
@@ -208,16 +213,15 @@ namespace ash {
 
     // ========== MaterialManager ==========
 
-    MaterialManager& MaterialManager::Instance() {
+    MaterialManager &MaterialManager::Instance() {
         static MaterialManager instance;
         return instance;
     }
 
     Ref<CanvasItemMaterial> MaterialManager::CreateCanvasItem(
-        const std::string& id,
-        const Vec4& albedo
-    ) {
-        {
+        const String &id,
+        const Vec4 &albedo
+    ) { {
             std::lock_guard lock(m_Mutex);
             auto it = m_Materials.find(id);
             if (it != m_Materials.end()) {
@@ -226,9 +230,7 @@ namespace ash {
             }
         }
 
-        auto material = MaterialFactory::CreateCanvasItem(albedo);
-
-        {
+        auto material = MaterialFactory::CreateCanvasItem(albedo); {
             std::lock_guard lock(m_Mutex);
             m_Materials[id] = material;
         }
@@ -238,10 +240,9 @@ namespace ash {
     }
 
     Ref<CanvasItemMaterial> MaterialManager::CreateCanvasItemTextured(
-        const std::string& id,
-        const std::string& textureName
-    ) {
-        {
+        const String &id,
+        const String &textureName
+    ) { {
             std::lock_guard lock(m_Mutex);
             auto it = m_Materials.find(id);
             if (it != m_Materials.end()) {
@@ -251,9 +252,7 @@ namespace ash {
         }
 
         auto texture = TextureManager::Instance().Get(textureName);
-        auto material = MaterialFactory::CreateCanvasItemTextured(texture);
-
-        {
+        auto material = MaterialFactory::CreateCanvasItemTextured(texture); {
             std::lock_guard lock(m_Mutex);
             m_Materials[id] = material;
         }
@@ -263,13 +262,12 @@ namespace ash {
     }
 
     Ref<SpatialMaterial> MaterialManager::CreateSpatial(
-        const std::string& id,
-        const Vec4& albedo,
+        const String &id,
+        const Vec4 &albedo,
         float metallic,
         float roughness,
         float specular
-    ) {
-        {
+    ) { {
             std::lock_guard lock(m_Mutex);
             auto it = m_Materials.find(id);
             if (it != m_Materials.end()) {
@@ -278,9 +276,7 @@ namespace ash {
             }
         }
 
-        auto material = MaterialFactory::CreateSpatial(albedo, metallic, roughness, specular);
-
-        {
+        auto material = MaterialFactory::CreateSpatial(albedo, metallic, roughness, specular); {
             std::lock_guard lock(m_Mutex);
             m_Materials[id] = material;
         }
@@ -290,10 +286,9 @@ namespace ash {
     }
 
     Ref<SpatialMaterial> MaterialManager::CreateSpatialUnlit(
-        const std::string& id,
-        const Vec4& albedo
-    ) {
-        {
+        const String &id,
+        const Vec4 &albedo
+    ) { {
             std::lock_guard lock(m_Mutex);
             auto it = m_Materials.find(id);
             if (it != m_Materials.end()) {
@@ -302,9 +297,7 @@ namespace ash {
             }
         }
 
-        auto material = MaterialFactory::CreateSpatialUnlit(albedo);
-
-        {
+        auto material = MaterialFactory::CreateSpatialUnlit(albedo); {
             std::lock_guard lock(m_Mutex);
             m_Materials[id] = material;
         }
@@ -314,12 +307,11 @@ namespace ash {
     }
 
     Ref<ToonMaterial> MaterialManager::CreateToon(
-        const std::string& id,
-        const Vec4& albedo,
+        const String &id,
+        const Vec4 &albedo,
         int toonLevels,
         float rimAmount
-    ) {
-        {
+    ) { {
             std::lock_guard lock(m_Mutex);
             auto it = m_Materials.find(id);
             if (it != m_Materials.end()) {
@@ -328,9 +320,7 @@ namespace ash {
             }
         }
 
-        auto material = MaterialFactory::CreateToon(albedo, toonLevels, rimAmount);
-
-        {
+        auto material = MaterialFactory::CreateToon(albedo, toonLevels, rimAmount); {
             std::lock_guard lock(m_Mutex);
             m_Materials[id] = material;
         }
@@ -340,10 +330,9 @@ namespace ash {
     }
 
     Ref<SkyMaterial> MaterialManager::CreateSky(
-        const std::string& id,
-        const Vec4& color
-    ) {
-        {
+        const String &id,
+        const Vec4 &color
+    ) { {
             std::lock_guard lock(m_Mutex);
             auto it = m_Materials.find(id);
             if (it != m_Materials.end()) {
@@ -352,9 +341,7 @@ namespace ash {
             }
         }
 
-        auto material = MaterialFactory::CreateSky(color);
-
-        {
+        auto material = MaterialFactory::CreateSky(color); {
             std::lock_guard lock(m_Mutex);
             m_Materials[id] = material;
         }
@@ -363,7 +350,7 @@ namespace ash {
         return material;
     }
 
-    Ref<Material> MaterialManager::Get(const std::string& id) const {
+    Ref<Material> MaterialManager::Get(const String &id) const {
         std::lock_guard lock(m_Mutex);
         auto it = m_Materials.find(id);
         if (it != m_Materials.end()) {
@@ -372,7 +359,7 @@ namespace ash {
         return nullptr;
     }
 
-    bool MaterialManager::Has(const std::string& id) const {
+    bool MaterialManager::Has(const String &id) const {
         std::lock_guard lock(m_Mutex);
         return m_Materials.contains(id);
     }
@@ -394,10 +381,10 @@ namespace ash {
         static std::once_flag flag;
         std::call_once(flag, []() {
             Logger::Info("Initializing AssetLibrary...");
-            
+
             // Preload built-in shaders
             BuiltInShaderManager::Instance().PreloadAll();
-            
+
             Logger::Info("AssetLibrary initialized");
         });
     }
@@ -419,7 +406,7 @@ namespace ash {
         Textures().Clear();
         Meshes().Clear();
         Materials().Clear();
-        
+
         Logger::Info("All assets cleared");
     }
 }

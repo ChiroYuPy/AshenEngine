@@ -1,12 +1,13 @@
 #ifndef ASHEN_APPLICATION_H
 #define ASHEN_APPLICATION_H
 
-#include "Logger.h"
+#include "Ashen/Core/Logger.h"
 #include "Ashen/Core/Layer.h"
 #include "Ashen/Core/LayerStack.h"
 #include "Ashen/Core/Window.h"
 #include "Ashen/Core/Types.h"
 #include "Ashen/Math/Math.h"
+#include "Ashen/Nodes/NodeGraph.h"
 
 namespace ash {
     struct ApplicationCommandLineArgs {
@@ -50,6 +51,8 @@ namespace ash {
 
         [[nodiscard]] Window &GetWindow() const { return *m_Window; }
 
+        [[nodiscard]] NodeGraph &GetNodeGraph() const { return *m_NodeGraph; }
+
         [[nodiscard]] Vec2 GetFramebufferSize() const;
 
         static Application &Get();
@@ -77,6 +80,7 @@ namespace ash {
 
         ApplicationSettings m_Settings;
         LayerStack m_LayerStack;
+        Own<NodeGraph> m_NodeGraph;
         Own<Window> m_Window;
         bool m_Running;
 

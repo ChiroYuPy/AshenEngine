@@ -4,21 +4,23 @@
 #include "Event.h"
 
 namespace ash {
-
     class EventDispatcher {
     public:
-        explicit EventDispatcher(Event& event) : mEvent(event) {}
+        explicit EventDispatcher(Event &event) : mEvent(event) {
+        }
 
         template<typename T, typename Func>
-        bool Dispatch(const Func& func) {
+        bool Dispatch(const Func &func) {
             if (mEvent.GetType() == T::GetStaticType()) {
-                mEvent.Handled = func(static_cast<T&>(mEvent));
+                if (func(static_cast<T &>(mEvent)))
+                    mEvent.SetHandled();
                 return true;
             }
             return false;
         }
+
     private:
-        Event& mEvent;
+        Event &mEvent;
     };
 }
 

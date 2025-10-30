@@ -13,9 +13,7 @@
 namespace ash {
     Renderer2D::RenderData Renderer2D::s_Data{};
 
-    void Renderer2D::Init() {
-        // =============== QUADS ===============
-        {
+    void Renderer2D::Init() { {
             auto &quads = s_Data.Quads;
 
             quads.VertexArray2D = MakeRef<VertexArray>();
@@ -54,7 +52,7 @@ namespace ash {
             quads.WhiteTexture->SetWrap(TextureWrap::Repeat, TextureWrap::Repeat);
             quads.TextureSlots[0] = quads.WhiteTexture;
 
-            const std::string quadVertSrc = R"(
+            const String quadVertSrc = R"(
                 #version 410 core
                 layout(location = 0) in vec3 a_Position;
                 layout(location = 1) in vec4 a_Color;
@@ -72,7 +70,7 @@ namespace ash {
                 }
             )";
 
-            const std::string quadFragSrc = R"(
+            const String quadFragSrc = R"(
                 #version 410 core
                 layout(location = 0) out vec4 color;
                 in vec4 v_Color;
@@ -107,10 +105,7 @@ namespace ash {
             quads.TexCoords[3] = {0.0f, 1.0f};
 
             quads.VertexBufferBase = new QuadVertex[QuadData::MaxVertices];
-        }
-
-        // =============== LINES ===============
-        {
+        } {
             auto &lines = s_Data.Lines;
 
             lines.VertexArray2D = MakeRef<VertexArray>();
@@ -124,7 +119,7 @@ namespace ash {
 
             lines.VertexArray2D->AddVertexBuffer(lines.VertexBuffer2D, layout);
 
-            const std::string lineVertSrc = R"(
+            const String lineVertSrc = R"(
                 #version 410 core
                 layout(location = 0) in vec3 a_Position;
                 layout(location = 1) in vec4 a_Color;
@@ -136,7 +131,7 @@ namespace ash {
                 }
             )";
 
-            const std::string lineFragSrc = R"(
+            const String lineFragSrc = R"(
                 #version 410 core
                 layout(location = 0) out vec4 color;
                 in vec4 v_Color;
@@ -151,10 +146,7 @@ namespace ash {
             lines.Shader->Link();
 
             lines.VertexBufferBase = new LineVertex[LineData::MaxVertices];
-        }
-
-        // =============== CIRCLES ===============
-        {
+        } {
             auto &circles = s_Data.Circles;
 
             circles.VertexArray2D = MakeRef<VertexArray>();
@@ -186,7 +178,7 @@ namespace ash {
             circles.IndexBuffer2D->SetData<uint32_t>(indices);
             circles.VertexArray2D->SetIndexBuffer(circles.IndexBuffer2D);
 
-            const std::string circleVertSrc = R"(
+            const String circleVertSrc = R"(
                 #version 410 core
                 layout(location = 0) in vec3 a_WorldPosition;
                 layout(location = 1) in vec3 a_LocalPosition;
@@ -207,7 +199,7 @@ namespace ash {
                 }
             )";
 
-            const std::string circleFragSrc = R"(
+            const String circleFragSrc = R"(
                 #version 410 core
                 layout(location = 0) out vec4 color;
                 in vec3 v_LocalPosition;
@@ -275,16 +267,13 @@ namespace ash {
     }
 
     void Renderer2D::StartBatch() {
-        // Quads
         s_Data.Quads.IndexCount = 0;
         s_Data.Quads.VertexBufferPtr = s_Data.Quads.VertexBufferBase;
         s_Data.Quads.TextureSlotIndex = 1;
 
-        // Lines
         s_Data.Lines.VertexCount = 0;
         s_Data.Lines.VertexBufferPtr = s_Data.Lines.VertexBufferBase;
 
-        // Circles
         s_Data.Circles.IndexCount = 0;
         s_Data.Circles.VertexBufferPtr = s_Data.Circles.VertexBufferBase;
     }
@@ -360,8 +349,6 @@ namespace ash {
         s_Data.Circles.IndexCount = 0;
         s_Data.Circles.VertexBufferPtr = s_Data.Circles.VertexBufferBase;
     }
-
-    // =============== QUADS ===============
 
     void Renderer2D::DrawQuad(const Vec2 &position, const Vec2 &size, const Vec4 &color) {
         DrawQuad(Vec3(position.x, position.y, 0.0f), size, color);
@@ -482,8 +469,6 @@ namespace ash {
         DrawQuad(transform, texture, tintColor);
     }
 
-    // =============== LINES ===============
-
     void Renderer2D::DrawLine(const Vec2 &p0, const Vec2 &p1, const Vec4 &color) {
         DrawLine(Vec3(p0.x, p0.y, 0.0f), Vec3(p1.x, p1.y, 0.0f), color);
     }
@@ -529,8 +514,6 @@ namespace ash {
         DrawLine(corners[3], corners[0], color);
     }
 
-    // =============== CIRCLES ===============
-
     void Renderer2D::DrawCircle(const Vec2 &center, const float radius, const Vec4 &color,
                                 const float thickness, const float fade) {
         DrawCircle(Vec3(center.x, center.y, 0.0f), radius, color, thickness, fade);
@@ -571,11 +554,8 @@ namespace ash {
     }
 
     void Renderer2D::DrawFilledCircle(const Vec3 &center, const float radius, const Vec4 &color) {
-        // Cercle rempli = cercle avec thickness = 1.0
         DrawCircle(center, radius, color, 1.0f, 0.005f);
     }
-
-    // =============== POLYGONS ===============
 
     void Renderer2D::DrawPolygon(const Vector<Vec2> &points, const Vec4 &color) {
         Vector<Vec3> points3d;
@@ -589,9 +569,7 @@ namespace ash {
     void Renderer2D::DrawPolygon(const Vector<Vec3> &points, const Vec4 &color) {
         if (points.size() < 3) return;
 
-        // Triangulation simple en éventail depuis le premier point
         for (size_t i = 1; i < points.size() - 1; i++) {
-            // Créer un quad dégénéré pour chaque triangle
             if (s_Data.Quads.IndexCount >= QuadData::MaxIndices) {
                 FlushQuads();
                 s_Data.Quads.IndexCount = 0;
@@ -599,7 +577,6 @@ namespace ash {
                 s_Data.Quads.TextureSlotIndex = 1;
             }
 
-            // Triangle: points[0], points[i], points[i+1]
             s_Data.Quads.VertexBufferPtr->Position = points[0];
             s_Data.Quads.VertexBufferPtr->Color = color;
             s_Data.Quads.VertexBufferPtr->TexCoord = {0.0f, 0.0f};
@@ -618,7 +595,6 @@ namespace ash {
             s_Data.Quads.VertexBufferPtr->TexIndex = 0.0f;
             s_Data.Quads.VertexBufferPtr++;
 
-            // Point dupliqué pour compléter le quad
             s_Data.Quads.VertexBufferPtr->Position = points[i + 1];
             s_Data.Quads.VertexBufferPtr->Color = color;
             s_Data.Quads.VertexBufferPtr->TexCoord = {0.0f, 0.0f};
@@ -646,8 +622,6 @@ namespace ash {
             DrawLine(points[i], points[next], color);
         }
     }
-
-    // =============== UTILITY ===============
 
     void Renderer2D::SetLineWidth(const float width) {
         s_Data.LineWidth = width;

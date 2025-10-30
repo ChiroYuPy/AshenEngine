@@ -3,7 +3,6 @@
 
 #include "Ashen/Core/Types.h"
 #include <glm/glm.hpp>
-#include <vector>
 
 namespace ash {
     template<int Dim, typename T>
@@ -262,14 +261,14 @@ namespace ash {
                 result.reserve(8);
                 for (int i = 0; i < 8; ++i) {
                     VecType childMin(
-                        (i & 1) ? center.x : min.x,
-                        (i & 2) ? center.y : min.y,
-                        (i & 4) ? center.z : min.z
+                        i & 1 ? center.x : min.x,
+                        i & 2 ? center.y : min.y,
+                        i & 4 ? center.z : min.z
                     );
                     VecType childMax(
-                        (i & 1) ? max.x : center.x,
-                        (i & 2) ? max.y : center.y,
-                        (i & 4) ? max.z : center.z
+                        i & 1 ? max.x : center.x,
+                        i & 2 ? max.y : center.y,
+                        i & 4 ? max.z : center.z
                     );
                     result.emplace_back(childMin, childMax);
                 }
@@ -292,9 +291,9 @@ namespace ash {
                 corners.reserve(8);
                 for (int i = 0; i < 8; ++i) {
                     corners.emplace_back(
-                        (i & 1) ? max.x : min.x,
-                        (i & 2) ? max.y : min.y,
-                        (i & 4) ? max.z : min.z
+                        i & 1 ? max.x : min.x,
+                        i & 2 ? max.y : min.y,
+                        i & 4 ? max.z : min.z
                     );
                 }
             }
@@ -302,7 +301,6 @@ namespace ash {
             return corners;
         }
 
-        // ===== Transform (for 3D) =====
         template<int D = Dim>
         [[nodiscard]] std::enable_if_t<D == 3, BBox>
         Transformed(const Mat4 &matrix) const {
@@ -317,7 +315,6 @@ namespace ash {
             return result;
         }
 
-        // ===== Operators =====
         BBox &operator+=(const VecType &offset) {
             Translate(offset);
             return *this;
@@ -345,14 +342,12 @@ namespace ash {
             return !(*this == other);
         }
 
-        // ===== Utility =====
         [[nodiscard]] VecType Pos() const { return min; }
 
         [[nodiscard]] VecType GetMin() const { return min; }
         [[nodiscard]] VecType GetMax() const { return max; }
     };
 
-    // ===== Type Aliases =====
     using BBox2 = BBox<2, float>;
     using BBox3 = BBox<3, float>;
     using BBox2i = BBox<2, int>;

@@ -1,84 +1,56 @@
 #ifndef ASHEN_BUILTINSHADERS_H
 #define ASHEN_BUILTINSHADERS_H
 
-#include <string>
-#include <unordered_map>
 #include "Ashen/GraphicsAPI/Shader.h"
 
 namespace ash {
-    /**
-     * @brief Built-in shader types
-     */
     class BuiltInShaders {
     public:
         enum class Type {
-            // 2D Shaders
-            CanvasItem, // Basic 2D shader for sprites/UI
-            CanvasItemTextured, // Textured 2D shader
+            CanvasItem,
+            CanvasItemTextured,
 
-            // 3D Shaders
-            Spatial, // Basic 3D shader with Blinn-Phong lighting
-            SpatialUnlit, // Unlit 3D shader
-            Toon, // Cell-shaded/Toon shader
+            Spatial,
+            SpatialUnlit,
+            Toon,
 
-            // Environment
-            Sky, // Skybox shader
+            Sky,
 
             MAX_TYPES
         };
 
-        /**
-         * @brief Get vertex and fragment shader source for a type
-         */
-        static std::pair<std::string, std::string> GetSource(Type type);
+        static std::pair<String, String> GetSource(Type type);
 
-        /**
-         * @brief Create a shader program from built-in type
-         */
         static ShaderProgram Create(Type type);
 
-        /**
-         * @brief Get human-readable shader name
-         */
-        static std::string GetTypeName(Type type);
+        static String GetTypeName(Type type);
 
-        /**
-         * @brief Check if type is valid
-         */
         static bool IsValid(Type type);
 
     private:
-        // 2D Vertex Shaders
-        static std::string GetCanvasItemVertexShader();
+        static String GetCanvasItemVertexShader();
 
-        // 2D Fragment Shaders
-        static std::string GetCanvasItemColorFragmentShader();
+        static String GetCanvasItemColorFragmentShader();
 
-        static std::string GetCanvasItemTexturedFragmentShader();
+        static String GetCanvasItemTexturedFragmentShader();
 
-        // 3D Vertex Shaders
-        static std::string GetSpatialVertexShader();
+        static String GetSpatialVertexShader();
 
-        static std::string GetSpatialUnlitVertexShader();
+        static String GetSpatialUnlitVertexShader();
 
-        static std::string GetToonVertexShader();
+        static String GetToonVertexShader();
 
-        // 3D Fragment Shaders
-        static std::string GetSpatialFragmentShader();
+        static String GetSpatialFragmentShader();
 
-        static std::string GetSpatialUnlitFragmentShader();
+        static String GetSpatialUnlitFragmentShader();
 
-        static std::string GetToonFragmentShader();
+        static String GetToonFragmentShader();
 
-        // Environment Shaders
-        static std::string GetSkyVertexShader();
+        static String GetSkyVertexShader();
 
-        static std::string GetSkyFragmentShader();
+        static String GetSkyFragmentShader();
     };
 
-    /**
-     * @brief Shader manager with caching
-     */
     class BuiltInShaderManager {
     public:
         static BuiltInShaderManager &Instance() {
@@ -86,7 +58,7 @@ namespace ash {
             return instance;
         }
 
-        std::shared_ptr<ShaderProgram> Get(BuiltInShaders::Type type);
+        Ref<ShaderProgram> Get(BuiltInShaders::Type type);
 
         void Clear();
 
@@ -95,7 +67,7 @@ namespace ash {
     private:
         BuiltInShaderManager() = default;
 
-        std::unordered_map<BuiltInShaders::Type, std::shared_ptr<ShaderProgram> > m_Shaders;
+        HashMap<BuiltInShaders::Type, Ref<ShaderProgram> > m_Shaders;
     };
 }
 

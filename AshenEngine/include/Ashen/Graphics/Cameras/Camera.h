@@ -9,43 +9,49 @@
 #include "Ashen/Math/Math.h"
 
 namespace ash {
-
     class Camera {
     public:
         virtual ~Camera() = default;
 
         virtual Mat4 GetProjectionMatrix() const = 0;
+
         virtual void OnResize(uint32_t width, uint32_t height) = 0;
-        virtual void Update(float deltaTime) {}
+
+        virtual void Update(float deltaTime) {
+        }
 
         Mat4 GetViewMatrix() const;
 
-        const Mat4& GetViewProjectionMatrix() const;
+        const Mat4 &GetViewProjectionMatrix() const;
 
-        const Frustum& GetViewFrustum() const;
+        const Frustum &GetViewFrustum() const;
 
-        const Vec3& GetPosition() const { return m_Position; }
-        const Vec3& GetFront() const { return m_Front; }
-        const Vec3& GetUp() const { return m_Up; }
-        const Vec3& GetRight() const { return m_Right; }
+        const Vec3 &GetPosition() const { return m_Position; }
+        const Vec3 &GetFront() const { return m_Front; }
+        const Vec3 &GetUp() const { return m_Up; }
+        const Vec3 &GetRight() const { return m_Right; }
 
-        void SetPosition(const Vec3& pos);
+        void SetPosition(const Vec3 &pos);
 
-        void LookAt(const Vec3& target, const Vec3& up = {0, 1, 0});
+        void LookAt(const Vec3 &target, const Vec3 &up = {0, 1, 0});
 
         float GetNearPlane() const { return m_NearPlane; }
         float GetFarPlane() const { return m_FarPlane; }
+
         void SetClipPlanes(float nearPlane, float farPlane);
 
-        const Viewport& GetViewport() const { return m_Viewport; }
-        void SetViewport(const Viewport& viewport) { m_Viewport = viewport; }
+        const Viewport &GetViewport() const { return m_Viewport; }
+        void SetViewport(const Viewport &viewport) { m_Viewport = viewport; }
 
     protected:
         Camera() = default;
-        Camera(const Camera&) = default;
-        Camera& operator=(const Camera&) = default;
+
+        Camera(const Camera &) = default;
+
+        Camera &operator=(const Camera &) = default;
 
         void MarkViewDirty() const;
+
         void MarkProjectionDirty() const;
 
         Vec3 m_Position{0.0f, 0.0f, 0.0f};
@@ -71,20 +77,23 @@ namespace ash {
 
     class PerspectiveCamera final : public Camera {
     public:
-        PerspectiveCamera(float fov = 60.0f, float aspect = 16.0f / 9.0f,
-                                   float nearClip = 0.1f, float farClip = 1000.0f);
+        PerspectiveCamera(float fov = 60.0f, float aspect = 16.0f / 9.0f, float nearClip = 0.1f,
+                          float farClip = 1000.0f);
 
         Mat4 GetProjectionMatrix() const override;
+
         void OnResize(uint32_t width, uint32_t height) override;
 
         void SetFieldOfView(float fov);
+
         void SetAspectRatio(float aspect);
 
         float GetFieldOfView() const { return m_FieldOfView; }
         float GetAspectRatio() const { return m_AspectRatio; }
 
-        void SetOrientation(const Quaternion& orientation);
-        const Quaternion& GetOrientation() const { return m_Orientation; }
+        void SetOrientation(const Quaternion &orientation);
+
+        const Quaternion &GetOrientation() const { return m_Orientation; }
 
     private:
         void UpdateVectorsFromOrientation();
@@ -101,21 +110,27 @@ namespace ash {
             Center
         };
 
-        OrthographicCamera(float left, float right, float bottom, float top, float nearClip = -1.0f, float farClip = 1.0f);
+        OrthographicCamera(float left, float right, float bottom, float top, float nearClip = -1.0f,
+                           float farClip = 1.0f);
 
         OrthographicCamera(float width, float height, OriginMode mode = OriginMode::BottomLeft);
 
         Mat4 GetProjectionMatrix() const override;
+
         void OnResize(uint32_t width, uint32_t height) override;
 
         void SetBounds(float left, float right, float bottom, float top);
+
         void SetSize(float width, float height);
 
         void SetZoom(float zoom);
+
         float GetZoom() const { return m_Zoom; }
 
         void SetRotation2D(float rotation);
+
         void Rotate2D(float rotationOffset);
+
         float GetRotation2D() const { return m_Rotation2D; }
 
         float GetWidth() const { return m_OrthoBoundsRight - m_OrthoBoundsLeft; }

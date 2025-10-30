@@ -23,6 +23,8 @@ file(GLOB_RECURSE ENGINE_HEADERS "include/*.h" "include/*.hpp")
 add_library(AshenEngineLib STATIC
         ${ENGINE_SOURCES}
         ${ENGINE_HEADERS}
+        src/Math/Transform.cpp
+        include/Ashen/Nodes/NodeGraph.h
 )
 
 add_library(Ashen::Engine ALIAS AshenEngineLib)

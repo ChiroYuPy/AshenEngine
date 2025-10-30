@@ -52,6 +52,6 @@ namespace ash {
     private:
         static Statistics s_Stats;
     };
-} // namespace ash
+}
 
 #endif //ASHEN_RENDERER_H

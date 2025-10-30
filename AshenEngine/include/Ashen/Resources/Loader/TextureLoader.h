@@ -31,8 +31,8 @@ namespace ash {
          * @return Loaded texture (moved)
          */
         [[nodiscard]] static Texture2D Load2D(
-            const fs::path& path,
-            const TextureConfig& config
+            const fs::path &path,
+            const TextureConfig &config
         );
 
         /**
@@ -42,8 +42,8 @@ namespace ash {
          * @return Loaded cubemap (moved)
          */
         [[nodiscard]] static TextureCubeMap LoadCubemap(
-            const std::array<fs::path, 6>& facesPaths,
-            const TextureConfig& config
+            const std::array<fs::path, 6> &facesPaths,
+            const TextureConfig &config
         );
 
         /**
@@ -51,8 +51,8 @@ namespace ash {
          * Searches for: .png, .jpg, .jpeg, .bmp, .tga, .hdr
          */
         [[nodiscard]] static fs::path FindTexture(
-            const fs::path& basePath,
-            const std::string& textureName
+            const fs::path &basePath,
+            const std::string &textureName
         );
 
     private:
@@ -60,8 +60,8 @@ namespace ash {
          * @brief Create texture from loaded image data
          */
         static Texture2D CreateFromImageData(
-            const ImageData& imageData,
-            const TextureConfig& config
+            const ImageData &imageData,
+            const TextureConfig &config
         );
     };
 }

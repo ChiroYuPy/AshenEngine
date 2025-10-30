@@ -2,17 +2,15 @@
 #include "Ashen/Core/Logger.h"
 
 #include <miniaudio.h>
+#include <ranges>
 
 namespace ash {
-
     MiniAudioDevice::MiniAudioDevice()
         : m_Engine(nullptr)
-        , m_Initialized(false)
-        , m_NextHandle(1)
-        , m_MasterVolume(1.0f)
-        , m_AllPaused(false) {
-
-        // Initialiser les volumes par catégorie
+          , m_Initialized(false)
+          , m_NextHandle(1)
+          , m_MasterVolume(1.0f)
+          , m_AllPaused(false) {
         m_CategoryVolumes[AudioCategory::Master] = {AudioCategory::Master, 1.0f, false};
         m_CategoryVolumes[AudioCategory::Music] = {AudioCategory::Music, 1.0f, false};
         m_CategoryVolumes[AudioCategory::SFX] = {AudioCategory::SFX, 1.0f, false};
@@ -34,7 +32,7 @@ namespace ash {
 
         m_Engine = new ma_engine;
 
-        ma_result result = ma_engine_init(nullptr, m_Engine);
+        const ma_result result = ma_engine_init(nullptr, m_Engine);
         if (result != MA_SUCCESS) {
             Logger::Error("Failed to initialize miniaudio engine");
             delete m_Engine;
@@ -51,10 +49,8 @@ namespace ash {
     void MiniAudioDevice::Shutdown() {
         if (!m_Initialized) return;
 
-        // Arrêter et détruire toutes les sources
         m_Sources.clear();
 
-        // Détruire le moteur
         if (m_Engine) {
             ma_engine_uninit(m_Engine);
             delete m_Engine;
@@ -65,7 +61,7 @@ namespace ash {
         Logger::Info("Audio system shut down");
     }
 
-    Ref<AudioSource> MiniAudioDevice::CreateSource(const std::string& filepath, const AudioSourceConfig& config) {
+    Ref<AudioSource> MiniAudioDevice::CreateSource(const String &filepath, const AudioSourceConfig &config) {
         if (!m_Initialized) {
             Logger::Error("Cannot create audio source: device not initialized");
             return nullptr;
@@ -79,32 +75,29 @@ namespace ash {
             return source;
         }
 
-        Logger::Error("Failed to create audio source from: {}", filepath);
+        Logger::Error(Format("Failed to create audio source from: {}", filepath));
         return nullptr;
     }
 
     void MiniAudioDevice::DestroySource(const AudioSourceHandle handle) {
-        auto it = m_Sources.find(handle);
-        if (it != m_Sources.end()) {
+        const auto it = m_Sources.find(handle);
+        if (it != m_Sources.end())
             m_Sources.erase(it);
-        }
     }
 
-    void MiniAudioDevice::SetListenerPosition(const Vec3& position) {
+    void MiniAudioDevice::SetListenerPosition(const Vec3 &position) {
         m_ListenerConfig.Position = position;
-        if (m_Engine) {
+        if (m_Engine)
             ma_engine_listener_set_position(m_Engine, 0, position.x, position.y, position.z);
-        }
     }
 
-    void MiniAudioDevice::SetListenerVelocity(const Vec3& velocity) {
+    void MiniAudioDevice::SetListenerVelocity(const Vec3 &velocity) {
         m_ListenerConfig.Velocity = velocity;
-        if (m_Engine) {
+        if (m_Engine)
             ma_engine_listener_set_velocity(m_Engine, 0, velocity.x, velocity.y, velocity.z);
-        }
     }
 
-    void MiniAudioDevice::SetListenerOrientation(const Vec3& forward, const Vec3& up) {
+    void MiniAudioDevice::SetListenerOrientation(const Vec3 &forward, const Vec3 &up) {
         m_ListenerConfig.Forward = forward;
         m_ListenerConfig.Up = up;
         if (m_Engine) {
@@ -119,9 +112,8 @@ namespace ash {
 
     void MiniAudioDevice::SetMasterVolume(const float volume) {
         m_MasterVolume = glm::clamp(volume, 0.0f, 1.0f);
-        if (m_Engine) {
+        if (m_Engine)
             ma_engine_set_volume(m_Engine, m_MasterVolume);
-        }
     }
 
     float MiniAudioDevice::GetMasterVolume() const {
@@ -134,8 +126,8 @@ namespace ash {
     }
 
     float MiniAudioDevice::GetCategoryVolume(const AudioCategory category) const {
-        auto it = m_CategoryVolumes.find(category);
-        return (it != m_CategoryVolumes.end()) ? it->second.Volume : 1.0f;
+        const auto it = m_CategoryVolumes.find(category);
+        return it != m_CategoryVolumes.end() ? it->second.Volume : 1.0f;
     }
 
     void MiniAudioDevice::MuteCategory(const AudioCategory category, const bool mute) {
@@ -144,39 +136,36 @@ namespace ash {
     }
 
     bool MiniAudioDevice::IsCategoryMuted(const AudioCategory category) const {
-        auto it = m_CategoryVolumes.find(category);
-        return (it != m_CategoryVolumes.end()) ? it->second.Muted : false;
+        const auto it = m_CategoryVolumes.find(category);
+        return it != m_CategoryVolumes.end() ? it->second.Muted : false;
     }
 
     void MiniAudioDevice::PauseAll() {
         m_AllPaused = true;
-        for (auto& [handle, source] : m_Sources) {
-            if (source->IsPlaying()) {
+        for (const auto &source: m_Sources | std::views::values) {
+            if (source->IsPlaying())
                 source->Pause();
-            }
         }
     }
 
     void MiniAudioDevice::ResumeAll() {
         m_AllPaused = false;
-        for (auto& [handle, source] : m_Sources) {
-            if (source->IsPaused()) {
+        for (const auto &source: m_Sources | std::views::values) {
+            if (source->IsPaused())
                 source->Resume();
-            }
         }
     }
 
     void MiniAudioDevice::StopAll() {
-        for (auto& [handle, source] : m_Sources) {
+        for (const auto &source: m_Sources | std::views::values)
             source->Stop();
-        }
     }
 
     AudioDeviceInfo MiniAudioDevice::GetDeviceInfo() const {
         AudioDeviceInfo info;
 
         if (m_Engine) {
-            ma_device* device = ma_engine_get_device(m_Engine);
+            ma_device *device = ma_engine_get_device(m_Engine);
             if (device) {
                 info.Name = device->playback.name;
                 info.SampleRate = device->sampleRate;
@@ -192,11 +181,10 @@ namespace ash {
         Vector<AudioDeviceInfo> devices;
 
         ma_context context;
-        if (ma_context_init(nullptr, 0, nullptr, &context) != MA_SUCCESS) {
+        if (ma_context_init(nullptr, 0, nullptr, &context) != MA_SUCCESS)
             return devices;
-        }
 
-        ma_device_info* pPlaybackInfos;
+        ma_device_info *pPlaybackInfos;
         ma_uint32 playbackCount;
 
         if (ma_context_get_devices(&context, &pPlaybackInfos, &playbackCount, nullptr, nullptr) == MA_SUCCESS) {
@@ -212,7 +200,7 @@ namespace ash {
         return devices;
     }
 
-    bool MiniAudioDevice::SelectDevice(const std::string& deviceName) {
+    bool MiniAudioDevice::SelectDevice(const String &deviceName) {
         Logger::Warn("Device selection not implemented for miniaudio backend");
         return false;
     }
@@ -222,22 +210,17 @@ namespace ash {
 
         // Nettoyer les sources terminées
         Vector<AudioSourceHandle> toRemove;
-        for (auto& [handle, source] : m_Sources) {
-            if (source->IsStopped() && !source->IsLooping()) {
+        for (auto &[handle, source]: m_Sources)
+            if (source->IsStopped() && !source->IsLooping())
                 toRemove.push_back(handle);
-            }
-        }
 
-        for (auto handle : toRemove) {
+        for (auto handle: toRemove)
             m_Sources.erase(handle);
-        }
     }
 
     void MiniAudioDevice::ApplyCategoryVolumes() {
-        for (auto& [handle, source] : m_Sources) {
+        for (auto &[handle, source]: m_Sources) {
             float effectiveVolume = CalculateEffectiveVolume(source->GetCategory());
-            // Note: Le volume est déjà géré par la source elle-même
-            // On pourrait implémenter un système de gain séparé ici si nécessaire
         }
     }
 
@@ -246,13 +229,12 @@ namespace ash {
 
         auto it = m_CategoryVolumes.find(category);
         if (it != m_CategoryVolumes.end()) {
-            if (it->second.Muted) {
+            if (it->second.Muted)
                 return 0.0f;
-            }
+
             volume *= it->second.Volume;
         }
 
         return volume;
     }
-
-} // namespace ash
+}

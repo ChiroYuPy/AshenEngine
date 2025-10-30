@@ -3,19 +3,22 @@
 
 #include "Ashen/Core/Layer.h"
 #include "Ashen/Core/Types.h"
-#include "Ashen/Events/Event.h"
 
 namespace ash {
     class LayerStack final {
     public:
         LayerStack() = default;
+
         ~LayerStack();
 
-        LayerStack(const LayerStack&) = delete;
-        LayerStack& operator=(const LayerStack&) = delete;
+        LayerStack(const LayerStack &) = delete;
+
+        LayerStack &operator=(const LayerStack &) = delete;
 
         void PushLayer(Own<Layer> layer);
+
         void PopLayer();
+
         void Clear();
 
         size_t Size() const noexcept { return m_Layers.size(); }
@@ -32,7 +35,7 @@ namespace ash {
         auto rend() const noexcept { return m_Layers.rend(); }
 
     private:
-        Vector<Own<Layer>> m_Layers;
+        Vector<Own<Layer> > m_Layers;
     };
 }
 

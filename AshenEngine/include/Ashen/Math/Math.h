@@ -121,7 +121,7 @@ namespace ash {
 
     template<typename T>
     constexpr T Clamp(T value, T minVal, T maxVal) noexcept {
-        return value < minVal ? minVal : (value > maxVal ? maxVal : value);
+        return value < minVal ? minVal : value > maxVal ? maxVal : value;
     }
 
     template<typename T>
@@ -312,7 +312,7 @@ namespace ash {
 
     template<typename Vec>
     Vec Project(const Vec &a, const Vec &b) noexcept {
-        return (Dot(a, b) / LengthSqr(b)) * b;
+        return Dot(a, b) / LengthSqr(b) * b;
     }
 
     template<typename Vec>
@@ -478,16 +478,6 @@ namespace ash {
     }
 
     template<typename T>
-    constexpr const T &Min(const T &a, const T &b) noexcept {
-        return a < b ? a : b;
-    }
-
-    template<typename T>
-    constexpr const T &Max(const T &a, const T &b) noexcept {
-        return a > b ? a : b;
-    }
-
-    template<typename T>
     constexpr T LimitMin() noexcept {
         return std::numeric_limits<T>::min();
     }
@@ -501,6 +491,6 @@ namespace ash {
     constexpr T LimitLowest() noexcept {
         return std::numeric_limits<T>::lowest();
     }
-} // namespace ash
+}
 
 #endif // ASHEN_MATH_H

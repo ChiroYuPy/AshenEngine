@@ -22,7 +22,7 @@ namespace ash {
     }
 
     void LayerStack::Clear() {
-        for (auto& layer : m_Layers)
+        for (auto &layer: m_Layers)
             if (layer) layer->OnDetach();
 
         m_Layers.clear();

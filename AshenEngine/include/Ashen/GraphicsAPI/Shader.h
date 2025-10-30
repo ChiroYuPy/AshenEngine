@@ -4,9 +4,6 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
 
 #include <glad/glad.h>
 
@@ -17,7 +14,6 @@
 #include "Ashen/GraphicsAPI/GLObject.h"
 
 namespace ash {
-
     class ShaderException final : public std::runtime_error {
     public:
         using std::runtime_error::runtime_error;
@@ -25,7 +21,7 @@ namespace ash {
 
     class ShaderUnit final : public GLObject {
     public:
-        ShaderUnit(const ShaderStage stage, const std::string &source)
+        ShaderUnit(const ShaderStage stage, const String &source)
             : m_Stage(stage) {
             Compile(source);
         }
@@ -36,10 +32,11 @@ namespace ash {
         }
 
         ShaderUnit(const ShaderUnit &) = delete;
+
         ShaderUnit &operator=(const ShaderUnit &) = delete;
 
         ShaderUnit(ShaderUnit &&other) noexcept
-              : m_Stage(other.m_Stage) {
+            : m_Stage(other.m_Stage) {
             m_ID = other.m_ID;
             other.m_ID = 0;
         }
@@ -63,7 +60,7 @@ namespace ash {
             return id;
         }
 
-        static ShaderUnit FromFile(ShaderStage stage, const std::string &filepath) {
+        static ShaderUnit FromFile(ShaderStage stage, const String &filepath) {
             std::ifstream file(filepath);
             if (!file.is_open())
                 throw ShaderException("Failed to open shader file: " + filepath);
@@ -76,7 +73,7 @@ namespace ash {
     private:
         ShaderStage m_Stage;
 
-        void Compile(const std::string &source) {
+        void Compile(const String &source) {
             m_ID = glCreateShader(static_cast<GLenum>(m_Stage));
             if (!m_ID)
                 throw ShaderException("glCreateShader failed");
@@ -91,9 +88,9 @@ namespace ash {
                 GLint length = 0;
                 glGetShaderiv(m_ID, GL_INFO_LOG_LENGTH, &length);
 
-                std::string infoLog;
+                String infoLog;
                 if (length > 0) {
-                    std::vector<char> buf(static_cast<size_t>(length));
+                    Vector<char> buf(static_cast<size_t>(length));
                     glGetShaderInfoLog(m_ID, length, nullptr, buf.data());
                     infoLog.assign(buf.begin(), buf.end());
                 } else {
@@ -103,12 +100,12 @@ namespace ash {
                 glDeleteShader(m_ID);
                 m_ID = 0;
 
-                const std::string stageStr = GetStageName(m_Stage);
+                const String stageStr = GetStageName(m_Stage);
                 throw ShaderException(stageStr + " shader compilation failed:\n" + infoLog);
             }
         }
 
-        static std::string GetStageName(const ShaderStage stage) {
+        static String GetStageName(const ShaderStage stage) {
             switch (stage) {
                 case ShaderStage::Vertex: return "Vertex";
                 case ShaderStage::Fragment: return "Fragment";
@@ -160,6 +157,7 @@ namespace ash {
         }
 
         ShaderProgram(const ShaderProgram &) = delete;
+
         ShaderProgram &operator=(const ShaderProgram &) = delete;
 
         ShaderProgram(ShaderProgram &&other) noexcept
@@ -231,9 +229,9 @@ namespace ash {
                 GLint length = 0;
                 glGetProgramiv(m_ID, GL_INFO_LOG_LENGTH, &length);
 
-                std::string infoLog;
+                String infoLog;
                 if (length > 0) {
-                    std::vector<char> buf(static_cast<size_t>(length));
+                    Vector<char> buf(static_cast<size_t>(length));
                     glGetProgramInfoLog(m_ID, length, nullptr, buf.data());
                     infoLog.assign(buf.begin(), buf.end());
                 } else {
@@ -271,9 +269,9 @@ namespace ash {
                 GLint length = 0;
                 glGetProgramiv(m_ID, GL_INFO_LOG_LENGTH, &length);
 
-                std::string infoLog;
+                String infoLog;
                 if (length > 0) {
-                    std::vector<char> buf(static_cast<size_t>(length));
+                    Vector<char> buf(static_cast<size_t>(length));
                     glGetProgramInfoLog(m_ID, length, nullptr, buf.data());
                     infoLog.assign(buf.begin(), buf.end());
                 } else {
@@ -287,74 +285,74 @@ namespace ash {
             }
         }
 
-        void SetBool(const std::string &name, const bool value) const {
+        void SetBool(const String &name, const bool value) const {
             const GLint loc = GetUniformLocation(name);
             if (loc == -1) return;
             glUniform1i(loc, static_cast<int>(value));
         }
 
-        void SetInt(const std::string &name, const int value) const {
+        void SetInt(const String &name, const int value) const {
             const GLint loc = GetUniformLocation(name);
             if (loc == -1) return;
             glUniform1i(loc, value);
         }
 
-        void SetFloat(const std::string &name, const float value) const {
+        void SetFloat(const String &name, const float value) const {
             const GLint loc = GetUniformLocation(name);
             if (loc == -1) return;
             glUniform1f(loc, value);
         }
 
-        void SetVec2(const std::string &name, const Vec2 &v) const {
+        void SetVec2(const String &name, const Vec2 &v) const {
             const GLint loc = GetUniformLocation(name);
             if (loc == -1) return;
             glUniform2fv(loc, 1, glm::value_ptr(v));
         }
 
-        void SetVec2(const std::string &name, const float x, const float y) const {
+        void SetVec2(const String &name, const float x, const float y) const {
             const GLint loc = GetUniformLocation(name);
             if (loc == -1) return;
             glUniform2f(loc, x, y);
         }
 
-        void SetVec3(const std::string &name, const Vec3 &v) const {
+        void SetVec3(const String &name, const Vec3 &v) const {
             const GLint loc = GetUniformLocation(name);
             if (loc == -1) return;
             glUniform3fv(loc, 1, glm::value_ptr(v));
         }
 
-        void SetVec3(const std::string &name, const float x, const float y, const float z) const {
+        void SetVec3(const String &name, const float x, const float y, const float z) const {
             const GLint loc = GetUniformLocation(name);
             if (loc == -1) return;
             glUniform3f(loc, x, y, z);
         }
 
-        void SetVec4(const std::string &name, const Vec4 &v) const {
+        void SetVec4(const String &name, const Vec4 &v) const {
             const GLint loc = GetUniformLocation(name);
             if (loc == -1) return;
             glUniform4fv(loc, 1, glm::value_ptr(v));
         }
 
-        void SetVec4(const std::string &name, const float x, const float y, const float z, const float w) const {
+        void SetVec4(const String &name, const float x, const float y, const float z, const float w) const {
             const GLint loc = GetUniformLocation(name);
             if (loc == -1) return;
             glUniform4f(loc, x, y, z, w);
         }
 
-        void SetMat3(const std::string &name, const Mat3 &m) const {
+        void SetMat3(const String &name, const Mat3 &m) const {
             const GLint loc = GetUniformLocation(name);
             if (loc == -1) return;
             glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(m));
         }
 
-        void SetMat4(const std::string &name, const Mat4 &m) const {
+        void SetMat4(const String &name, const Mat4 &m) const {
             const GLint loc = GetUniformLocation(name);
             if (loc == -1) return;
             glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));
         }
 
         // Uniform block binding
-        void BindUniformBlock(const std::string &name, const uint32_t bindingPoint) const {
+        void BindUniformBlock(const String &name, const uint32_t bindingPoint) const {
             if (!m_ID) {
                 Logger::Error() << "Attempt to bind a uniform block on invalid program!";
                 return;
@@ -368,7 +366,7 @@ namespace ash {
         }
 
         // Shader storage block binding
-        void BindStorageBlock(const std::string &name, const uint32_t bindingPoint) const {
+        void BindStorageBlock(const String &name, const uint32_t bindingPoint) const {
             if (!m_ID) {
                 Logger::Error() << "Attempt to bind a storage block on invalid program!";
                 return;
@@ -384,13 +382,13 @@ namespace ash {
 
         [[nodiscard]] const ShaderConfig &GetConfig() const { return m_Config; }
 
-        [[nodiscard]] bool HasUniform(const std::string &name) const {
+        [[nodiscard]] bool HasUniform(const String &name) const {
             return GetUniformLocation(name) != -1;
         }
 
         // Builders style SFML
-        static ShaderProgram FromFiles(const std::string &vertexPath,
-                                       const std::string &fragmentPath,
+        static ShaderProgram FromFiles(const String &vertexPath,
+                                       const String &fragmentPath,
                                        const ShaderConfig &config = ShaderConfig::Default()) {
             ShaderProgram program(config);
 
@@ -404,8 +402,8 @@ namespace ash {
             return program;
         }
 
-        static ShaderProgram FromSources(const std::string &vertexSource,
-                                         const std::string &fragmentSource,
+        static ShaderProgram FromSources(const String &vertexSource,
+                                         const String &fragmentSource,
                                          const ShaderConfig &config = ShaderConfig::Default()) {
             ShaderProgram program(config);
 
@@ -419,9 +417,9 @@ namespace ash {
             return program;
         }
 
-        static ShaderProgram FromFilesWithGeometry(const std::string &vertexPath,
-                                                   const std::string &fragmentPath,
-                                                   const std::string &geometryPath,
+        static ShaderProgram FromFilesWithGeometry(const String &vertexPath,
+                                                   const String &fragmentPath,
+                                                   const String &geometryPath,
                                                    const ShaderConfig &config = ShaderConfig::Default()) {
             ShaderProgram program(config);
 
@@ -438,13 +436,13 @@ namespace ash {
         }
 
     private:
-        mutable std::unordered_map<std::string, GLint> m_UniformCache;
+        mutable std::unordered_map<String, GLint> m_UniformCache;
         std::unordered_set<ShaderStage> m_AttachedStages;
         Vector<GLuint> m_AttachedShaderIDs;
-        mutable std::unordered_set<std::string> m_WarnedUniforms;
+        mutable std::unordered_set<String> m_WarnedUniforms;
         ShaderConfig m_Config;
 
-        GLint GetUniformLocation(const std::string &name) const {
+        GLint GetUniformLocation(const String &name) const {
             if (m_Config.cacheUniforms) {
                 auto it = m_UniformCache.find(name);
                 if (it != m_UniformCache.end())
@@ -479,17 +477,18 @@ namespace ash {
             constexpr size_t MaxUniformNameLength = 256;
 
             for (GLint i = 0; i < uniformCount; ++i) {
-                std::vector<char> nameBuf(MaxUniformNameLength);
+                Vector<char> nameBuf(MaxUniformNameLength);
                 GLsizei length = 0;
                 GLint size = 0;
                 GLenum type = 0;
 
-                glGetActiveUniform(m_ID, i, static_cast<GLsizei>(nameBuf.size()), &length, &size, &type, nameBuf.data());
+                glGetActiveUniform(m_ID, i, static_cast<GLsizei>(nameBuf.size()), &length, &size, &type,
+                                   nameBuf.data());
 
                 if (length <= 0)
                     continue;
 
-                std::string name(nameBuf.data(), static_cast<size_t>(length));
+                String name(nameBuf.data(), static_cast<size_t>(length));
                 const GLint location = glGetUniformLocation(m_ID, name.c_str());
                 if (location != -1)
                     m_UniformCache[name] = location;

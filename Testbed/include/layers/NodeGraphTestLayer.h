@@ -1,0 +1,9 @@
+#ifndef ASHEN_NODEGRAPHTESTLAYER_H
+#define ASHEN_NODEGRAPHTESTLAYER_H
+
+
+class NodeGraphTestLayer {
+};
+
+
+#endif //ASHEN_NODEGRAPHTESTLAYER_H

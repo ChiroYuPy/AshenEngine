@@ -3931,16 +3931,16 @@ implementations of some @ref basic_json methods, and meta-programming helpers.
         (is_default_constructible<ConstructibleObjectType>::value &&
          (std::is_move_assignable<ConstructibleObjectType>::value ||
           std::is_copy_assignable<ConstructibleObjectType>::value) &&
-         (is_constructible<typename ConstructibleObjectType::key_type,
-          typename object_t::key_type>::value &&
-          std::is_same <
-          typename object_t::mapped_type,
-          typename ConstructibleObjectType::mapped_type >::value)) ||
-        (has_from_json<BasicJsonType,
-         typename ConstructibleObjectType::mapped_type>::value ||
-         has_non_default_from_json <
-         BasicJsonType,
-         typename ConstructibleObjectType::mapped_type >::value);
+         is_constructible<typename ConstructibleObjectType::key_type,
+             typename object_t::key_type>::value &&
+         std::is_same <
+             typename object_t::mapped_type,
+             typename ConstructibleObjectType::mapped_type >::value) ||
+        has_from_json<BasicJsonType,
+            typename ConstructibleObjectType::mapped_type>::value ||
+        has_non_default_from_json <
+            BasicJsonType,
+            typename ConstructibleObjectType::mapped_type >::value;
 };
 
         template<typename BasicJsonType, typename ConstructibleObjectType>
@@ -4229,7 +4229,7 @@ implementations of some @ref basic_json methods, and meta-programming helpers.
 
         template<typename OfType, typename T>
         using never_out_of_range = std::integral_constant<bool,
-            (std::is_signed<OfType>::value && (sizeof(T) < sizeof(OfType)))
+            (std::is_signed<OfType>::value && sizeof(T) < sizeof(OfType))
             || (same_sign<OfType, T>::value && sizeof(OfType) == sizeof(T))>;
 
         template<typename OfType, typename T,
@@ -4629,7 +4629,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
             static parse_error create(int id_, std::size_t byte_, const std::string &what_arg,
                                       BasicJsonContext context) {
                 const std::string w = concat(exception::name("parse_error", id_), "parse error",
-                                             (byte_ != 0 ? (concat(" at byte ", std::to_string(byte_))) : ""),
+                                             byte_ != 0 ? concat(" at byte ", std::to_string(byte_)) : "",
                                              ": ", exception::diagnostics(context), what_arg);
                 return {id_, byte_, w.c_str()};
             }
@@ -6530,27 +6530,27 @@ subsequent call for input from the std::istream.
                         utf8_bytes_filled = 1;
                     } else if (wc <= 0x7FF) {
                         utf8_bytes[0] = static_cast<std::char_traits<char>::int_type>(
-                            0xC0u | ((static_cast<unsigned int>(wc) >> 6u) & 0x1Fu));
+                            0xC0u | static_cast<unsigned int>(wc) >> 6u & 0x1Fu);
                         utf8_bytes[1] = static_cast<std::char_traits<char>::int_type>(
-                            0x80u | (static_cast<unsigned int>(wc) & 0x3Fu));
+                            0x80u | static_cast<unsigned int>(wc) & 0x3Fu);
                         utf8_bytes_filled = 2;
                     } else if (wc <= 0xFFFF) {
                         utf8_bytes[0] = static_cast<std::char_traits<char>::int_type>(
-                            0xE0u | ((static_cast<unsigned int>(wc) >> 12u) & 0x0Fu));
+                            0xE0u | static_cast<unsigned int>(wc) >> 12u & 0x0Fu);
                         utf8_bytes[1] = static_cast<std::char_traits<char>::int_type>(
-                            0x80u | ((static_cast<unsigned int>(wc) >> 6u) & 0x3Fu));
+                            0x80u | static_cast<unsigned int>(wc) >> 6u & 0x3Fu);
                         utf8_bytes[2] = static_cast<std::char_traits<char>::int_type>(
-                            0x80u | (static_cast<unsigned int>(wc) & 0x3Fu));
+                            0x80u | static_cast<unsigned int>(wc) & 0x3Fu);
                         utf8_bytes_filled = 3;
                     } else if (wc <= 0x10FFFF) {
                         utf8_bytes[0] = static_cast<std::char_traits<char>::int_type>(
-                            0xF0u | ((static_cast<unsigned int>(wc) >> 18u) & 0x07u));
+                            0xF0u | static_cast<unsigned int>(wc) >> 18u & 0x07u);
                         utf8_bytes[1] = static_cast<std::char_traits<char>::int_type>(
-                            0x80u | ((static_cast<unsigned int>(wc) >> 12u) & 0x3Fu));
+                            0x80u | static_cast<unsigned int>(wc) >> 12u & 0x3Fu);
                         utf8_bytes[2] = static_cast<std::char_traits<char>::int_type>(
-                            0x80u | ((static_cast<unsigned int>(wc) >> 6u) & 0x3Fu));
+                            0x80u | static_cast<unsigned int>(wc) >> 6u & 0x3Fu);
                         utf8_bytes[3] = static_cast<std::char_traits<char>::int_type>(
-                            0x80u | (static_cast<unsigned int>(wc) & 0x3Fu));
+                            0x80u | static_cast<unsigned int>(wc) & 0x3Fu);
                         utf8_bytes_filled = 4;
                     } else {
                         // unknown character
@@ -6583,29 +6583,29 @@ subsequent call for input from the std::istream.
                         utf8_bytes_filled = 1;
                     } else if (wc <= 0x7FF) {
                         utf8_bytes[0] = static_cast<std::char_traits<char>::int_type>(
-                            0xC0u | ((static_cast<unsigned int>(wc) >> 6u)));
+                            0xC0u | static_cast<unsigned int>(wc) >> 6u);
                         utf8_bytes[1] = static_cast<std::char_traits<char>::int_type>(
-                            0x80u | (static_cast<unsigned int>(wc) & 0x3Fu));
+                            0x80u | static_cast<unsigned int>(wc) & 0x3Fu);
                         utf8_bytes_filled = 2;
                     } else if (0xD800 > wc || wc >= 0xE000) {
                         utf8_bytes[0] = static_cast<std::char_traits<char>::int_type>(
-                            0xE0u | ((static_cast<unsigned int>(wc) >> 12u)));
+                            0xE0u | static_cast<unsigned int>(wc) >> 12u);
                         utf8_bytes[1] = static_cast<std::char_traits<char>::int_type>(
-                            0x80u | ((static_cast<unsigned int>(wc) >> 6u) & 0x3Fu));
+                            0x80u | static_cast<unsigned int>(wc) >> 6u & 0x3Fu);
                         utf8_bytes[2] = static_cast<std::char_traits<char>::int_type>(
-                            0x80u | (static_cast<unsigned int>(wc) & 0x3Fu));
+                            0x80u | static_cast<unsigned int>(wc) & 0x3Fu);
                         utf8_bytes_filled = 3;
                     } else {
                         if (JSON_HEDLEY_UNLIKELY(!input.empty())) {
                             const auto wc2 = static_cast<unsigned int>(input.get_character());
                             const auto charcode =
-                                    0x10000u + (((static_cast<unsigned int>(wc) & 0x3FFu) << 10u) | (wc2 & 0x3FFu));
-                            utf8_bytes[0] = static_cast<std::char_traits<char>::int_type>(0xF0u | (charcode >> 18u));
+                                    0x10000u + ((static_cast<unsigned int>(wc) & 0x3FFu) << 10u | wc2 & 0x3FFu);
+                            utf8_bytes[0] = static_cast<std::char_traits<char>::int_type>(0xF0u | charcode >> 18u);
                             utf8_bytes[1] = static_cast<std::char_traits<char>::int_type>(
-                                0x80u | ((charcode >> 12u) & 0x3Fu));
+                                0x80u | charcode >> 12u & 0x3Fu);
                             utf8_bytes[2] = static_cast<std::char_traits<char>::int_type>(
-                                0x80u | ((charcode >> 6u) & 0x3Fu));
-                            utf8_bytes[3] = static_cast<std::char_traits<char>::int_type>(0x80u | (charcode & 0x3Fu));
+                                0x80u | charcode >> 6u & 0x3Fu);
+                            utf8_bytes[3] = static_cast<std::char_traits<char>::int_type>(0x80u | charcode & 0x3Fu);
                             utf8_bytes_filled = 4;
                         } else {
                             utf8_bytes[0] = static_cast<std::char_traits<char>::int_type>(wc);
@@ -6997,7 +6997,7 @@ This class organizes the lexical analysis during JSON deserialization.
             static char get_decimal_point() noexcept {
                 const auto *loc = localeconv();
                 JSON_ASSERT(loc != nullptr);
-                return (loc->decimal_point == nullptr) ? '.' : *(loc->decimal_point);
+                return loc->decimal_point == nullptr ? '.' : *loc->decimal_point;
             }
 
             /////////////////////
@@ -7064,7 +7064,7 @@ This class organizes the lexical analysis during JSON deserialization.
 
                 for (auto range = ranges.begin(); range != ranges.end(); ++range) {
                     get();
-                    if (JSON_HEDLEY_LIKELY(*range <= current && current <= *(++range))) // NOLINT(bugprone-inc-dec-in-conditions)
+                    if (JSON_HEDLEY_LIKELY(*range <= current && current <= *++range)) // NOLINT(bugprone-inc-dec-in-conditions)
                     {
                         add(current);
                     } else {
@@ -7210,27 +7210,27 @@ This class organizes the lexical analysis during JSON deserialization.
                                     } else if (codepoint <= 0x7FF) {
                                         // 2-byte characters: 110xxxxx 10xxxxxx
                                         add(static_cast<char_int_type>(
-                                            0xC0u | (static_cast<unsigned int>(codepoint) >> 6u)));
+                                            0xC0u | static_cast<unsigned int>(codepoint) >> 6u));
                                         add(static_cast<char_int_type>(
-                                            0x80u | (static_cast<unsigned int>(codepoint) & 0x3Fu)));
+                                            0x80u | static_cast<unsigned int>(codepoint) & 0x3Fu));
                                     } else if (codepoint <= 0xFFFF) {
                                         // 3-byte characters: 1110xxxx 10xxxxxx 10xxxxxx
                                         add(static_cast<char_int_type>(
-                                            0xE0u | (static_cast<unsigned int>(codepoint) >> 12u)));
+                                            0xE0u | static_cast<unsigned int>(codepoint) >> 12u));
                                         add(static_cast<char_int_type>(
-                                            0x80u | ((static_cast<unsigned int>(codepoint) >> 6u) & 0x3Fu)));
+                                            0x80u | static_cast<unsigned int>(codepoint) >> 6u & 0x3Fu));
                                         add(static_cast<char_int_type>(
-                                            0x80u | (static_cast<unsigned int>(codepoint) & 0x3Fu)));
+                                            0x80u | static_cast<unsigned int>(codepoint) & 0x3Fu));
                                     } else {
                                         // 4-byte characters: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
                                         add(static_cast<char_int_type>(
-                                            0xF0u | (static_cast<unsigned int>(codepoint) >> 18u)));
+                                            0xF0u | static_cast<unsigned int>(codepoint) >> 18u));
                                         add(static_cast<char_int_type>(
-                                            0x80u | ((static_cast<unsigned int>(codepoint) >> 12u) & 0x3Fu)));
+                                            0x80u | static_cast<unsigned int>(codepoint) >> 12u & 0x3Fu));
                                         add(static_cast<char_int_type>(
-                                            0x80u | ((static_cast<unsigned int>(codepoint) >> 6u) & 0x3Fu)));
+                                            0x80u | static_cast<unsigned int>(codepoint) >> 6u & 0x3Fu));
                                         add(static_cast<char_int_type>(
-                                            0x80u | (static_cast<unsigned int>(codepoint) & 0x3Fu)));
+                                            0x80u | static_cast<unsigned int>(codepoint) & 0x3Fu));
                                     }
 
                                     break;
@@ -8590,7 +8590,7 @@ constructor contains the parsed value.
                 JSON_ASSERT(ref_stack.back()->is_object());
 
                 // add null at the given key and store the reference for later
-                object_element = &(ref_stack.back()->m_data.m_value.object->operator[](val));
+                object_element = &ref_stack.back()->m_data.m_value.object->operator[](val);
                 return true;
             }
 
@@ -8750,7 +8750,7 @@ constructor contains the parsed value.
                     handle_diagnostic_positions_for_json_value(ref_stack.back()->m_data.m_value.array->back());
 #endif
 
-                    return &(ref_stack.back()->m_data.m_value.array->back());
+                    return &ref_stack.back()->m_data.m_value.array->back();
                 }
 
                 JSON_ASSERT(ref_stack.back()->is_object());
@@ -9124,7 +9124,7 @@ constructor contains the parsed value.
                 // array
                 if (ref_stack.back()->is_array()) {
                     ref_stack.back()->m_data.m_value.array->emplace_back(std::move(value));
-                    return {true, &(ref_stack.back()->m_data.m_value.array->back())};
+                    return {true, &ref_stack.back()->m_data.m_value.array->back()};
                 }
 
                 // object
@@ -10217,7 +10217,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                         // is shown in Fig. 3.
                         const auto half = static_cast<unsigned int>((byte1 << 8u) + byte2);
                         const double val = [&half] {
-                            const int exp = (half >> 10u) & 0x1Fu;
+                            const int exp = half >> 10u & 0x1Fu;
                             const unsigned int mant = half & 0x3FFu;
                             JSON_ASSERT(0 <= exp&& exp <= 32);
                             JSON_ASSERT(mant <= 1024);
@@ -10225,7 +10225,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                                 case 0:
                                     return std::ldexp(mant, -24);
                                 case 31:
-                                    return (mant == 0)
+                                    return mant == 0
                                                ? std::numeric_limits<double>::infinity()
                                                : std::numeric_limits<double>::quiet_NaN();
                                 default:
@@ -11585,7 +11585,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                                                             input_format, "ndarray can not be recursive", "size"),
                                                         nullptr));
                         }
-                        result.second |= (1 << 8);
+                        result.second |= 1 << 8;
                         // use bit 8 to indicate ndarray, all UBJSON and BJData markers should be ASCII letters
                     }
                     return is_error;
@@ -11706,7 +11706,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                         // is shown in Fig. 3.
                         const auto half = static_cast<unsigned int>((byte2 << 8u) + byte1);
                         const double val = [&half] {
-                            const int exp = (half >> 10u) & 0x1Fu;
+                            const int exp = half >> 10u & 0x1Fu;
                             const unsigned int mant = half & 0x3FFu;
                             JSON_ASSERT(0 <= exp&& exp <= 32);
                             JSON_ASSERT(mant <= 1024);
@@ -11714,7 +11714,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                                 case 0:
                                     return std::ldexp(mant, -24);
                                 case 31:
-                                    return (mant == 0)
+                                    return mant == 0
                                                ? std::numeric_limits<double>::infinity()
                                                : std::numeric_limits<double>::quiet_NaN();
                                 default:
@@ -11797,7 +11797,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                 // {"_ArrayType_" : "typeid", "_ArraySize_" : [n1, n2, ...], "_ArrayData_" : [v1, v2, ...]}
 
                 if (input_format == input_format_t::bjdata && size_and_type.first != npos && (
-                        size_and_type.second & (1 << 8)) != 0) {
+                        size_and_type.second & 1 << 8) != 0) {
                     size_and_type.second &= ~(static_cast<char_int_type>(1) << 8);
                     // use bit 8 to indicate ndarray, here we remove the bit to restore the type marker
                     auto it = std::lower_bound(bjd_types_map.begin(), bjd_types_map.end(), size_and_type.second,
@@ -11832,7 +11832,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                         }
                     }
 
-                    return (sax->end_array() && sax->end_object());
+                    return sax->end_array() && sax->end_object();
                 }
 
                 // If BJData type marker is 'B' decode as binary
@@ -11889,7 +11889,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
 
                 // do not accept ND-array size in objects in BJData
                 if (input_format == input_format_t::bjdata && size_and_type.first != npos && (
-                        size_and_type.second & (1 << 8)) != 0) {
+                        size_and_type.second & 1 << 8) != 0) {
                     auto last_token = get_token_string();
                     return sax->parse_error(chars_read, last_token, parse_error::create(112, chars_read,
                                                 exception_message(input_format,
@@ -12412,7 +12412,7 @@ This class implements a recursive descent parser.
                     sax_parse_internal(&sdp);
 
                     // in strict mode, input must be completely read
-                    if (strict && (get_token() != token_type::end_of_input)) {
+                    if (strict && get_token() != token_type::end_of_input) {
                         sdp.parse_error(m_lexer.get_position(),
                                         m_lexer.get_token_string(),
                                         parse_error::create(101, m_lexer.get_position(),
@@ -12436,7 +12436,7 @@ This class implements a recursive descent parser.
                     sax_parse_internal(&sdp);
 
                     // in strict mode, input must be completely read
-                    if (strict && (get_token() != token_type::end_of_input)) {
+                    if (strict && get_token() != token_type::end_of_input) {
                         sdp.parse_error(m_lexer.get_position(),
                                         m_lexer.get_token_string(),
                                         parse_error::create(101, m_lexer.get_position(),
@@ -12473,7 +12473,7 @@ This class implements a recursive descent parser.
                 const bool result = sax_parse_internal(sax);
 
                 // strict mode: next byte must be EOF
-                if (result && strict && (get_token() != token_type::end_of_input)) {
+                if (result && strict && get_token() != token_type::end_of_input) {
                     return sax->parse_error(m_lexer.get_position(),
                                             m_lexer.get_token_string(),
                                             parse_error::create(101, m_lexer.get_position(),
@@ -13289,7 +13289,7 @@ This class implements a both iterators (iterator and const_iterator) for the
                 switch (m_object->m_data.m_type) {
                     case value_t::object: {
                         JSON_ASSERT(m_it.object_iterator != m_object->m_data.m_value.object->end());
-                        return &(m_it.object_iterator->second);
+                        return &m_it.object_iterator->second;
                     }
 
                     case value_t::array: {
@@ -13322,7 +13322,7 @@ This class implements a both iterators (iterator and const_iterator) for the
             iter_impl operator++(int) & // NOLINT(cert-dcl21-cpp)
             {
                 auto result = *this;
-                ++(*this);
+                ++*this;
                 return result;
             }
 
@@ -13368,7 +13368,7 @@ This class implements a both iterators (iterator and const_iterator) for the
             iter_impl operator--(int) & // NOLINT(cert-dcl21-cpp)
             {
                 auto result = *this;
-                --(*this);
+                --*this;
                 return result;
             }
 
@@ -13411,8 +13411,7 @@ This class implements a both iterators (iterator and const_iterator) for the
     @brief comparison: equal
     @pre (1) Both iterators are initialized to point to the same object, or (2) both iterators are value-initialized.
     */
-            template<typename IterImpl, detail::enable_if_t<(
-                    std::is_same<IterImpl, iter_impl>::value || std::is_same<IterImpl, other_iter_impl>::value),
+            template<typename IterImpl, detail::enable_if_t<std::is_same<IterImpl, iter_impl>::value || std::is_same<IterImpl, other_iter_impl>::value,
                 std::nullptr_t> = nullptr>
             bool operator==(const IterImpl &other) const {
                 // if objects are not the same, the comparison is undefined
@@ -13428,10 +13427,10 @@ This class implements a both iterators (iterator and const_iterator) for the
 
                 switch (m_object->m_data.m_type) {
                     case value_t::object:
-                        return (m_it.object_iterator == other.m_it.object_iterator);
+                        return m_it.object_iterator == other.m_it.object_iterator;
 
                     case value_t::array:
-                        return (m_it.array_iterator == other.m_it.array_iterator);
+                        return m_it.array_iterator == other.m_it.array_iterator;
 
                     case value_t::null:
                     case value_t::string:
@@ -13442,7 +13441,7 @@ This class implements a both iterators (iterator and const_iterator) for the
                     case value_t::binary:
                     case value_t::discarded:
                     default:
-                        return (m_it.primitive_iterator == other.m_it.primitive_iterator);
+                        return m_it.primitive_iterator == other.m_it.primitive_iterator;
                 }
             }
 
@@ -13450,8 +13449,7 @@ This class implements a both iterators (iterator and const_iterator) for the
     @brief comparison: not equal
     @pre (1) Both iterators are initialized to point to the same object, or (2) both iterators are value-initialized.
     */
-            template<typename IterImpl, detail::enable_if_t<(
-                    std::is_same<IterImpl, iter_impl>::value || std::is_same<IterImpl, other_iter_impl>::value),
+            template<typename IterImpl, detail::enable_if_t<std::is_same<IterImpl, iter_impl>::value || std::is_same<IterImpl, other_iter_impl>::value,
                 std::nullptr_t> = nullptr>
             bool operator!=(const IterImpl &other) const {
                 return !operator==(other);
@@ -13479,7 +13477,7 @@ This class implements a both iterators (iterator and const_iterator) for the
                         JSON_THROW(invalid_iterator::create(213, "cannot compare order of object iterators", m_object));
 
                     case value_t::array:
-                        return (m_it.array_iterator < other.m_it.array_iterator);
+                        return m_it.array_iterator < other.m_it.array_iterator;
 
                     case value_t::null:
                     case value_t::string:
@@ -13490,7 +13488,7 @@ This class implements a both iterators (iterator and const_iterator) for the
                     case value_t::binary:
                     case value_t::discarded:
                     default:
-                        return (m_it.primitive_iterator < other.m_it.primitive_iterator);
+                        return m_it.primitive_iterator < other.m_it.primitive_iterator;
                 }
             }
 
@@ -13787,7 +13785,7 @@ create @ref const_reverse_iterator).
 
             /// access to successor
             reference operator[](const difference_type n) const {
-                return *(this->operator+(n));
+                return *this->operator+(n);
             }
 
             /// return the key of an object iterator
@@ -14188,7 +14186,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                                         });
 
                     // change value to an array for numbers or "-" or to object otherwise
-                    *ptr = (nums || reference_token == "-")
+                    *ptr = nums || reference_token == "-"
                                ? detail::value_t::array
                                : detail::value_t::object;
                 }
@@ -14484,7 +14482,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                 start != 0;
                 // set the beginning of the next reference token
                 // (will eventually be 0 if slash == string_t::npos)
-                start = (slash == string_t::npos) ? 0 : slash + 1,
+                start = slash == string_t::npos ? 0 : slash + 1,
                 // find next slash
                 slash = reference_string.find_first_of('/', start)) {
                 // use the text between the beginning of the reference token
@@ -15546,7 +15544,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                         const auto N = j.m_data.m_value.object->size();
                         if (N <= 15) {
                             // fixmap
-                            write_number(static_cast<std::uint8_t>(0x80 | (N & 0xF)));
+                            write_number(static_cast<std::uint8_t>(0x80 | N & 0xF));
                         } else if (N <= (std::numeric_limits<std::uint16_t>::max)()) {
                             // map 16
                             oa->write_character(to_char_type(0xDE));
@@ -15875,7 +15873,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
     @return The size of the BSON-encoded unsigned integer in @a j
     */
             static constexpr std::size_t calc_bson_unsigned_size(const std::uint64_t value) noexcept {
-                return (value <= static_cast<std::uint64_t>((std::numeric_limits<std::int32_t>::max)()))
+                return value <= static_cast<std::uint64_t>((std::numeric_limits<std::int32_t>::max)())
                            ? sizeof(std::int32_t)
                            : sizeof(std::int64_t);
             }
@@ -16207,9 +16205,9 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                         oa->write_character(to_char_type('I')); // int16
                     }
                     write_number(static_cast<std::int16_t>(n), use_bjdata);
-                } else if (use_bjdata && (static_cast<std::int64_t>((std::numeric_limits<std::uint16_t>::min)()) <= n &&
-                                          n <= static_cast<std::int64_t>((std::numeric_limits<
-                                              std::uint16_t>::max)()))) {
+                } else if (use_bjdata && static_cast<std::int64_t>((std::numeric_limits<std::uint16_t>::min)()) <= n &&
+                           n <= static_cast<std::int64_t>((std::numeric_limits<
+                               std::uint16_t>::max)())) {
                     if (add_prefix) {
                         oa->write_character(to_char_type('u')); // uint16 - bjdata only
                     }
@@ -16220,9 +16218,9 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                         oa->write_character(to_char_type('l')); // int32
                     }
                     write_number(static_cast<std::int32_t>(n), use_bjdata);
-                } else if (use_bjdata && (static_cast<std::int64_t>((std::numeric_limits<std::uint32_t>::min)()) <= n &&
-                                          n <= static_cast<std::int64_t>((std::numeric_limits<
-                                              std::uint32_t>::max)()))) {
+                } else if (use_bjdata && static_cast<std::int64_t>((std::numeric_limits<std::uint32_t>::min)()) <= n &&
+                           n <= static_cast<std::int64_t>((std::numeric_limits<
+                               std::uint32_t>::max)())) {
                     if (add_prefix) {
                         oa->write_character(to_char_type('m')); // uint32 - bjdata only
                     }
@@ -16273,18 +16271,18 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                             m_value.number_integer <= (std::numeric_limits<std::int16_t>::max)()) {
                             return 'I';
                         }
-                        if (use_bjdata && ((std::numeric_limits<std::uint16_t>::min)() <= j.m_data.m_value.
-                                           number_integer && j.m_data.m_value.number_integer <= (std::numeric_limits<
-                                               std::uint16_t>::max)())) {
+                        if (use_bjdata && (std::numeric_limits<std::uint16_t>::min)() <= j.m_data.m_value.
+                            number_integer && j.m_data.m_value.number_integer <= (std::numeric_limits<
+                                std::uint16_t>::max)()) {
                             return 'u';
                         }
                         if ((std::numeric_limits<std::int32_t>::min)() <= j.m_data.m_value.number_integer && j.m_data.
                             m_value.number_integer <= (std::numeric_limits<std::int32_t>::max)()) {
                             return 'l';
                         }
-                        if (use_bjdata && ((std::numeric_limits<std::uint32_t>::min)() <= j.m_data.m_value.
-                                           number_integer && j.m_data.m_value.number_integer <= (std::numeric_limits<
-                                               std::uint32_t>::max)())) {
+                        if (use_bjdata && (std::numeric_limits<std::uint32_t>::min)() <= j.m_data.m_value.
+                            number_integer && j.m_data.m_value.number_integer <= (std::numeric_limits<
+                                std::uint32_t>::max)()) {
                             return 'm';
                         }
                         if ((std::numeric_limits<std::int64_t>::min)() <= j.m_data.m_value.number_integer && j.m_data.
@@ -16378,7 +16376,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                 CharType dtype = it->second;
 
                 key = "_ArraySize_";
-                std::size_t len = (value.at(key).empty() ? 0 : 1);
+                std::size_t len = value.at(key).empty() ? 0 : 1;
                 for (const auto &el: value.at(key)) {
                     len *= static_cast<std::size_t>(el.m_data.m_value.number_unsigned);
                 }
@@ -16478,11 +16476,11 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #endif
-                if (!std::isfinite(n) || ((static_cast<double>(n) >= static_cast<double>(std::numeric_limits<
-                                               float>::lowest()) &&
-                                           static_cast<double>(n) <= static_cast<double>((std::numeric_limits<
-                                               float>::max)()) &&
-                                           static_cast<double>(static_cast<float>(n)) == static_cast<double>(n)))) {
+                if (!std::isfinite(n) || (static_cast<double>(n) >= static_cast<double>(std::numeric_limits<
+                                              float>::lowest()) &&
+                                          static_cast<double>(n) <= static_cast<double>((std::numeric_limits<
+                                              float>::max)()) &&
+                                          static_cast<double>(static_cast<float>(n)) == static_cast<double>(n))) {
                     oa->write_character(format == detail::input_format_t::cbor
                                             ? get_cbor_float_prefix(static_cast<float>(n))
                                             : get_msgpack_float_prefix(static_cast<float>(n)));
@@ -16730,7 +16728,7 @@ For a detailed description of the algorithm see:
                 static diyfp normalize(diyfp x) noexcept {
                     JSON_ASSERT(x.f != 0);
 
-                    while ((x.f >> 63u) == 0) {
+                    while (x.f >> 63u == 0) {
                         x.f <<= 1u;
                         x.e--;
                     }
@@ -16788,7 +16786,7 @@ boundaries.
 
                 const auto bits = static_cast<std::uint64_t>(reinterpret_bits<bits_type>(value));
                 const std::uint64_t E = bits >> (kPrecision - 1);
-                const std::uint64_t F = bits & (kHiddenBit - 1);
+                const std::uint64_t F = bits & kHiddenBit - 1;
 
                 const bool is_denormal = E == 0;
                 const diyfp v = is_denormal
@@ -16817,10 +16815,10 @@ boundaries.
                 //                       v-     m-     v             m+            v+
 
                 const bool lower_boundary_is_closer = F == 0 && E > 1;
-                const diyfp m_plus = diyfp((2 * v.f) + 1, v.e - 1);
+                const diyfp m_plus = diyfp(2 * v.f + 1, v.e - 1);
                 const diyfp m_minus = lower_boundary_is_closer
-                                          ? diyfp((4 * v.f) - 1, v.e - 2) // (B)
-                                          : diyfp((2 * v.f) - 1, v.e - 1); // (A)
+                                          ? diyfp(4 * v.f - 1, v.e - 2) // (B)
+                                          : diyfp(2 * v.f - 1, v.e - 1); // (A)
 
                 // Determine the normalized w+ = m+.
                 const diyfp w_plus = diyfp::normalize(m_plus);
@@ -17049,7 +17047,7 @@ satisfies (Definition 3.2 from [1])
                 JSON_ASSERT(e >= -1500);
                 JSON_ASSERT(e <= 1500);
                 const int f = kAlpha - e - 1;
-                const int k = ((f * 78913) / (1 << 18)) + static_cast<int>(f > 0);
+                const int k = f * 78913 / (1 << 18) + static_cast<int>(f > 0);
 
                 const int index = (-kCachedPowersMinDecExp + k + (kCachedPowersDecStep - 1)) / kCachedPowersDecStep;
                 JSON_ASSERT(index >= 0);
@@ -17184,7 +17182,7 @@ M- and M+ must be normalized and share the same exponent -60 <= e <= -32.
 
                 auto p1 = static_cast<std::uint32_t>(M_plus.f >> -one.e);
                 // p1 = f div 2^-e (Since -e >= 32, p1 fits into a 32-bit int.)
-                std::uint64_t p2 = M_plus.f & (one.f - 1); // p2 = f mod 2^-e
+                std::uint64_t p2 = M_plus.f & one.f - 1; // p2 = f mod 2^-e
 
                 // 1)
                 //
@@ -17324,7 +17322,7 @@ M- and M+ must be normalized and share the same exponent -60 <= e <= -32.
                     JSON_ASSERT(p2 <= (std::numeric_limits<std::uint64_t>::max)() / 10);
                     p2 *= 10;
                     const std::uint64_t d = p2 >> -one.e; // d = (10 * p2) div 2^-e
-                    const std::uint64_t r = p2 & (one.f - 1); // r = (10 * p2) mod 2^-e
+                    const std::uint64_t r = p2 & one.f - 1; // r = (10 * p2) mod 2^-e
                     //
                     //      M+ = buffer * 10^-m + 10^-m * (1/10 * (d * 2^-e + r) * 2^e
                     //         = buffer * 10^-m + 10^-m * (1/10 * (d + r * 2^e))
@@ -17504,13 +17502,13 @@ The buffer must be large enough, i.e. >= max_digits10.
                     *buf++ = '0';
                     *buf++ = static_cast<char>('0' + k);
                 } else if (k < 100) {
-                    *buf++ = static_cast<char>('0' + (k / 10));
+                    *buf++ = static_cast<char>('0' + k / 10);
                     k %= 10;
                     *buf++ = static_cast<char>('0' + k);
                 } else {
-                    *buf++ = static_cast<char>('0' + (k / 100));
+                    *buf++ = static_cast<char>('0' + k / 100);
                     k %= 100;
-                    *buf++ = static_cast<char>('0' + (k / 10));
+                    *buf++ = static_cast<char>('0' + k / 10);
                     k %= 10;
                     *buf++ = static_cast<char>('0' + k);
                 }
@@ -17711,10 +17709,10 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                   , loc(std::localeconv())
                   , thousands_sep(loc->thousands_sep == nullptr
                                       ? '\0'
-                                      : std::char_traits<char>::to_char_type(*(loc->thousands_sep)))
+                                      : std::char_traits<char>::to_char_type(*loc->thousands_sep))
                   , decimal_point(loc->decimal_point == nullptr
                                       ? '\0'
-                                      : std::char_traits<char>::to_char_type(*(loc->decimal_point)))
+                                      : std::char_traits<char>::to_char_type(*loc->decimal_point))
                   , indent_char(ichar)
                   , indent_string(512, indent_char)
                   , error_handler(error_handler_) {
@@ -18062,7 +18060,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                                 default: {
                                     // escape control characters (0x00..0x1F) or, if
                                     // ensure_ascii parameter is used, non-ASCII characters
-                                    if ((codepoint <= 0x1F) || (ensure_ascii && (codepoint >= 0x7F))) {
+                                    if (codepoint <= 0x1F || (ensure_ascii && codepoint >= 0x7F)) {
                                         if (codepoint <= 0xFFFF) {
                                             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg,hicpp-vararg)
                                             static_cast<void>((std::snprintf)(
@@ -18347,18 +18345,18 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                 // Fast int2ascii implementation inspired by "Fastware" talk by Andrei Alexandrescu
                 // See: https://www.youtube.com/watch?v=o4-CwDo2zpg
                 while (abs_value >= 100) {
-                    const auto digits_index = static_cast<unsigned>((abs_value % 100));
+                    const auto digits_index = static_cast<unsigned>(abs_value % 100);
                     abs_value /= 100;
-                    *(--buffer_ptr) = digits_to_99[digits_index][1];
-                    *(--buffer_ptr) = digits_to_99[digits_index][0];
+                    *--buffer_ptr = digits_to_99[digits_index][1];
+                    *--buffer_ptr = digits_to_99[digits_index][0];
                 }
 
                 if (abs_value >= 10) {
                     const auto digits_index = static_cast<unsigned>(abs_value);
-                    *(--buffer_ptr) = digits_to_99[digits_index][1];
-                    *(--buffer_ptr) = digits_to_99[digits_index][0];
+                    *--buffer_ptr = digits_to_99[digits_index][1];
+                    *--buffer_ptr = digits_to_99[digits_index][0];
                 } else {
-                    *(--buffer_ptr) = static_cast<char>('0' + abs_value);
+                    *--buffer_ptr = static_cast<char>('0' + abs_value);
                 }
 
                 o->write_characters(number_buffer.data(), n_chars);
@@ -18419,7 +18417,7 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                     const auto end = std::remove(number_buffer.begin(), number_buffer.begin() + len, thousands_sep);
                     std::fill(end, number_buffer.end(), '\0');
                     JSON_ASSERT((end - number_buffer.begin()) <= len);
-                    len = (end - number_buffer.begin());
+                    len = end - number_buffer.begin();
                 }
 
                 // convert decimal point to '.'
@@ -18501,11 +18499,11 @@ NLOHMANN_JSON_NAMESPACE_BEGIN
                 JSON_ASSERT(byte < utf8d.size());
                 const std::uint8_t type = utf8d[byte];
 
-                codep = (state != UTF8_ACCEPT)
-                            ? (byte & 0x3fu) | (codep << 6u)
-                            : (0xFFu >> type) & (byte);
+                codep = state != UTF8_ACCEPT
+                            ? byte & 0x3fu | codep << 6u
+                            : 0xFFu >> type & byte;
 
-                const std::size_t index = 256u + (static_cast<size_t>(state) * 16u) + static_cast<size_t>(type);
+                const std::size_t index = 256u + static_cast<size_t>(state) * 16u + static_cast<size_t>(type);
                 JSON_ASSERT(index < utf8d.size());
                 state = utf8d[index];
                 return state;
@@ -19748,7 +19746,7 @@ The invariants are checked by member function assert_invariant().
                 for (auto &element_ref: init) {
                     auto element = element_ref.moved_or_copied();
                     m_data.m_value.object->emplace(
-                        std::move(*((*element.m_data.m_value.array)[0].m_data.m_value.string)),
+                        std::move(*(*element.m_data.m_value.array)[0].m_data.m_value.string),
                         std::move((*element.m_data.m_value.array)[1]));
                 }
             } else {
@@ -22069,7 +22067,7 @@ The invariants are checked by member function assert_invariant().
             // swap only works for arrays
             if (JSON_HEDLEY_LIKELY(is_array())) {
                 using std::swap;
-                swap(*(m_data.m_value.array), other);
+                swap(*m_data.m_value.array, other);
             } else {
                 JSON_THROW(
                     type_error::create(310, detail::concat("cannot use swap(array_t&) with ", type_name()), this));
@@ -22083,7 +22081,7 @@ The invariants are checked by member function assert_invariant().
             // swap only works for objects
             if (JSON_HEDLEY_LIKELY(is_object())) {
                 using std::swap;
-                swap(*(m_data.m_value.object), other);
+                swap(*m_data.m_value.object, other);
             } else {
                 JSON_THROW(
                     type_error::create(310, detail::concat("cannot use swap(object_t&) with ", type_name()), this));
@@ -22097,7 +22095,7 @@ The invariants are checked by member function assert_invariant().
             // swap only works for strings
             if (JSON_HEDLEY_LIKELY(is_string())) {
                 using std::swap;
-                swap(*(m_data.m_value.string), other);
+                swap(*m_data.m_value.string, other);
             } else {
                 JSON_THROW(
                     type_error::create(310, detail::concat("cannot use swap(string_t&) with ", type_name()), this));
@@ -22111,7 +22109,7 @@ The invariants are checked by member function assert_invariant().
             // swap only works for strings
             if (JSON_HEDLEY_LIKELY(is_binary())) {
                 using std::swap;
-                swap(*(m_data.m_value.binary), other);
+                swap(*m_data.m_value.binary, other);
             } else {
                 JSON_THROW(
                     type_error::create(310, detail::concat("cannot use swap(binary_t&) with ", type_name()), this));
@@ -22125,7 +22123,7 @@ The invariants are checked by member function assert_invariant().
             // swap only works for strings
             if (JSON_HEDLEY_LIKELY(is_binary())) {
                 using std::swap;
-                swap(*(m_data.m_value.binary), other);
+                swap(*m_data.m_value.binary, other);
             } else {
                 JSON_THROW(
                     type_error::create(310, detail::concat("cannot use swap(binary_t::container_type&) with ", type_name
@@ -23423,7 +23421,7 @@ The invariants are checked by member function assert_invariant().
                     auto it = val.m_data.m_value.object->find(member);
 
                     // context-sensitive error message
-                    const auto error_msg = (op == "op") ? "operation" : detail::concat("operation '", op, '\''); // NOLINT(bugprone-unused-local-non-trivial-variable)
+                    const auto error_msg = op == "op" ? "operation" : detail::concat("operation '", op, '\''); // NOLINT(bugprone-unused-local-non-trivial-variable)
 
                     // check if the desired value is present
                     if (JSON_HEDLEY_UNLIKELY(it == val.m_data.m_value.object->end())) {
@@ -23507,7 +23505,7 @@ The invariants are checked by member function assert_invariant().
                         JSON_TRY {
                             // check if "value" matches the one at "path"
                             // the "path" location must exist - use at()
-                            success = (result.at(ptr) == get_value("test", "value", false));
+                            success = result.at(ptr) == get_value("test", "value", false);
                         }
                         JSON_INTERNAL_CATCH(out_of_range&) {
                             // ignore out of range errors: success remains false

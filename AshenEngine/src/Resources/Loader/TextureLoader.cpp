@@ -5,10 +5,9 @@
 #include "Ashen/Utils/FileSystem.h"
 
 namespace ash {
-
     Texture2D TextureLoader::Load2D(
-        const fs::path& path,
-        const TextureConfig& config
+        const fs::path &path,
+        const TextureConfig &config
     ) {
         if (!FileSystem::Exists(path)) {
             throw std::runtime_error("Texture file not found: " + path.string());
@@ -21,8 +20,8 @@ namespace ash {
     }
 
     TextureCubeMap TextureLoader::LoadCubemap(
-        const std::array<fs::path, 6>& facesPaths,
-        const TextureConfig& config
+        const std::array<fs::path, 6> &facesPaths,
+        const TextureConfig &config
     ) {
         TextureCubeMap cubemap;
 
@@ -74,8 +73,8 @@ namespace ash {
     }
 
     fs::path TextureLoader::FindTexture(
-        const fs::path& basePath,
-        const std::string& textureName
+        const fs::path &basePath,
+        const String &textureName
     ) {
         // Check exact path first
         fs::path texPath = basePath / textureName;
@@ -85,7 +84,7 @@ namespace ash {
 
         // Try with supported extensions
         const auto extensions = ImageLoader::GetSupportedExtensions();
-        for (const auto& ext : extensions) {
+        for (const auto &ext: extensions) {
             texPath = basePath / (textureName + ext);
             if (FileSystem::Exists(texPath)) {
                 return texPath;
@@ -96,8 +95,8 @@ namespace ash {
     }
 
     Texture2D TextureLoader::CreateFromImageData(
-        const ImageData& imageData,
-        const TextureConfig& config
+        const ImageData &imageData,
+        const TextureConfig &config
     ) {
         if (!imageData.IsValid()) {
             throw std::runtime_error("Invalid image data");

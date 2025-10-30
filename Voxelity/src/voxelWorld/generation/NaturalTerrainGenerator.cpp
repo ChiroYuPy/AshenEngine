@@ -83,7 +83,7 @@ namespace voxelity {
     void NaturalTerrainGenerator::generateTree(Chunk &voxelChunk, const glm::ivec3 &localPos,
                                                const glm::ivec3 &chunkPos) {
         // Générer un arbre simple (tronc + feuilles)
-        const int treeHeight = 4 + (rand() % 3); // Hauteur entre 4 et 6
+        const int treeHeight = 4 + rand() % 3; // Hauteur entre 4 et 6
         const glm::ivec3 worldPos = chunkPos * VoxelArray::SIZE + localPos;
 
         // Tronc

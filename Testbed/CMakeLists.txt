@@ -8,8 +8,8 @@ add_executable(AshenTestbed
         ${TESTBED_HEADERS}
         src/layers/Renderer2DTestLayer.cpp
         include/layers/Renderer2DTestLayer.h
-        src/layers/SceneTestLayer.cpp
-        include/layers/SceneTestLayer.h
+        src/layers/NodeGraphTestLayer.cpp
+        include/layers/NodeGraphTestLayer.h
 )
 
 target_include_directories(AshenTestbed PRIVATE

@@ -20,11 +20,9 @@
 #include <fstream>
 #endif
 
-// OpenGL for GPU info
 #include <GL/gl.h>
 
 namespace ash::Platform {
-    // ----- Platform detection -----
     bool IsWindows() {
 #if defined(_WIN32)
         return true;
@@ -65,7 +63,7 @@ namespace ash::Platform {
 #endif
     }
 
-    std::string GetPlatformName() {
+    String GetPlatformName() {
         if (IsWindows()) return "Windows";
         if (IsLinux()) return "Linux";
         if (IsMac()) return "macOS";
@@ -73,7 +71,6 @@ namespace ash::Platform {
         return "Unknown";
     }
 
-    // ----- ANSI colors -----
     void EnableAnsiColors() {
 #ifdef _WIN32
         const HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -85,15 +82,13 @@ namespace ash::Platform {
             }
         }
 #endif
-        // Linux/macOS support ANSI by default
     }
 
-    // ----- CPU info -----
     unsigned int GetCPUCoreCount() {
         return std::thread::hardware_concurrency();
     }
 
-    std::string GetCPUName() {
+    String GetCPUName() {
 #ifdef _WIN32
         int cpuInfo[4] = {0};
         __cpuid(cpuInfo, 0x80000000);
@@ -107,19 +102,19 @@ namespace ash::Platform {
             __cpuid(reinterpret_cast<int *>(cpuInfo), 0x80000004);
             std::memcpy(brand + 32, cpuInfo, 16);
         }
-        return std::string(brand);
+        return String(brand);
 #elif defined(__APPLE__) || defined(__MACH__)
         char str[256];
         size_t size = sizeof(str);
         sysctlbyname("machdep.cpu.brand_string", &str, &size, nullptr, 0);
-        return std::string(str);
+        return String(str);
 #elif defined(__linux__)
         std::ifstream cpuinfo("/proc/cpuinfo");
-        std::string line;
+        String line;
         while (std::getline(cpuinfo, line)) {
-            if (line.find("model name") != std::string::npos) {
+            if (line.find("model name") != String::npos) {
                 auto pos = line.find(":");
-                if (pos != std::string::npos)
+                if (pos != String::npos)
                     return line.substr(pos + 2);
             }
         }
@@ -129,7 +124,6 @@ namespace ash::Platform {
 #endif
     }
 
-    // ----- RAM info -----
     size_t GetTotalRAM() {
 #ifdef _WIN32
         MEMORYSTATUSEX status;
@@ -158,41 +152,37 @@ namespace ash::Platform {
         return status.ullAvailPhys;
 #elif defined(__linux__)
         std::ifstream meminfo("/proc/meminfo");
-        std::string line;
+        String line;
         size_t freeMem = 0;
         while (std::getline(meminfo, line)) {
-            if (line.find("MemAvailable:") != std::string::npos) {
+            if (line.find("MemAvailable:") != String::npos) {
                 auto pos = line.find_first_of("0123456789");
-                if (pos != std::string::npos)
+                if (pos != String::npos)
                     freeMem = std::stoull(line.substr(pos)) * 1024;
                 break;
             }
         }
         return freeMem;
 #elif defined(__APPLE__)
-        // macOS: more complicated, use sysctl or host_statistics
         int64_t memFree = 0;
-        // fallback
         return memFree;
 #else
         return 0;
 #endif
     }
 
-    // ----- GPU info (requires OpenGL context active!) -----
-    std::string GetGPUName() {
+    String GetGPUName() {
         const GLubyte *renderer = glGetString(GL_RENDERER);
         return renderer ? reinterpret_cast<const char *>(renderer) : "Unknown GPU";
     }
 
-    std::string GetGPUVendor() {
+    String GetGPUVendor() {
         const GLubyte *vendor = glGetString(GL_VENDOR);
         return vendor ? reinterpret_cast<const char *>(vendor) : "Unknown Vendor";
     }
 
-    // ----- Endianness -----
     Endianness GetEndianness() {
         uint32_t i = 1;
-        return (*reinterpret_cast<uint8_t *>(&i) == 1) ? Endianness::Little : Endianness::Big;
+        return *reinterpret_cast<uint8_t *>(&i) == 1 ? Endianness::Little : Endianness::Big;
     }
 }

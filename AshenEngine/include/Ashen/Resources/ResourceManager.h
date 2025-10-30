@@ -27,17 +27,22 @@ namespace ash {
      */
     class ResourcePaths final {
     public:
-        static ResourcePaths& Instance();
+        static ResourcePaths &Instance();
 
         // No copy/move
-        ResourcePaths(const ResourcePaths&) = delete;
-        ResourcePaths& operator=(const ResourcePaths&) = delete;
-        ResourcePaths(ResourcePaths&&) = delete;
-        ResourcePaths& operator=(ResourcePaths&&) = delete;
+        ResourcePaths(const ResourcePaths &) = delete;
 
-        void SetWorkingDirectory(const fs::path& dir);
-        [[nodiscard]] fs::path GetPath(const std::string& filename) const;
-        [[nodiscard]] const fs::path& Root() const;
+        ResourcePaths &operator=(const ResourcePaths &) = delete;
+
+        ResourcePaths(ResourcePaths &&) = delete;
+
+        ResourcePaths &operator=(ResourcePaths &&) = delete;
+
+        void SetWorkingDirectory(const fs::path &dir);
+
+        [[nodiscard]] fs::path GetPath(const std::string &filename) const;
+
+        [[nodiscard]] const fs::path &Root() const;
 
     private:
         ResourcePaths() = default;
@@ -56,17 +61,19 @@ namespace ash {
         virtual ~ResourceManager() = default;
 
         // No copy/move
-        ResourceManager(const ResourceManager&) = delete;
-        ResourceManager& operator=(const ResourceManager&) = delete;
-        ResourceManager(ResourceManager&&) = delete;
-        ResourceManager& operator=(ResourceManager&&) = delete;
+        ResourceManager(const ResourceManager &) = delete;
+
+        ResourceManager &operator=(const ResourceManager &) = delete;
+
+        ResourceManager(ResourceManager &&) = delete;
+
+        ResourceManager &operator=(ResourceManager &&) = delete;
 
         /**
          * @brief Get or load a resource by ID
          * Thread-safe, returns cached resource if available
          */
-        [[nodiscard]] Ref<T> Get(const std::string& id) {
-            {
+        [[nodiscard]] Ref<T> Get(const std::string &id) { {
                 std::lock_guard lock(m_Mutex);
                 auto it = m_Resources.find(id);
                 if (it != m_Resources.end()) {
@@ -79,7 +86,7 @@ namespace ash {
         /**
          * @brief Check if resource exists in cache
          */
-        [[nodiscard]] bool Has(const std::string& id) const {
+        [[nodiscard]] bool Has(const std::string &id) const {
             std::lock_guard lock(m_Mutex);
             return m_Resources.contains(id);
         }
@@ -107,17 +114,17 @@ namespace ash {
          * @brief Load resource implementation (called when not in cache)
          * Must be implemented by derived classes
          */
-        virtual Ref<T> Load(const std::string& id) = 0;
+        virtual Ref<T> Load(const std::string &id) = 0;
 
         /**
          * @brief Thread-safe cache insertion
          */
-        void Cache(const std::string& id, Ref<T> resource) {
+        void Cache(const std::string &id, Ref<T> resource) {
             std::lock_guard lock(m_Mutex);
             m_Resources[id] = std::move(resource);
         }
 
-        std::unordered_map<std::string, Ref<T>> m_Resources;
+        std::unordered_map<std::string, Ref<T> > m_Resources;
         mutable std::mutex m_Mutex;
     };
 
@@ -127,7 +134,7 @@ namespace ash {
      */
     class ShaderManager final : public ResourceManager<ShaderProgram> {
     public:
-        static ShaderManager& Instance();
+        static ShaderManager &Instance();
 
         // Built-in shaders (enum from BuiltInShader.h)
         enum class BuiltIn {
@@ -148,7 +155,7 @@ namespace ash {
          * @brief Load custom shader from vertex/fragment files
          * Files should be named: id.vert and id.frag
          */
-        Ref<ShaderProgram> Load(const std::string& id) override;
+        Ref<ShaderProgram> Load(const std::string &id) override;
 
         void Clear() override;
 
@@ -161,13 +168,13 @@ namespace ash {
      */
     class TextureManager final : public ResourceManager<Texture2D> {
     public:
-        static TextureManager& Instance();
+        static TextureManager &Instance();
 
         /**
          * @brief Load texture with automatic format detection
          * Searches for file with supported extensions
          */
-        Ref<Texture2D> Load(const std::string& id) override;
+        Ref<Texture2D> Load(const std::string &id) override;
 
     private:
         TextureManager() = default;
@@ -178,20 +185,23 @@ namespace ash {
      */
     class MeshManager final : public ResourceManager<Mesh> {
     public:
-        static MeshManager& Instance();
+        static MeshManager &Instance();
 
         /**
          * @brief Load mesh from file
          * Searches for file with supported extensions (.obj)
          */
-        Ref<Mesh> Load(const std::string& id) override;
+        Ref<Mesh> Load(const std::string &id) override;
 
         /**
          * @brief Get primitive meshes (cached)
          */
         [[nodiscard]] Ref<Mesh> GetCube();
+
         [[nodiscard]] Ref<Mesh> GetSphere();
+
         [[nodiscard]] Ref<Mesh> GetPlane();
+
         [[nodiscard]] Ref<Mesh> GetQuad();
 
     private:
@@ -204,13 +214,16 @@ namespace ash {
      */
     class MaterialManager final {
     public:
-        static MaterialManager& Instance();
+        static MaterialManager &Instance();
 
         // No copy/move
-        MaterialManager(const MaterialManager&) = delete;
-        MaterialManager& operator=(const MaterialManager&) = delete;
-        MaterialManager(MaterialManager&&) = delete;
-        MaterialManager& operator=(MaterialManager&&) = delete;
+        MaterialManager(const MaterialManager &) = delete;
+
+        MaterialManager &operator=(const MaterialManager &) = delete;
+
+        MaterialManager(MaterialManager &&) = delete;
+
+        MaterialManager &operator=(MaterialManager &&) = delete;
 
         // ====== Factory Methods ======
 
@@ -218,24 +231,24 @@ namespace ash {
          * @brief Create 2D colored material
          */
         [[nodiscard]] Ref<CanvasItemMaterial> CreateCanvasItem(
-            const std::string& id,
-            const Vec4& albedo = Vec4(1.0f)
+            const std::string &id,
+            const Vec4 &albedo = Vec4(1.0f)
         );
 
         /**
          * @brief Create 2D textured material
          */
         [[nodiscard]] Ref<CanvasItemMaterial> CreateCanvasItemTextured(
-            const std::string& id,
-            const std::string& textureName
+            const std::string &id,
+            const std::string &textureName
         );
 
         /**
          * @brief Create 3D PBR material
          */
         [[nodiscard]] Ref<SpatialMaterial> CreateSpatial(
-            const std::string& id,
-            const Vec4& albedo = Vec4(1.0f),
+            const std::string &id,
+            const Vec4 &albedo = Vec4(1.0f),
             float metallic = 0.0f,
             float roughness = 0.5f,
             float specular = 0.5f
@@ -245,16 +258,16 @@ namespace ash {
          * @brief Create 3D unlit material
          */
         [[nodiscard]] Ref<SpatialMaterial> CreateSpatialUnlit(
-            const std::string& id,
-            const Vec4& albedo = Vec4(1.0f)
+            const std::string &id,
+            const Vec4 &albedo = Vec4(1.0f)
         );
 
         /**
          * @brief Create toon/cel-shaded material
          */
         [[nodiscard]] Ref<ToonMaterial> CreateToon(
-            const std::string& id,
-            const Vec4& albedo = Vec4(1.0f),
+            const std::string &id,
+            const Vec4 &albedo = Vec4(1.0f),
             int toonLevels = 3,
             float rimAmount = 0.716f
         );
@@ -263,19 +276,19 @@ namespace ash {
          * @brief Create sky material
          */
         [[nodiscard]] Ref<SkyMaterial> CreateSky(
-            const std::string& id,
-            const Vec4& color = Vec4(0.5f, 0.7f, 1.0f, 1.0f)
+            const std::string &id,
+            const Vec4 &color = Vec4(0.5f, 0.7f, 1.0f, 1.0f)
         );
 
         /**
          * @brief Get cached material by ID
          */
-        [[nodiscard]] Ref<Material> Get(const std::string& id) const;
+        [[nodiscard]] Ref<Material> Get(const std::string &id) const;
 
         /**
          * @brief Check if material exists
          */
-        [[nodiscard]] bool Has(const std::string& id) const;
+        [[nodiscard]] bool Has(const std::string &id) const;
 
         /**
          * @brief Get number of cached materials
@@ -290,7 +303,7 @@ namespace ash {
     private:
         MaterialManager() = default;
 
-        std::unordered_map<std::string, Ref<Material>> m_Materials;
+        std::unordered_map<std::string, Ref<Material> > m_Materials;
         mutable std::mutex m_Mutex;
     };
 
@@ -319,10 +332,10 @@ namespace ash {
         static void ClearAll();
 
         // Manager accessors
-        static ShaderManager& Shaders() { return ShaderManager::Instance(); }
-        static TextureManager& Textures() { return TextureManager::Instance(); }
-        static MeshManager& Meshes() { return MeshManager::Instance(); }
-        static MaterialManager& Materials() { return MaterialManager::Instance(); }
+        static ShaderManager &Shaders() { return ShaderManager::Instance(); }
+        static TextureManager &Textures() { return TextureManager::Instance(); }
+        static MeshManager &Meshes() { return MeshManager::Instance(); }
+        static MaterialManager &Materials() { return MaterialManager::Instance(); }
     };
 }
 

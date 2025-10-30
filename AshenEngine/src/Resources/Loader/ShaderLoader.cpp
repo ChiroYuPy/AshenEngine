@@ -4,10 +4,9 @@
 #include "Ashen/Utils/FileSystem.h"
 
 namespace ash {
-
     ShaderProgram ShaderLoader::Load(
-        const fs::path& vertPath,
-        const fs::path& fragPath
+        const fs::path &vertPath,
+        const fs::path &fragPath
     ) {
         if (!FileSystem::Exists(vertPath)) {
             throw std::runtime_error("Vertex shader not found: " + vertPath.string());
@@ -17,16 +16,16 @@ namespace ash {
         }
 
         // Read shader source files
-        const std::string vertSource = FileSystem::ReadFileAsString(vertPath);
-        const std::string fragSource = FileSystem::ReadFileAsString(fragPath);
+        const String vertSource = FileSystem::ReadFileAsString(vertPath);
+        const String fragSource = FileSystem::ReadFileAsString(fragPath);
 
         return FromSources(vertSource, fragSource);
     }
 
     ShaderProgram ShaderLoader::LoadWithGeometry(
-        const fs::path& vertPath,
-        const fs::path& fragPath,
-        const fs::path& geomPath
+        const fs::path &vertPath,
+        const fs::path &fragPath,
+        const fs::path &geomPath
     ) {
         if (!FileSystem::Exists(vertPath)) {
             throw std::runtime_error("Vertex shader not found: " + vertPath.string());
@@ -39,9 +38,9 @@ namespace ash {
         }
 
         // Read shader source files
-        const std::string vertSource = FileSystem::ReadFileAsString(vertPath);
-        const std::string fragSource = FileSystem::ReadFileAsString(fragPath);
-        const std::string geomSource = FileSystem::ReadFileAsString(geomPath);
+        const String vertSource = FileSystem::ReadFileAsString(vertPath);
+        const String fragSource = FileSystem::ReadFileAsString(fragPath);
+        const String geomSource = FileSystem::ReadFileAsString(geomPath);
 
         // Create and compile shader units
         ShaderUnit vertexShader(ShaderStage::Vertex, vertSource);
@@ -59,8 +58,8 @@ namespace ash {
     }
 
     ShaderProgram ShaderLoader::FromSources(
-        const std::string& vertSource,
-        const std::string& fragSource
+        const String &vertSource,
+        const String &fragSource
     ) {
         // Create and compile shader units
         ShaderUnit vertexShader(ShaderStage::Vertex, vertSource);

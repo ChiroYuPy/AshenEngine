@@ -1,15 +1,14 @@
 #include "Ashen/Core/Input.h"
 #include "Ashen/Core/Window.h"
+
 #include <GLFW/glfw3.h>
 
 #include "Ashen/Events/EventDispatcher.h"
 
 namespace ash {
-    // ========== Initialization ==========
     void Input::Init(const Window &window) {
         s_Data.window = static_cast<GLFWwindow *>(window.GetHandle());
 
-        // Reset all states
         s_Data.keys.reset();
         s_Data.keysPrevious.reset();
         s_Data.keysRepeating.reset();
@@ -28,12 +27,9 @@ namespace ash {
         s_Data.mouseSensitivity = 1.0f;
         s_Data.rawMouseMotion = true;
 
-        // Enable raw mouse motion if supported
-        if (glfwRawMouseMotionSupported()) {
+        if (glfwRawMouseMotionSupported())
             glfwSetInputMode(s_Data.window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
-        }
 
-        // Get initial mouse position
         double x, y;
         glfwGetCursorPos(s_Data.window, &x, &y);
         s_Data.mousePosition = Vec2(static_cast<float>(x), static_cast<float>(y));
@@ -50,7 +46,6 @@ namespace ash {
         s_Data.keyHistory.clear();
     }
 
-    // ========== Frame Updates ==========
     void Input::OnEvent(Event &event) {
         EventDispatcher dispatcher(event);
 
@@ -80,22 +75,17 @@ namespace ash {
     }
 
     void Input::Update() {
-        // Save previous frame state
         s_Data.keysPrevious = s_Data.keys;
         s_Data.mouseButtonsPrevious = s_Data.mouseButtons;
 
-        // Clear repeating flags (they're set by events)
         s_Data.keysRepeating.reset();
 
-        // Update mouse delta with smoothing
         UpdateMouseDelta();
 
-        // Reset scroll delta (it's set by events)
         s_Data.mouseScrollDelta = 0.0f;
         s_Data.mouseScroll2D = Vec2(0.0f);
     }
 
-    // ========== Keyboard Queries ==========
     bool Input::IsKeyPressed(Key keycode) {
         if (!IsValidKey(keycode)) return false;
         return s_Data.keys[static_cast<size_t>(keycode)];
@@ -118,21 +108,20 @@ namespace ash {
         return s_Data.keysRepeating[static_cast<size_t>(keycode)];
     }
 
-    bool Input::AreKeysPressed(std::initializer_list<Key> keycodes) {
-        for (const Key key: keycodes) {
+    bool Input::AreKeysPressed(const std::initializer_list<Key> keycodes) {
+        for (const Key key: keycodes)
             if (!IsKeyPressed(key)) return false;
-        }
+
         return true;
     }
 
-    bool Input::AnyKeyPressed(std::initializer_list<Key> keycodes) {
-        for (const Key key: keycodes) {
+    bool Input::AnyKeyPressed(const std::initializer_list<Key> keycodes) {
+        for (const Key key: keycodes)
             if (IsKeyPressed(key)) return true;
-        }
+
         return false;
     }
 
-    // ========== Mouse Button Queries ==========
     bool Input::IsMouseButtonPressed(MouseButton button) {
         if (!IsValidMouseButton(button)) return false;
         return s_Data.mouseButtons[static_cast<size_t>(button)];
@@ -150,21 +139,20 @@ namespace ash {
                s_Data.mouseButtonsPrevious[static_cast<size_t>(button)];
     }
 
-    bool Input::AreMouseButtonsPressed(std::initializer_list<MouseButton> buttons) {
-        for (const MouseButton button: buttons) {
+    bool Input::AreMouseButtonsPressed(const std::initializer_list<MouseButton> buttons) {
+        for (const MouseButton button: buttons)
             if (!IsMouseButtonPressed(button)) return false;
-        }
+
         return true;
     }
 
-    bool Input::AnyMouseButtonPressed(std::initializer_list<MouseButton> buttons) {
-        for (const MouseButton button: buttons) {
+    bool Input::AnyMouseButtonPressed(const std::initializer_list<MouseButton> buttons) {
+        for (const MouseButton button: buttons)
             if (IsMouseButtonPressed(button)) return true;
-        }
+
         return false;
     }
 
-    // ========== Mouse Position & Movement ==========
     Vec2 Input::GetMousePosition() {
         return s_Data.mousePosition;
     }
@@ -173,11 +161,10 @@ namespace ash {
         return s_Data.mouseDelta * s_Data.mouseSensitivity;
     }
 
-    Vec2 Input::GetMouseDeltaSmooth(float smoothing) {
+    Vec2 Input::GetMouseDeltaSmooth(const float smoothing) {
         return s_Data.mouseDeltaSmoothed * s_Data.mouseSensitivity * smoothing;
     }
 
-    // ========== Mouse Scroll ==========
     float Input::GetMouseScrollDelta() {
         return s_Data.mouseScrollDelta;
     }
@@ -186,14 +173,12 @@ namespace ash {
         return s_Data.mouseScroll2D;
     }
 
-    // ========== Cursor Control ==========
     void Input::SetCursorMode(CursorMode mode) {
         if (!s_Data.window || s_Data.cursorMode == mode) return;
 
         s_Data.cursorMode = mode;
         glfwSetInputMode(s_Data.window, GLFW_CURSOR, static_cast<int>(mode));
 
-        // Reset mouse delta when changing cursor mode
         if (mode == CursorMode::Captured)
             ResetMouseDelta();
     }
@@ -222,38 +207,36 @@ namespace ash {
         SetCursorPosition(position.x, position.y);
     }
 
-    void Input::SetCursorPosition(float x, float y) {
+    void Input::SetCursorPosition(const float x, const float y) {
         if (!s_Data.window) return;
         glfwSetCursorPos(s_Data.window, static_cast<double>(x), static_cast<double>(y));
         s_Data.mousePosition = Vec2(x, y);
         s_Data.mousePositionPrevious = s_Data.mousePosition;
     }
 
-    // ========== Input Settings ==========
-    void Input::EnableRawMouseMotion(bool enabled) {
+    void Input::EnableRawMouseMotion(const bool enabled) {
         if (!s_Data.window) return;
         s_Data.rawMouseMotion = enabled;
 
-        if (glfwRawMouseMotionSupported()) {
+        if (glfwRawMouseMotionSupported())
             glfwSetInputMode(s_Data.window, GLFW_RAW_MOUSE_MOTION, enabled ? GLFW_TRUE : GLFW_FALSE);
-        }
     }
 
     bool Input::IsRawMouseMotionEnabled() {
         return s_Data.rawMouseMotion;
     }
 
-    void Input::EnableStickyKeys(bool enabled) {
+    void Input::EnableStickyKeys(const bool enabled) {
         if (!s_Data.window) return;
         glfwSetInputMode(s_Data.window, GLFW_STICKY_KEYS, enabled ? GLFW_TRUE : GLFW_FALSE);
     }
 
-    void Input::EnableStickyMouseButtons(bool enabled) {
+    void Input::EnableStickyMouseButtons(const bool enabled) {
         if (!s_Data.window) return;
         glfwSetInputMode(s_Data.window, GLFW_STICKY_MOUSE_BUTTONS, enabled ? GLFW_TRUE : GLFW_FALSE);
     }
 
-    void Input::SetMouseSensitivity(float sensitivity) {
+    void Input::SetMouseSensitivity(const float sensitivity) {
         s_Data.mouseSensitivity = sensitivity;
     }
 
@@ -261,7 +244,6 @@ namespace ash {
         return s_Data.mouseSensitivity;
     }
 
-    // ========== Input State Reset ==========
     void Input::ResetMouseDelta() {
         s_Data.mouseDelta = Vec2(0.0f);
         s_Data.mouseDeltaSmoothed = Vec2(0.0f);
@@ -279,26 +261,23 @@ namespace ash {
         s_Data.keyHistory.clear();
     }
 
-    // ========== Gamepad/Controller Support ==========
-    bool Input::IsControllerConnected(int controllerID) {
+    bool Input::IsControllerConnected(const int controllerID) {
         return glfwJoystickPresent(controllerID) == GLFW_TRUE;
     }
 
     int Input::GetConnectedControllerCount() {
         int count = 0;
-        for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i) {
+        for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; ++i)
             if (glfwJoystickPresent(i)) ++count;
-        }
+
         return count;
     }
 
-    // ========== Input History ==========
-    void Input::EnableInputHistory(bool enabled, size_t historySize) {
+    void Input::EnableInputHistory(const bool enabled, const size_t historySize) {
         s_Data.historyEnabled = enabled;
         s_Data.maxHistorySize = historySize;
-        if (!enabled) {
+        if (!enabled)
             s_Data.keyHistory.clear();
-        }
     }
 
     const Vector<int> &Input::GetKeyHistory() {
@@ -313,9 +292,9 @@ namespace ash {
 
     String Input::GetMouseButtonName(const MouseButton button) {
         switch (button) {
-            case MouseButton::ButtonLeft: return "Left";
-            case MouseButton::ButtonRight: return "Right";
-            case MouseButton::ButtonMiddle: return "Middle";
+            case MouseButton::Left: return "Left";
+            case MouseButton::Right: return "Right";
+            case MouseButton::Middle: return "Middle";
             default: return "Button" + std::to_string(static_cast<int>(button));
         }
     }
@@ -330,7 +309,6 @@ namespace ash {
 
     Input::InputData Input::s_Data;
 
-    // ========== Event Handlers ==========
     bool Input::OnKeyPressed(const KeyPressedEvent &e) {
         Key keycode = e.GetKeyCode();
         if (!IsValidKey(keycode)) return false;
@@ -338,11 +316,10 @@ namespace ash {
         const size_t key = static_cast<size_t>(keycode);
         s_Data.keys[key] = true;
 
-        if (e.IsRepeat()) {
+        if (e.IsRepeat())
             s_Data.keysRepeating[key] = true;
-        } else {
+        else
             UpdateInputHistory(keycode);
-        }
 
         return false;
     }
@@ -394,10 +371,9 @@ namespace ash {
         } else {
             s_Data.mouseDelta = s_Data.mousePosition - s_Data.mousePositionPrevious;
 
-            // Exponential smoothing
             constexpr float smoothingFactor = 0.3f;
-            s_Data.mouseDeltaSmoothed = s_Data.mouseDeltaSmoothed * (1.0f - smoothingFactor) +
-                                        s_Data.mouseDelta * smoothingFactor;
+            s_Data.mouseDeltaSmoothed = s_Data.mouseDeltaSmoothed * (1.0f - smoothingFactor) + s_Data.mouseDelta *
+                                        smoothingFactor;
         }
 
         s_Data.mousePositionPrevious = s_Data.mousePosition;
@@ -421,4 +397,4 @@ namespace ash {
         const int btn = static_cast<int>(button);
         return btn >= 0 && btn < static_cast<int>(MAX_MOUSE_BUTTONS);
     }
-} // namespace ash
+}
