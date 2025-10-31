@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 
 #include "Ashen/Core/Types.h"
-#include "Ashen/GraphicsAPI/GLEnums.h"
+#include "Ashen/GraphicsAPI/Enums.h"
 #include "Ashen/GraphicsAPI/GLObject.h"
 
 namespace ash {

@@ -1,5 +1,5 @@
 #include "Ashen/GraphicsAPI/RenderCommand.h"
-#include "Ashen/GraphicsAPI/GLEnums.h"
+#include "Ashen/GraphicsAPI/Enums.h"
 
 namespace ash {
     void RenderCommand::Clear(ClearBuffer buffers) {

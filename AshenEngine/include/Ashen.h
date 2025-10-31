@@ -33,7 +33,7 @@
 #include "Ashen/Graphics/Skybox/SkyboxCubeMap.h"
 
 // Renderer
-#include "Ashen/GraphicsAPI/GLEnums.h"
+#include "Ashen/GraphicsAPI/Enums.h"
 #include "Ashen/GraphicsAPI/GLObject.h"
 #include "Ashen/GraphicsAPI/FrameBuffer.h"
 #include "Ashen/GraphicsAPI/VertexArray.h"

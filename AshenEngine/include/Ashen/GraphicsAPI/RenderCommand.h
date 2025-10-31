@@ -1,7 +1,7 @@
 #ifndef ASHEN_RENDERCOMMAND_H
 #define ASHEN_RENDERCOMMAND_H
 
-#include "Ashen/GraphicsAPI/GLEnums.h"
+#include "Ashen/GraphicsAPI/Enums.h"
 #include "Ashen/Core/Types.h"
 #include "Ashen/Math/Math.h"
 

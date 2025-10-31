@@ -1,12 +1,14 @@
 #include "TestbedApp.h"
 
 #include "layers/GameLayer.h"
+#include "layers/NodeGraphTestLayer.h"
 #include "layers/Renderer2DTestLayer.h"
 
 namespace ash {
     TestbedApp::TestbedApp(const ApplicationSettings &settings)
         : Application(settings) {
         PushLayer(MakeOwn<GameLayer>());
+        PushLayer(MakeOwn<NodeGraphTestLayer>());
         // PushLayer(MakeOwn<Renderer2DTestLayer>());
     }
 }

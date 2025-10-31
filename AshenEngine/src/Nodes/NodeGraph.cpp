@@ -3,57 +3,57 @@
 namespace ash {
     NodeGraph::NodeGraph() {
         m_RootNode = MakeOwn<Node>("Root");
-        m_RootNode->_EnterTree();
+        m_RootNode->EnterTree();
     }
 
     NodeGraph::~NodeGraph() {
         if (m_RootNode)
-            m_RootNode->_ExitTree();
+            m_RootNode->ExitTree();
     }
 
-    Node * NodeGraph::GetRoot() const {
+    Node *NodeGraph::GetRoot() const {
         return m_RootNode.get();
     }
 
     void NodeGraph::SetRoot(Own<Node> newRoot) {
         if (m_RootNode)
-            m_RootNode->_ExitTree();
+            m_RootNode->ExitTree();
 
         m_RootNode = MovePtr(newRoot);
         if (m_RootNode) {
-            m_RootNode->_EnterTree();
-            m_RootNode->_Ready();
+            m_RootNode->EnterTree();
+            m_RootNode->Ready();
         }
     }
 
     void NodeGraph::Ready() {
         if (m_RootNode && !m_IsReady) {
-            m_RootNode->_Ready();
+            m_RootNode->Ready();
             m_IsReady = true;
         }
     }
 
     void NodeGraph::Process(const float deltaTime) const {
         if (m_RootNode && m_IsReady)
-            m_RootNode->_Process(deltaTime);
+            m_RootNode->Process(deltaTime);
     }
 
     void NodeGraph::PhysicsProcess(const float deltaTime) const {
         if (m_RootNode && m_IsReady)
-            m_RootNode->_PhysicsProcess(deltaTime);
+            m_RootNode->PhysicsProcess(deltaTime);
     }
 
     void NodeGraph::Draw() const {
         if (m_RootNode && m_IsReady)
-            m_RootNode->_Draw();
+            m_RootNode->Draw();
     }
 
     void NodeGraph::DispatchEvent(Event &event) const {
         if (m_RootNode && m_IsReady)
-            m_RootNode->_DispatchEvent(event);
+            m_RootNode->DispatchEvent(event);
     }
 
-    Node * NodeGraph::FindNode(const String &name, const bool recursive) const {
+    Node *NodeGraph::FindNode(const String &name, const bool recursive) const {
         if (!m_RootNode) return nullptr;
 
         if (m_RootNode->GetName() == name)
@@ -72,7 +72,7 @@ namespace ash {
 
     void NodeGraph::Clear() {
         if (m_RootNode) {
-            m_RootNode->_ExitTree();
+            m_RootNode->ExitTree();
             m_RootNode.reset();
         }
         m_IsReady = false;
