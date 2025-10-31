@@ -25,6 +25,8 @@ add_library(AshenEngineLib STATIC
         ${ENGINE_HEADERS}
         src/Math/Transform.cpp
         include/Ashen/Nodes/NodeGraph.h
+        src/Nodes/Node.cpp
+        src/Nodes/NodeGraph.cpp
 )
 
 add_library(Ashen::Engine ALIAS AshenEngineLib)

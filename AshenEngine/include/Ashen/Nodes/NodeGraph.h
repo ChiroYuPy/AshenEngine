@@ -8,136 +8,69 @@
 namespace ash {
     class NodeGraph {
     public:
-        NodeGraph() {
-            m_RootNode = MakeOwn<Node>("Root");
-            m_RootNode->_EnterTree();
-        }
+        NodeGraph();
 
-        ~NodeGraph() {
-            if (m_RootNode)
-                m_RootNode->_ExitTree();
-        }
+        ~NodeGraph();
 
-        Node *GetRoot() const {
-            return m_RootNode.get();
-        }
+        Node *GetRoot() const;
 
-        void SetRoot(Own<Node> newRoot) {
-            if (m_RootNode)
-                m_RootNode->_ExitTree();
+        void SetRoot(Own<Node> newRoot);
 
-            m_RootNode = MovePtr(newRoot);
-            if (m_RootNode) {
-                m_RootNode->_EnterTree();
-                m_RootNode->_Ready();
-            }
-        }
+        void Ready();
 
-        void Ready() {
-            if (m_RootNode && !m_IsReady) {
-                m_RootNode->_Ready();
-                m_IsReady = true;
-            }
-        }
+        void Process(float deltaTime) const;
 
-        void Process(const float deltaTime) const {
-            if (m_RootNode && m_IsReady)
-                m_RootNode->_Process(deltaTime);
-        }
+        void PhysicsProcess(float deltaTime) const;
 
-        void PhysicsProcess(const float deltaTime) const {
-            if (m_RootNode && m_IsReady)
-                m_RootNode->_PhysicsProcess(deltaTime);
-        }
+        void Draw() const;
 
-        void Draw() const {
-            if (m_RootNode && m_IsReady)
-                m_RootNode->_Draw();
-        }
+        void DispatchEvent(Event &event) const;
 
-        void DispatchEvent(Event &event) const {
-            if (m_RootNode && m_IsReady)
-                m_RootNode->_DispatchEvent(event);
-        }
+        Node *FindNode(const String &name, bool recursive = true) const;
 
-        Node *FindNode(const String &name, const bool recursive = true) const {
-            if (!m_RootNode) return nullptr;
-
-            if (m_RootNode->GetName() == name)
-                return m_RootNode.get();
-
-            return m_RootNode->FindChild(name, recursive);
-        }
-
-        Vector<Node *> GetNodesInGroup(const String &group) const {
-            Vector<Node *> nodes;
-            if (m_RootNode)
-                CollectNodesInGroup(m_RootNode.get(), group, nodes);
-
-            return nodes;
-        }
+        Vector<Node *> GetNodesInGroup(const String &group) const;
 
         template<typename T>
-        Vector<T *> GetNodesOfType() const {
-            Vector<T *> nodes;
-            if (m_RootNode)
-                CollectNodesOfType<T>(m_RootNode.get(), nodes);
+        Vector<T *> GetNodesOfType() const;
 
-            return nodes;
-        }
+        void Clear();
 
-        void Clear() {
-            if (m_RootNode) {
-                m_RootNode->_ExitTree();
-                m_RootNode.reset();
-            }
-            m_IsReady = false;
-        }
+        bool IsReady() const;
 
-        bool IsReady() const { return m_IsReady; }
-
-        size_t GetNodeCount() const {
-            return m_RootNode ? CountNodes(m_RootNode.get()) : 0;
-        }
+        size_t GetNodeCount() const;
 
     private:
-        static void CollectNodesInGroup(Node *node, const String &group, Vector<Node *> &result) {
-            if (!node) return;
-
-            if (node->IsInGroup(group))
-                result.push_back(node);
-
-            for (size_t i = 0; i < node->GetChildCount(); ++i)
-                if (const auto child = node->GetChild(i))
-                    CollectNodesInGroup(child, group, result);
-        }
+        static void CollectNodesInGroup(Node *node, const String &group, Vector<Node *> &result);
 
         template<typename T>
-        void CollectNodesOfType(Node *node, Vector<T *> &result) const {
-            if (!node) return;
+        void CollectNodesOfType(Node *node, Vector<T *> &result) const;
 
-            if (auto typedNode = dynamic_cast<T *>(node))
-                result.push_back(typedNode);
-
-            for (size_t i = 0; i < node->GetChildCount(); ++i)
-                if (auto child = node->GetChild(i))
-                    CollectNodesOfType<T>(child, result);
-        }
-
-        static size_t CountNodes(const Node *node) {
-            if (!node) return 0;
-
-            size_t count = 1;
-            for (size_t i = 0; i < node->GetChildCount(); ++i)
-                if (const auto child = node->GetChild(i))
-                    count += CountNodes(child);
-
-            return count;
-        }
+        static size_t CountNodes(const Node *node);
 
         Own<Node> m_RootNode;
         bool m_IsReady = false;
     };
+
+    template<typename T>
+    Vector<T *> NodeGraph::GetNodesOfType() const {
+        Vector<T *> nodes;
+        if (m_RootNode)
+            CollectNodesOfType<T>(m_RootNode.get(), nodes);
+
+        return nodes;
+    }
+
+    template<typename T>
+    void NodeGraph::CollectNodesOfType(Node *node, Vector<T *> &result) const {
+        if (!node) return;
+
+        if (auto typedNode = dynamic_cast<T *>(node))
+            result.push_back(typedNode);
+
+        for (size_t i = 0; i < node->GetChildCount(); ++i)
+            if (auto child = node->GetChild(i))
+                CollectNodesOfType<T>(child, result);
+    }
 }
 
 #endif // ASHEN_NODEGRAPH_H

@@ -18,8 +18,7 @@ namespace ash {
 
     class Node {
     public:
-        explicit Node(String name = "Node") : m_Name(MovePtr(name)) {
-        }
+        explicit Node(String name = "Node");
 
         virtual ~Node() = default;
 
@@ -31,132 +30,57 @@ namespace ash {
 
         Node &operator=(Node &&) = default;
 
-        Node *GetParent() const { return m_Parent; }
-        const Vector<Own<Node> > &GetChildren() const { return m_Children; }
+        Node *GetParent() const;
 
-        Node *GetChild(const size_t index) const {
-            return index < m_Children.size() ? m_Children[index].get() : nullptr;
-        }
+        const Vector<Own<Node> > &GetChildren() const;
 
-        Node *FindChild(const String &name, const bool recursive = false) const {
-            for (const auto &child: m_Children) {
-                if (child->GetName() == name) return child.get();
-                if (recursive)
-                    if (const auto found = child->FindChild(name, true)) return found;
-            }
-            return nullptr;
-        }
+        Node *GetChild(size_t index) const;
 
-        size_t GetChildCount() const { return m_Children.size(); }
+        Node *FindChild(const String &name, bool recursive = false) const;
 
-        void AddChild(Own<Node> child) {
-            if (!child) {
-                Logger::Warn("Tentative d'ajout d'un enfant null");
-                return;
-            }
+        size_t GetChildCount() const;
 
-            child->m_Parent = this;
+        void AddChild(Own<Node> child);
 
-            if (m_InsideTree) {
-                child->_EnterTree();
-                child->_Ready();
-            }
+        void RemoveChild(Node *child);
 
-            m_Children.push_back(MovePtr(child));
-        }
+        void RemoveFromParent();
 
-        void RemoveChild(Node *child) {
-            if (!child) return;
+        const String &GetName() const;
 
-            const auto it = std::ranges::find_if(m_Children,
-                                           [child](const Own<Node> &ptr) { return ptr.get() == child; });
+        void SetName(const String &name);
 
-            if (it != m_Children.end()) {
-                if ((*it)->m_InsideTree)
-                    (*it)->_ExitTree();
+        String GetPath() const;
 
-                (*it)->m_Parent = nullptr;
-                m_Children.erase(it);
-            }
-        }
+        void AddToGroup(const String &group);
 
-        void RemoveFromParent() {
-            if (m_Parent)
-                m_Parent->RemoveChild(this);
-        }
+        void RemoveFromGroup(const String &group);
 
-        const String &GetName() const { return m_Name; }
-        void SetName(const String &name) { m_Name = name; }
+        bool IsInGroup(const String &group) const;
 
-        String GetPath() const {
-            if (!m_Parent) return "/" + m_Name;
-            return m_Parent->GetPath() + "/" + m_Name;
-        }
+        const Set<String> &GetGroups() const;
 
-        void AddToGroup(const String &group) { m_Groups.insert(group); }
-        void RemoveFromGroup(const String &group) { m_Groups.erase(group); }
-        bool IsInGroup(const String &group) const { return m_Groups.contains(group); }
-        const Set<String> &GetGroups() const { return m_Groups; }
+        bool IsInsideTree() const;
 
-        bool IsInsideTree() const { return m_InsideTree; }
+        void SetProcessMode(bool enabled);
 
-        void SetProcessMode(const bool enabled) { m_ProcessEnabled = enabled; }
-        bool IsProcessing() const { return m_ProcessEnabled; }
+        bool IsProcessing() const;
 
-        virtual void _Ready() {
-            for (const auto &child: m_Children)
-                if (child) child->_Ready();
-        }
+        virtual void _Ready();
 
-        virtual void _Process(const float delta) {
-            if (!m_ProcessEnabled) return;
+        virtual void _Process(float delta);
 
-            for (const auto &child: m_Children)
-                if (child) child->_Process(delta);
-        }
+        virtual void _PhysicsProcess(float delta);
 
-        virtual void _PhysicsProcess(const float delta) {
-            if (!m_ProcessEnabled) return;
+        virtual void _Draw();
 
-            for (const auto &child: m_Children)
-                if (child) child->_PhysicsProcess(delta);
-        }
+        virtual void _DispatchEvent(Event &event);
 
-        virtual void _Draw() {
-            for (const auto &child: m_Children)
-                if (child) child->_Draw();
-        }
+        virtual void _OnEvent(Event &event);
 
-        virtual void _DispatchEvent(Event &event) {
-            if (event.IsHandled()) return;
+        virtual void _EnterTree();
 
-            _OnEvent(event);
-
-            if (!event.IsHandled()) {
-                for (const auto &child: m_Children) {
-                    if (child) {
-                        child->_DispatchEvent(event);
-                        if (event.IsHandled()) break;
-                    }
-                }
-            }
-        }
-
-        virtual void _OnEvent(Event &event) {
-
-        }
-
-        virtual void _EnterTree() {
-            m_InsideTree = true;
-            for (const auto &child: m_Children)
-                if (child) child->_EnterTree();
-        }
-
-        virtual void _ExitTree() {
-            m_InsideTree = false;
-            for (const auto &child: m_Children)
-                if (child) child->_ExitTree();
-        }
+        virtual void _ExitTree();
 
     protected:
         Node *m_Parent = nullptr;
@@ -169,7 +93,7 @@ namespace ash {
 
     class CanvasItem : public Node {
     public:
-        explicit CanvasItem(String name = "CanvasItem") : Node(MovePtr(name)) {}
+        explicit CanvasItem(String name = "CanvasItem");
 
         bool visible = true;
         int z_index = 0;
@@ -177,103 +101,77 @@ namespace ash {
         float modulate_alpha = 1.f;
         Vec4 modulate_color = Vec4(1.f, 1.f, 1.f, 1.f);
 
-        void _Draw() override {
-            if (!visible) return;
-            Node::_Draw();
-        }
+        void _Draw() override;
 
-        void Hide() { visible = false; }
-        void Show() { visible = true; }
-        bool IsVisible() const { return visible; }
+        void Hide();
 
-        bool IsVisibleInTree() const {
-            if (!visible) return false;
-            if (!m_Parent) return visible;
-            if (const auto parent = dynamic_cast<const CanvasItem *>(m_Parent))
-                return parent->IsVisibleInTree();
+        void Show();
 
-            return visible;
-        }
+        bool IsVisible() const;
 
-        int GetZIndex() const { return z_index; }
-        void SetZIndex(const int z) { z_index = z; }
+        bool IsVisibleInTree() const;
 
-        int GetGlobalZIndex() const {
-            if (!z_as_relative || !m_Parent) return z_index;
-            if (const auto parent = dynamic_cast<const CanvasItem *>(m_Parent))
-                return parent->GetGlobalZIndex() + z_index;
+        int GetZIndex() const;
 
-            return z_index;
-        }
+        void SetZIndex(int z);
+
+        int GetGlobalZIndex() const;
     };
 
     class Node2D : public CanvasItem {
     public:
-        explicit Node2D(String name = "Node2D") : CanvasItem(MovePtr(name)) {
-        }
+        explicit Node2D(String name = "Node2D");
 
         Transform2D local_transform;
 
-        Transform2D GetGlobalTransform() const {
-            if (m_Parent)
-                if (const auto parent2D = dynamic_cast<const Node2D *>(m_Parent))
-                    return local_transform.Combine(parent2D->GetGlobalTransform());
+        Transform2D GetGlobalTransform() const;
 
-            return local_transform;
-        }
+        void SetGlobalTransform(const Transform2D &transform);
 
-        void SetGlobalTransform(const Transform2D &transform) {
-            if (m_Parent) {
-                if (const auto parent2D = dynamic_cast<const Node2D *>(m_Parent)) {
-                    local_transform = parent2D->GetGlobalTransform().Inverse() * transform;
-                    return;
-                }
-            }
-            local_transform = transform;
-        }
+        Vec2 GetPosition() const;
 
-        Vec2 GetPosition() const { return local_transform.position; }
-        void SetPosition(const Vec2 &pos) { local_transform.position = pos; }
-        void SetPosition(const float x, const float y) { SetPosition(Vec2(x, y)); }
+        void SetPosition(const Vec2 &pos);
 
-        Vec2 GetGlobalPosition() const { return GetGlobalTransform().position; }
+        void SetPosition(float x, float y);
 
-        void SetGlobalPosition(const Vec2 &pos) {
-            auto t = GetGlobalTransform();
-            t.position = pos;
-            SetGlobalTransform(t);
-        }
+        Vec2 GetGlobalPosition() const;
 
-        float GetRotation() const { return local_transform.rotation; }
-        void SetRotation(const float radians) { local_transform.rotation = radians; }
-        void SetRotationDegrees(const float degrees) { SetRotation(ToRadians(degrees)); }
-        float GetRotationDegrees() const { return ToDegrees(GetRotation()); }
-        float GetGlobalRotation() const { return GetGlobalTransform().rotation; }
+        void SetGlobalPosition(const Vec2 &pos);
 
-        Vec2 GetScale() const { return local_transform.scale; }
-        void SetScale(const Vec2 &scl) { local_transform.scale = scl; }
-        void SetScale(const float sx, const float sy) { SetScale(Vec2(sx, sy)); }
+        float GetRotation() const;
 
-        void Translate(const Vec2 &offset) { local_transform.position += offset; }
-        void Rotate(const float radians) { local_transform.rotation += radians; }
-        void ScaleBy(const float factor) { local_transform.scale *= factor; }
+        void SetRotation(float radians);
 
-        Vec2 GetRight() const { return GetGlobalTransform().TransformDirection(Vec2(1.f, 0.f)); }
-        Vec2 GetUp() const { return GetGlobalTransform().TransformDirection(Vec2(0.f, -1.f)); }
+        void SetRotationDegrees(float degrees);
 
-        Vec2 ToLocal(const Vec2 &global_point) const {
-            return GetGlobalTransform().Inverse().TransformPoint(global_point);
-        }
+        float GetRotationDegrees() const;
 
-        Vec2 ToGlobal(const Vec2 &local_point) const {
-            return GetGlobalTransform().TransformPoint(local_point);
-        }
+        float GetGlobalRotation() const;
+
+        Vec2 GetScale() const;
+
+        void SetScale(const Vec2 &scl);
+
+        void SetScale(float sx, float sy);
+
+        void Translate(const Vec2 &offset);
+
+        void Rotate(float radians);
+
+        void ScaleBy(float factor);
+
+        Vec2 GetRight() const;
+
+        Vec2 GetUp() const;
+
+        Vec2 ToLocal(const Vec2 &global_point) const;
+
+        Vec2 ToGlobal(const Vec2 &local_point) const;
     };
 
     class Control : public CanvasItem {
     public:
-        explicit Control(String name = "Control") : CanvasItem(MovePtr(name)) {
-        }
+        explicit Control(String name = "Control");
 
         Vec2 size = Vec2(100.f, 100.f);
         Vec2 position = Vec2(0.f, 0.f);
@@ -292,221 +190,94 @@ namespace ash {
 
         String tooltip_text;
 
-        BBox2 GetGlobalRect() const {
-            const Vec2 global_pos = GetGlobalPosition();
-            return BBox2(global_pos, global_pos + size);
-        }
+        BBox2 GetGlobalRect() const;
 
-        BBox2 GetRect() const {
-            return BBox2(position, position + size);
-        }
+        BBox2 GetRect() const;
 
-        Vec2 GetGlobalPosition() const {
-            if (m_Parent)
-                if (const auto parent_ctrl = dynamic_cast<const Control *>(m_Parent))
-                    return position + parent_ctrl->GetGlobalPosition();
+        Vec2 GetGlobalPosition() const;
 
-            return position;
-        }
+        void SetGlobalPosition(const Vec2 &pos);
 
-        void SetGlobalPosition(const Vec2 &pos) {
-            if (m_Parent) {
-                if (const auto parent_ctrl = dynamic_cast<const Control *>(m_Parent)) {
-                    position = pos - parent_ctrl->GetGlobalPosition();
-                    return;
-                }
-            }
-            position = pos;
-        }
+        Vec2 GetSize() const;
 
-        Vec2 GetSize() const { return size; }
-
-        void SetSize(const Vec2 &s) {
-            Vec2 new_size = s;
-            new_size.x = Max(new_size.x, GetMinimumSize().x);
-            new_size.y = Max(new_size.y, GetMinimumSize().y);
-
-            if (ApproxEqual(size, new_size)) return;
-
-            size = new_size;
-            _OnResized();
-        }
+        void SetSize(const Vec2 &s);
 
         void SetSize(const float w, const float h) { SetSize(Vec2(w, h)); }
 
-        Vec2 GetMinimumSize() const {
-            return Vec2(
-                Max(min_size.x, custom_minimum_size.x),
-                Max(min_size.y, custom_minimum_size.y)
-            );
-        }
+        Vec2 GetMinimumSize() const;
 
-        Vec2 GetCenter() const {
-            return position + size * 0.5f;
-        }
+        Vec2 GetCenter() const;
 
-        bool HasPoint(const Vec2 &point) const {
-            return GetGlobalRect().Contains(point);
-        }
+        bool HasPoint(const Vec2 &point) const;
 
-        void GrabFocus() {
-            if (!focusable) return;
-            focused = true;
-            _OnFocusEnter();
-        }
+        void GrabFocus();
 
-        void ReleaseFocus() {
-            if (focused) {
-                focused = false;
-                _OnFocusExit();
-            }
-        }
+        void ReleaseFocus();
 
-        bool HasFocus() const { return focused; }
+        bool HasFocus() const;
 
-        virtual void _OnMouseEnter() {}
+        virtual void _OnMouseEnter();
 
-        virtual void _OnMouseExit() {}
+        virtual void _OnMouseExit();
 
-        virtual void _OnMouseButton(MouseButton button, bool pressed, const Vec2 &pos) {}
+        virtual void _OnMouseButton(MouseButton button, bool pressed, const Vec2 &pos);
 
-        virtual void _OnMouseMotion(const Vec2 &pos, const Vec2 &relative) {}
+        virtual void _OnMouseMotion(const Vec2 &pos, const Vec2 &relative);
 
-        virtual void _OnMouseWheel(float delta_x, float delta_y) {}
+        virtual void _OnMouseWheel(float delta_x, float delta_y);
 
-        virtual void _OnKey(bool pressed, int key_code) {}
+        virtual void _OnKey(bool pressed, int key_code);
 
-        virtual void _OnTextInput(const String &text) {}
+        virtual void _OnTextInput(const String &text);
 
-        virtual void _OnFocusEnter() {}
+        virtual void _OnFocusEnter();
 
-        virtual void _OnFocusExit() {}
+        virtual void _OnFocusExit();
 
-        virtual void _OnResized() {}
+        virtual void _OnResized();
 
-        Vec2 ToLocal(const Vec2 &global_point) const {
-            return global_point - GetGlobalPosition();
-        }
+        Vec2 ToLocal(const Vec2 &global_point) const;
 
-        Vec2 ToGlobal(const Vec2 &local_point) const {
-            return local_point + GetGlobalPosition();
-        }
+        Vec2 ToGlobal(const Vec2 &local_point) const;
 
-        void SetAnchors(const float left, const float top, const float right, const float bottom) {
-            anchor_left_top = Vec2(left, top);
-            anchor_right_bottom = Vec2(right, bottom);
-            _UpdateLayout();
-        }
+        void SetAnchors(float left, float top, float right, float bottom);
 
-        void SetAnchorsPreset(const Anchor preset) {
-            anchor_preset = preset;
-            switch (preset) {
-                case Anchor::TopLeft: SetAnchors(0.f, 0.f, 0.f, 0.f);
-                    break;
-                case Anchor::TopCenter: SetAnchors(0.5f, 0.f, 0.5f, 0.f);
-                    break;
-                case Anchor::TopRight: SetAnchors(1.f, 0.f, 1.f, 0.f);
-                    break;
-                case Anchor::CenterLeft: SetAnchors(0.f, 0.5f, 0.f, 0.5f);
-                    break;
-                case Anchor::Center: SetAnchors(0.5f, 0.5f, 0.5f, 0.5f);
-                    break;
-                case Anchor::CenterRight: SetAnchors(1.f, 0.5f, 1.f, 0.5f);
-                    break;
-                case Anchor::BottomLeft: SetAnchors(0.f, 1.f, 0.f, 1.f);
-                    break;
-                case Anchor::BottomCenter: SetAnchors(0.5f, 1.f, 0.5f, 1.f);
-                    break;
-                case Anchor::BottomRight: SetAnchors(1.f, 1.f, 1.f, 1.f);
-                    break;
-            }
-        }
+        void SetAnchorsPreset(Anchor preset);
 
     protected:
-        virtual void _UpdateLayout() {
-            if (!m_Parent) return;
-
-            const auto parent_ctrl = dynamic_cast<Control *>(m_Parent);
-            if (!parent_ctrl) return;
-
-            const Vec2 parent_size = parent_ctrl->GetSize();
-            const Vec2 anchor_pos_lt = parent_size * anchor_left_top;
-            const Vec2 anchor_pos_rb = parent_size * anchor_right_bottom;
-
-            position = anchor_pos_lt + margin_left_top;
-            size = anchor_pos_rb + margin_right_bottom - position;
-            size = Vec2(Max(size.x, 0.f), Max(size.y, 0.f));
-        }
+        virtual void _UpdateLayout();
     };
 
     class Container : public Control {
     public:
-        explicit Container(String name = "Container") : Control(MovePtr(name)) {}
+        explicit Container(String name = "Container");
 
-        virtual void _UpdateChildrenLayout() {
-            for (const auto &child: m_Children)
-                if (const auto ctrl = dynamic_cast<Container *>(child.get()))
-                    ctrl->_UpdateChildrenLayout();
-        }
+        virtual void _UpdateChildrenLayout();
 
-        void _OnResized() override {
-            _UpdateChildrenLayout();
-        }
+        void _OnResized() override;
     };
 
     class VBoxContainer : public Container {
     public:
-        explicit VBoxContainer(String name = "VBoxContainer") : Container(MovePtr(name)) {
-        }
+        explicit VBoxContainer(String name = "VBoxContainer");
 
         float separation = 4.f;
 
-        void _UpdateChildrenLayout() override {
-            float y_offset = 0.f;
-
-            for (const auto &child: m_Children) {
-                const auto ctrl = dynamic_cast<Control *>(child.get());
-                if (!ctrl || !ctrl->visible) continue;
-
-                ctrl->position = Vec2(0.f, y_offset);
-                Vec2 child_size = ctrl->GetSize();
-                child_size.x = size.x;
-                ctrl->SetSize(child_size);
-
-                y_offset += child_size.y + separation;
-            }
-        }
+        void _UpdateChildrenLayout() override;
     };
 
     class HBoxContainer : public Container {
     public:
-        explicit HBoxContainer(String name = "HBoxContainer") : Container(MovePtr(name)) {
-        }
+        explicit HBoxContainer(String name = "HBoxContainer");
 
         float separation = 4.f;
 
-        void _UpdateChildrenLayout() override {
-            float x_offset = 0.f;
-
-            for (const auto &child: m_Children) {
-                const auto ctrl = dynamic_cast<Control *>(child.get());
-                if (!ctrl || !ctrl->visible) continue;
-
-                ctrl->position = Vec2(x_offset, 0.f);
-                Vec2 child_size = ctrl->GetSize();
-                child_size.y = size.y;
-                ctrl->SetSize(child_size);
-
-                x_offset += child_size.x + separation;
-            }
-        }
+        void _UpdateChildrenLayout() override;
     };
 
     class Label : public Control {
     public:
-        explicit Label(String name = "Label") : Control(MovePtr(name)) {
-            mouse_filter = false;
-        }
+        explicit Label(String name = "Label");
 
         String text;
         float font_size = 16.f;
@@ -518,126 +289,82 @@ namespace ash {
         Align horizontal_align = Align::Left;
         Align vertical_align = Align::Center;
 
-        void SetText(const String &t) {
-            text = t;
-            _UpdateMinimumSize();
-        }
+        void SetText(const String &t);
 
-        const String &GetText() const { return text; }
+        const String &GetText() const;
 
     protected:
-        void _UpdateMinimumSize() {
-            min_size = Vec2(text.length() * font_size * 0.6f, font_size + 4.f);
-        }
+        void _UpdateMinimumSize();
     };
 
     class Button : public Control {
     public:
-        explicit Button(String name = "Button") : Control(MovePtr(name)) {
-            focusable = true;
-            size = Vec2(100.f, 30.f);
-        }
+        explicit Button(String name = "Button");
 
         String text;
         bool pressed = false;
         bool toggle_mode = false;
         bool disabled = false;
 
-        void SetText(const String &t) { text = t; }
-        const String &GetText() const { return text; }
+        void SetText(const String &t);
 
-        void SetDisabled(const bool d) { disabled = d; }
-        bool IsDisabled() const { return disabled; }
+        const String &GetText() const;
 
-        virtual void _OnPressed() {
-        }
+        void SetDisabled(bool d);
 
-        virtual void _OnReleased() {
-        }
+        bool IsDisabled() const;
 
-        virtual void _OnToggled(bool is_pressed) {
-        }
+        virtual void _OnPressed();
 
-        void _OnMouseButton(const MouseButton button, const bool is_pressed, const Vec2 &pos) override {
-            if (disabled || button != MouseButton::Left) return;
+        virtual void _OnReleased();
 
-            if (is_pressed) {
-                pressed = true;
-                GrabFocus();
-                _OnPressed();
-            } else if (pressed) {
-                if (toggle_mode) {
-                    pressed = !pressed;
-                    _OnToggled(pressed);
-                } else {
-                    pressed = false;
-                }
-                _OnReleased();
-            }
-        }
+        virtual void _OnToggled(bool is_pressed);
+
+        void _OnMouseButton(MouseButton button, bool is_pressed, const Vec2 &pos) override;
     };
 
     class Panel : public Control {
     public:
-        explicit Panel(String name = "Panel") : Control(MovePtr(name)) {
-        }
+        explicit Panel(String name = "Panel");
 
         Vec4 background_color = Vec4(0.2f, 0.2f, 0.2f, 1.f);
     };
 
     class Node3D : public Node {
     public:
-        explicit Node3D(String name = "Node3D") : Node(MovePtr(name)) {
-        }
+        explicit Node3D(String name = "Node3D");
 
         Transform3D local_transform;
 
-        Transform3D GetGlobalTransform() const {
-            if (m_Parent)
-                if (const auto parent3D = dynamic_cast<const Node3D *>(m_Parent))
-                    return local_transform.Combine(parent3D->GetGlobalTransform());
+        Transform3D GetGlobalTransform() const;
 
-            return local_transform;
-        }
+        void SetGlobalTransform(const Transform3D &transform);
 
-        void SetGlobalTransform(const Transform3D &transform) {
-            if (m_Parent) {
-                if (const auto parent3D = dynamic_cast<const Node3D *>(m_Parent)) {
-                    local_transform = parent3D->GetGlobalTransform().Inverse() * transform;
-                    return;
-                }
-            }
-            local_transform = transform;
-        }
+        Vec3 GetPosition() const;
 
-        Vec3 GetPosition() const { return local_transform.position; }
-        void SetPosition(const Vec3 &pos) { local_transform.position = pos; }
+        void SetPosition(const Vec3 &pos);
 
-        Quaternion GetRotation() const { return local_transform.rotation; }
-        void SetRotation(const Quaternion &rot) { local_transform.rotation = rot; }
+        Quaternion GetRotation() const;
 
-        Vec3 GetScale() const { return local_transform.scale; }
-        void SetScale(const Vec3 &scl) { local_transform.scale = scl; }
+        void SetRotation(const Quaternion &rot);
 
-        Vec3 GetGlobalPosition() const { return GetGlobalTransform().position; }
+        Vec3 GetScale() const;
 
-        void SetGlobalPosition(const Vec3 &pos) {
-            auto t = GetGlobalTransform();
-            t.position = pos;
-            SetGlobalTransform(t);
-        }
+        void SetScale(const Vec3 &scl);
 
-        Vec3 GetRight() const { return GetGlobalTransform().GetRight(); }
-        Vec3 GetUp() const { return GetGlobalTransform().GetUp(); }
-        Vec3 GetForward() const { return GetGlobalTransform().GetForward(); }
+        Vec3 GetGlobalPosition() const;
 
-        Vec3 ToLocal(const Vec3 &global_point) const {
-            return GetGlobalTransform().Inverse().TransformPoint(global_point);
-        }
+        void SetGlobalPosition(const Vec3 &pos);
 
-        Vec3 ToGlobal(const Vec3 &local_point) const {
-            return GetGlobalTransform().TransformPoint(local_point);
-        }
+        Vec3 GetRight() const;
+
+        Vec3 GetUp() const;
+
+        Vec3 GetForward() const;
+
+        Vec3 ToLocal(const Vec3 &global_point) const;
+
+        Vec3 ToGlobal(const Vec3 &local_point) const;
     };
 }
 
