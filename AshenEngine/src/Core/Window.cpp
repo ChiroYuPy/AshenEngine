@@ -141,6 +141,7 @@ namespace ash {
                     data.EventCallback(event);
                     break;
                 }
+                default: break;
             }
         });
 
@@ -169,6 +170,7 @@ namespace ash {
                     data.EventCallback(event);
                     break;
                 }
+                default: break;
             }
         });
 
@@ -215,17 +217,20 @@ namespace ash {
         m_Handle = glfwCreateWindow(m_Data.Size.x, m_Data.Size.y, m_Data.Title.c_str(), nullptr, nullptr);
         ++s_GLFWWindowCount;
 
-        m_Context = MakeOwn<GraphicsContext>(m_Handle);
+        m_Context = GraphicsContext::Create(m_Handle);
         m_Context->Init();
 
         glfwSetWindowUserPointer(m_Handle, &m_Data);
-        glfwSwapInterval(m_Data.VSync ? 1 : 0); // Vsync
+        glfwSwapInterval(m_Data.VSync ? 1 : 0);
 
         SetupCallbacks();
     }
 
     void Window::Destroy() {
         if (!m_Handle) return;
+
+        if (m_Context)
+            m_Context->Terminate();
 
         glfwDestroyWindow(m_Handle);
         --s_GLFWWindowCount;
