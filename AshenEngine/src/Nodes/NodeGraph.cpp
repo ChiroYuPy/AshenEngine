@@ -73,7 +73,7 @@ namespace ash {
     void NodeGraph::Clear() {
         if (m_RootNode) {
             m_RootNode->ExitTree();
-            m_RootNode.reset();
+            m_RootNode = MakeOwn<Node>("Root");
         }
         m_IsReady = false;
     }

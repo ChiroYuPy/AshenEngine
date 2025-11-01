@@ -3,7 +3,7 @@
 
 #include "Ashen/Audio/AudioDevice.h"
 #include "Ashen/Audio/AudioTypes.h"
-#include "Ashen/Audio/MiniAudioImpl/MiniAudioSource.h"
+#include "Ashen/Audio/MiniAudio/MiniAudioSource.h"
 
 typedef ma_engine ma_engine;
 

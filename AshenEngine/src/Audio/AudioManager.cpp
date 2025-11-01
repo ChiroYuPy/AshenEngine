@@ -1,5 +1,5 @@
 #include "Ashen/Audio/AudioManager.h"
-#include "Ashen/Audio/MiniAudioImpl/MiniAudioDevice.h"
+#include "Ashen/Audio/MiniAudio/MiniAudioDevice.h"
 #include "Ashen/Core/Logger.h"
 
 namespace ash {

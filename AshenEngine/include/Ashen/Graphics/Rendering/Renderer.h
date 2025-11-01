@@ -43,8 +43,7 @@ namespace ash {
 
         static void DrawInstanced(const VertexArray &vao, uint32_t instanceCount);
 
-        static void DrawIndexedInstanced(const VertexArray &vao, uint32_t indexCount,
-                                         uint32_t instanceCount, uint32_t indexOffset = 0);
+        static void DrawIndexedInstanced(const VertexArray &vao, uint32_t indexCount, uint32_t instanceCount, uint32_t indexOffset = 0);
 
         static const Statistics &GetStats() { return s_Stats; }
         static void ResetStats() { s_Stats.Reset(); }

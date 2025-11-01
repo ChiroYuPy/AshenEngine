@@ -158,7 +158,7 @@ namespace ash {
             return vbo;
         }
 
-        static Ref<VertexBuffer> CreateEmpty(size_t count, size_t elementSize,
+        static Ref<VertexBuffer> CreateEmpty(const size_t count, const size_t elementSize,
                                              const BufferConfig &config = BufferConfig::Dynamic()) {
             auto vbo = MakeRef<VertexBuffer>(config);
             vbo->SetEmpty(count, elementSize);
@@ -238,7 +238,7 @@ namespace ash {
             return ibo;
         }
 
-        static Ref<IndexBuffer> CreateEmpty(size_t count, size_t indexSize,
+        static Ref<IndexBuffer> CreateEmpty(const size_t count, const size_t indexSize,
                                             IndexType type = IndexType::UnsignedInt,
                                             const BufferConfig &config = BufferConfig::Dynamic()) {
             auto ibo = MakeRef<IndexBuffer>(type, config);
@@ -302,7 +302,7 @@ namespace ash {
             return ubo;
         }
 
-        static Ref<UniformBuffer> CreateEmpty(size_t size,
+        static Ref<UniformBuffer> CreateEmpty(const size_t size,
                                               const BufferConfig &config = BufferConfig::Dynamic()) {
             auto ubo = MakeRef<UniformBuffer>(config);
             ubo->Allocate(size);
@@ -338,7 +338,7 @@ namespace ash {
             return ssbo;
         }
 
-        static Ref<ShaderStorageBuffer> CreateEmpty(size_t size,
+        static Ref<ShaderStorageBuffer> CreateEmpty(const size_t size,
                                                     const BufferConfig &config = BufferConfig::Dynamic()) {
             auto ssbo = MakeRef<ShaderStorageBuffer>(config);
             ssbo->Allocate(size);

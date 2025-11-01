@@ -156,6 +156,8 @@ namespace ash {
 
         RenderLayers();
 
+        m_NodeGraph->Draw();
+
         Renderer::EndFrame();
     }
 

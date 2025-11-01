@@ -12,6 +12,8 @@ namespace ash {
     Renderer::Statistics Renderer::s_Stats;
 
     void Renderer::Init() {
+        RenderCommand::Init();
+
         RenderCommand::EnableDepthTest();
         RenderCommand::SetDepthFunc(DepthFunc::Less);
         RenderCommand::EnableCulling();
@@ -27,6 +29,9 @@ namespace ash {
     void Renderer::Shutdown() {
         Renderer2D::Shutdown();
         Renderer3D::Shutdown();
+
+        RenderCommand::Shutdown();
+
         Logger::Info("Renderer shutdown");
     }
 
@@ -53,8 +58,7 @@ namespace ash {
         vao.Bind();
 
         const auto offset = reinterpret_cast<const void *>(indexOffset * sizeof(uint32_t));
-        RenderCommand::DrawElements(PrimitiveType::Triangles, static_cast<int>(indexCount), IndexType::UnsignedInt,
-                                    offset);
+        RenderCommand::DrawElements(PrimitiveType::Triangles, static_cast<int>(indexCount), IndexType::UnsignedInt, offset);
 
         s_Stats.DrawCalls++;
         s_Stats.Indices += indexCount;

@@ -1,215 +1,212 @@
 #include "Ashen/GraphicsAPI/RenderCommand.h"
-#include "Ashen/GraphicsAPI/Enums.h"
+#include "Ashen/GraphicsAPI/OpenGL/OpenGLRendererAPI.h"
 
 namespace ash {
-    void RenderCommand::Clear(ClearBuffer buffers) {
-        glClear(static_cast<GLbitfield>(buffers));
+
+    Own<RendererAPI> RenderCommand::s_API = nullptr;
+
+    void RenderCommand::Init() {
+        switch (RendererAPI::GetAPI()) {
+            case RendererAPI::API::OpenGL:
+                s_API = MakeOwn<OpenGLRendererAPI>();
+                break;
+
+            case RendererAPI::API::None:
+            default:
+                // No rendering API
+                break;
+        }
+    }
+
+    void RenderCommand::Shutdown() {
+        s_API.reset();
+    }
+
+    void RenderCommand::Clear(const ClearBuffer buffers) {
+        s_API->Clear(buffers);
     }
 
     void RenderCommand::SetClearColor(const Vec4 &color) {
-        glClearColor(color.r, color.g, color.b, color.a);
+        s_API->SetClearColor(color);
     }
 
     void RenderCommand::SetClearColor(const float r, const float g, const float b, const float a) {
-        glClearColor(r, g, b, a);
+        s_API->SetClearColor(r, g, b, a);
     }
 
     void RenderCommand::SetViewport(const uint32_t x, const uint32_t y, const uint32_t width, const uint32_t height) {
-        glViewport(static_cast<GLint>(x), static_cast<GLint>(y), static_cast<GLsizei>(width), static_cast<GLsizei>(height));
+        s_API->SetViewport(x, y, width, height);
     }
 
     void RenderCommand::SetViewport(const uint32_t width, const uint32_t height) {
-        SetViewport(0, 0, width, height);
+        s_API->SetViewport(0, 0, width, height);
     }
 
     void RenderCommand::EnableScissor() {
-        if (!s_ScissorEnabled) {
-            s_ScissorEnabled = true;
-            glEnable(GL_SCISSOR_TEST);
-        }
+        s_API->EnableScissor();
     }
 
     void RenderCommand::DisableScissor() {
-        if (s_ScissorEnabled) {
-            s_ScissorEnabled = false;
-            glDisable(GL_SCISSOR_TEST);
-        }
+        s_API->DisableScissor();
     }
 
     void RenderCommand::SetScissor(const uint32_t x, const uint32_t y, const uint32_t width, const uint32_t height) {
-        glScissor(static_cast<GLint>(x), static_cast<GLint>(y), static_cast<GLsizei>(width), static_cast<GLsizei>(height));
+        s_API->SetScissor(x, y, width, height);
     }
 
     void RenderCommand::EnableDepthTest() {
-        if (!s_DepthEnabled) {
-            s_DepthEnabled = true;
-            glEnable(GL_DEPTH_TEST);
-        }
+        s_API->EnableDepthTest();
     }
 
     void RenderCommand::DisableDepthTest() {
-        if (s_DepthEnabled) {
-            s_DepthEnabled = false;
-            glDisable(GL_DEPTH_TEST);
-        }
+        s_API->DisableDepthTest();
     }
 
-    void RenderCommand::SetDepthFunc(DepthFunc func) {
-        glDepthFunc(static_cast<GLenum>(func));
+    void RenderCommand::SetDepthFunc(const DepthFunc func) {
+        s_API->SetDepthFunc(func);
     }
 
     void RenderCommand::SetDepthWrite(const bool enable) {
-        if (s_DepthWrite != enable) {
-            s_DepthWrite = enable;
-            glDepthMask(enable ? GL_TRUE : GL_FALSE);
-        }
+        s_API->SetDepthWrite(enable);
     }
 
     void RenderCommand::EnableBlending() {
-        if (!s_BlendEnabled) {
-            s_BlendEnabled = true;
-            glEnable(GL_BLEND);
-        }
+        s_API->EnableBlending();
     }
 
     void RenderCommand::DisableBlending() {
-        if (s_BlendEnabled) {
-            s_BlendEnabled = false;
-            glDisable(GL_BLEND);
-        }
+        s_API->DisableBlending();
     }
 
-    void RenderCommand::SetBlendFunc(BlendFactor src, BlendFactor dst) {
-        glBlendFunc(static_cast<GLenum>(src), static_cast<GLenum>(dst));
+    void RenderCommand::SetBlendFunc(const BlendFactor src, const BlendFactor dst) {
+        s_API->SetBlendFunc(src, dst);
     }
 
-    void RenderCommand::SetBlendFuncSeparate(BlendFactor srcRGB, BlendFactor dstRGB, BlendFactor srcAlpha, BlendFactor dstAlpha) {
-        glBlendFuncSeparate(static_cast<GLenum>(srcRGB), static_cast<GLenum>(dstRGB), static_cast<GLenum>(srcAlpha), static_cast<GLenum>(dstAlpha));
+    void RenderCommand::SetBlendFuncSeparate(const BlendFactor srcRGB, const BlendFactor dstRGB,
+        const BlendFactor srcAlpha, const BlendFactor dstAlpha) {
+        s_API->SetBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
     }
 
-    void RenderCommand::SetBlendOp(BlendEquation op) {
-        glBlendEquation(static_cast<GLenum>(op));
+    void RenderCommand::SetBlendOp(const BlendEquation op) {
+        s_API->SetBlendOp(op);
     }
 
     void RenderCommand::SetBlendColor(const Vec4 &color) {
-        glBlendColor(color.r, color.g, color.b, color.a);
+        s_API->SetBlendColor(color);
     }
 
     void RenderCommand::EnableCulling() {
-        if (!s_CullingEnabled) {
-            s_CullingEnabled = true;
-            glEnable(GL_CULL_FACE);
-        }
+        s_API->EnableCulling();
     }
 
     void RenderCommand::DisableCulling() {
-        if (s_CullingEnabled) {
-            s_CullingEnabled = false;
-            glDisable(GL_CULL_FACE);
-        }
+        s_API->DisableCulling();
     }
 
-    void RenderCommand::SetCullFace(CullFaceMode mode) {
-        glCullFace(static_cast<GLenum>(mode));
+    void RenderCommand::SetCullFace(const CullFaceMode mode) {
+        s_API->SetCullFace(mode);
     }
 
-    void RenderCommand::SetFrontFace(FrontFace orientation) {
-        glFrontFace(static_cast<GLenum>(orientation));
+    void RenderCommand::SetFrontFace(const FrontFace orientation) {
+        s_API->SetFrontFace(orientation);
     }
 
-    void RenderCommand::SetPolygonMode(CullFaceMode faces, PolygonMode mode) {
-        glPolygonMode(static_cast<GLenum>(faces), static_cast<GLenum>(mode));
+    void RenderCommand::SetPolygonMode(const CullFaceMode faces, const PolygonMode mode) {
+        s_API->SetPolygonMode(faces, mode);
     }
 
     void RenderCommand::EnablePolygonOffset() {
-        glEnable(GL_POLYGON_OFFSET_FILL);
-        glEnable(GL_POLYGON_OFFSET_LINE);
-        glEnable(GL_POLYGON_OFFSET_POINT);
+        s_API->EnablePolygonOffset();
     }
 
     void RenderCommand::DisablePolygonOffset() {
-        glDisable(GL_POLYGON_OFFSET_FILL);
-        glDisable(GL_POLYGON_OFFSET_LINE);
-        glDisable(GL_POLYGON_OFFSET_POINT);
+        s_API->DisablePolygonOffset();
     }
 
     void RenderCommand::SetPolygonOffset(const float factor, const float units) {
-        glPolygonOffset(factor, units);
+        s_API->SetPolygonOffset(factor, units);
     }
 
     void RenderCommand::SetPointSize(const float size) {
-        glPointSize(size);
+        s_API->SetPointSize(size);
     }
 
     void RenderCommand::SetLineWidth(const float width) {
-        glLineWidth(width);
+        s_API->SetLineWidth(width);
     }
 
     void RenderCommand::EnableStencil() {
-        if (!s_StencilEnabled) {
-            s_StencilEnabled = true;
-            glEnable(GL_STENCIL_TEST);
-        }
+        s_API->EnableStencil();
     }
 
     void RenderCommand::DisableStencil() {
-        if (s_StencilEnabled) {
-            s_StencilEnabled = false;
-            glDisable(GL_STENCIL_TEST);
-        }
+        s_API->DisableStencil();
     }
 
-    void RenderCommand::SetStencilFunc(StencilOp func, const int ref, const uint32_t mask) {
-        glStencilFunc(static_cast<GLenum>(func), ref, mask);
+    void RenderCommand::SetStencilFunc(const StencilOp func, const int ref, const uint32_t mask) {
+        s_API->SetStencilFunc(func, ref, mask);
     }
 
-    void RenderCommand::SetStencilOp(StencilOp sfail, StencilOp dpfail, StencilOp dppass) {
-        glStencilOp(static_cast<GLenum>(sfail), static_cast<GLenum>(dpfail), static_cast<GLenum>(dppass));
+    void RenderCommand::SetStencilOp(const StencilOp sfail, const StencilOp dpfail, const StencilOp dppass) {
+        s_API->SetStencilOp(sfail, dpfail, dppass);
     }
 
     void RenderCommand::SetStencilMask(const uint32_t mask) {
-        glStencilMask(mask);
+        s_API->SetStencilMask(mask);
     }
 
     void RenderCommand::SetColorMask(const bool r, const bool g, const bool b, const bool a) {
-        glColorMask(r ? GL_TRUE : GL_FALSE, g ? GL_TRUE : GL_FALSE,
-                    b ? GL_TRUE : GL_FALSE, a ? GL_TRUE : GL_FALSE);
+        s_API->SetColorMask(r, g, b, a);
     }
 
     void RenderCommand::EnableMultisample() {
-        if (!s_MultisampleEnabled) {
-            s_MultisampleEnabled = true;
-            glEnable(GL_MULTISAMPLE);
-        }
+        s_API->EnableMultisample();
     }
 
     void RenderCommand::DisableMultisample() {
-        if (s_MultisampleEnabled) {
-            s_MultisampleEnabled = false;
-            glDisable(GL_MULTISAMPLE);
-        }
+        s_API->DisableMultisample();
     }
 
-    void RenderCommand::DrawArrays(PrimitiveType mode, const int first, const int count) {
-        glDrawArrays(static_cast<GLenum>(mode), first, count);
+    void RenderCommand::DrawArrays(const PrimitiveType mode, const int first, const int count) {
+        s_API->DrawArrays(mode, first, count);
     }
 
-    void RenderCommand::DrawElements(PrimitiveType mode, const int count, IndexType type, const void *indices) {
-        glDrawElements(static_cast<GLenum>(mode), count, static_cast<GLenum>(type), indices);
+    void RenderCommand::DrawElements(const PrimitiveType mode, const int count, const IndexType type,
+        const void *indices) {
+        s_API->DrawElements(mode, count, type, indices);
     }
 
-    void RenderCommand::DrawArraysInstanced(PrimitiveType mode, const int first, const int count, const int instanceCount) {
-        glDrawArraysInstanced(static_cast<GLenum>(mode), first, count, instanceCount);
+    void RenderCommand::DrawArraysInstanced(const PrimitiveType mode, const int first, const int count,
+        const int instanceCount) {
+        s_API->DrawArraysInstanced(mode, first, count, instanceCount);
     }
 
-    void RenderCommand::DrawElementsInstanced(PrimitiveType mode, const int count, IndexType type, const void *indices, const int instanceCount) {
-        glDrawElementsInstanced(static_cast<GLenum>(mode), count, static_cast<GLenum>(type), indices, instanceCount);
+    void RenderCommand::DrawElementsInstanced(const PrimitiveType mode, const int count, const IndexType type,
+        const void *indices, const int instanceCount) {
+        s_API->DrawElementsInstanced(mode, count, type, indices, instanceCount);
     }
 
-    bool RenderCommand::IsDepthTestEnabled() { return s_DepthEnabled; }
-    bool RenderCommand::IsBlendingEnabled() { return s_BlendEnabled; }
-    bool RenderCommand::IsCullingEnabled() { return s_CullingEnabled; }
-    bool RenderCommand::IsStencilEnabled() { return s_StencilEnabled; }
-    bool RenderCommand::IsWireframeEnabled() { return s_Wireframe; }
-    bool RenderCommand::IsScissorEnabled() { return s_ScissorEnabled; }
+    bool RenderCommand::IsDepthTestEnabled() {
+        return s_API->IsDepthTestEnabled();
+    }
+
+    bool RenderCommand::IsBlendingEnabled() {
+        return s_API->IsBlendingEnabled();
+    }
+
+    bool RenderCommand::IsCullingEnabled() {
+        return s_API->IsCullingEnabled();
+    }
+
+    bool RenderCommand::IsStencilEnabled() {
+        return s_API->IsStencilEnabled();
+    }
+
+    bool RenderCommand::IsWireframeEnabled() {
+        return s_API->IsWireframeEnabled();
+    }
+
+    bool RenderCommand::IsScissorEnabled() {
+        return s_API->IsScissorEnabled();
+    }
 }
