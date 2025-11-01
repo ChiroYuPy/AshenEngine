@@ -23,11 +23,6 @@ file(GLOB_RECURSE ENGINE_HEADERS "include/*.h" "include/*.hpp")
 add_library(AshenEngineLib STATIC
         ${ENGINE_SOURCES}
         ${ENGINE_HEADERS}
-        include/Ashen/GraphicsAPI/RendererAPI.h
-        include/Ashen/GraphicsAPI/OpenGL/OpenGLRendererAPI.h
-        src/GraphicsAPI/OpenGL/OpenGLRendererAPI.cpp
-        include/Ashen/GraphicsAPI/OpenGL/OpenGLGraphicsContext.h
-        src/GraphicsAPI/OpenGL/OpenGLGraphicsContext.cpp
 )
 
 add_library(Ashen::Engine ALIAS AshenEngineLib)
