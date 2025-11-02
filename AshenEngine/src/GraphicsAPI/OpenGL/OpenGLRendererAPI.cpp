@@ -1,8 +1,77 @@
 #include "Ashen/GraphicsAPI/OpenGL/OpenGLRendererAPI.h"
+#include "Ashen/Core/Logger.h"
 
 #include <glad/glad.h>
 
 namespace ash {
+
+    // === Lifecycle ===
+
+    void OpenGLRendererAPI::Init() {
+        if (m_Initialized) {
+            Logger::Warn("OpenGLRendererAPI already initialized");
+            return;
+        }
+
+        // Configuration OpenGL par défaut
+        glEnable(GL_DEPTH_TEST);
+        m_DepthEnabled = true;
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        m_BlendEnabled = true;
+
+        glEnable(GL_MULTISAMPLE);
+        m_MultisampleEnabled = true;
+
+        // Enable debug output si disponible
+        #ifdef ASHEN_DEBUG
+        int flags;
+        glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+        if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+            glEnable(GL_DEBUG_OUTPUT);
+            glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+            glDebugMessageCallback([](GLenum source, GLenum type, GLuint id,
+                                     GLenum severity, GLsizei length,
+                                     const GLchar* message, const void* userParam) {
+                // Ignorer les messages non-significatifs
+                if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
+
+                Logger::Debug("OpenGL Debug Message ({0}): {1}", id, message);
+
+                switch (severity) {
+                    case GL_DEBUG_SEVERITY_HIGH:
+                        Logger::Error("OpenGL Error: {0}", message);
+                        break;
+                    case GL_DEBUG_SEVERITY_MEDIUM:
+                        Logger::Warn("OpenGL Warning: {0}", message);
+                        break;
+                    case GL_DEBUG_SEVERITY_LOW:
+                        Logger::Info("OpenGL Info: {0}", message);
+                        break;
+                    default:
+                        break;
+                }
+            }, nullptr);
+
+            glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION,
+                                 0, nullptr, GL_FALSE);
+        }
+        #endif
+
+        m_Initialized = true;
+        Logger::Info("OpenGLRendererAPI initialized");
+    }
+
+    void OpenGLRendererAPI::Shutdown() {
+        if (!m_Initialized) return;
+
+        m_Initialized = false;
+        Logger::Info("OpenGLRendererAPI shut down");
+    }
+
+    // === Clear Operations ===
+
     void OpenGLRendererAPI::Clear(ClearBuffer buffers) {
         glClear(static_cast<GLenum>(buffers));
     }
@@ -14,6 +83,8 @@ namespace ash {
     void OpenGLRendererAPI::SetClearColor(const float r, const float g, const float b, const float a) {
         glClearColor(r, g, b, a);
     }
+
+    // === Viewport & Scissor ===
 
     void OpenGLRendererAPI::SetViewport(const u32 x, const u32 y, const u32 width, const u32 height) {
         glViewport(static_cast<GLint>(x), static_cast<GLint>(y), static_cast<GLsizei>(width), static_cast<GLsizei>(height));
@@ -36,6 +107,8 @@ namespace ash {
     void OpenGLRendererAPI::SetScissor(const u32 x, const u32 y, const u32 width, const u32 height) {
         glScissor(static_cast<GLint>(x), static_cast<GLint>(y), static_cast<GLsizei>(width), static_cast<GLsizei>(height));
     }
+
+    // === Depth Testing ===
 
     void OpenGLRendererAPI::EnableDepthTest() {
         if (!m_DepthEnabled) {
@@ -62,6 +135,8 @@ namespace ash {
         }
     }
 
+    // === Blending ===
+
     void OpenGLRendererAPI::EnableBlending() {
         if (!m_BlendEnabled) {
             m_BlendEnabled = true;
@@ -80,8 +155,7 @@ namespace ash {
         glBlendFunc(static_cast<GLenum>(src), static_cast<GLenum>(dst));
     }
 
-    void OpenGLRendererAPI::SetBlendFuncSeparate(BlendFactor srcRGB, BlendFactor dstRGB,
-                                                  BlendFactor srcAlpha, BlendFactor dstAlpha) {
+    void OpenGLRendererAPI::SetBlendFuncSeparate(BlendFactor srcRGB, BlendFactor dstRGB,BlendFactor srcAlpha, BlendFactor dstAlpha) {
         glBlendFuncSeparate(static_cast<GLenum>(srcRGB), static_cast<GLenum>(dstRGB), static_cast<GLenum>(srcAlpha), static_cast<GLenum>(dstAlpha));
     }
 
@@ -92,6 +166,8 @@ namespace ash {
     void OpenGLRendererAPI::SetBlendColor(const Vec4& color) {
         glBlendColor(color.r, color.g, color.b, color.a);
     }
+
+    // === Culling ===
 
     void OpenGLRendererAPI::EnableCulling() {
         if (!m_CullingEnabled) {
@@ -115,8 +191,11 @@ namespace ash {
         glFrontFace(static_cast<GLenum>(orientation));
     }
 
+    // === Polygon Mode ===
+
     void OpenGLRendererAPI::SetPolygonMode(CullFaceMode faces, PolygonMode mode) {
         glPolygonMode(static_cast<GLenum>(faces), static_cast<GLenum>(mode));
+        m_Wireframe = (mode == PolygonMode::Line);
     }
 
     void OpenGLRendererAPI::EnablePolygonOffset() {
@@ -135,6 +214,8 @@ namespace ash {
         glPolygonOffset(factor, units);
     }
 
+    // === Rendering Primitives ===
+
     void OpenGLRendererAPI::SetPointSize(const float size) {
         glPointSize(size);
     }
@@ -142,6 +223,8 @@ namespace ash {
     void OpenGLRendererAPI::SetLineWidth(const float width) {
         glLineWidth(width);
     }
+
+    // === Stencil Testing ===
 
     void OpenGLRendererAPI::EnableStencil() {
         if (!m_StencilEnabled) {
@@ -162,16 +245,21 @@ namespace ash {
     }
 
     void OpenGLRendererAPI::SetStencilOp(StencilOp sfail, StencilOp dpfail, StencilOp dppass) {
-        glStencilOp(static_cast<GLenum>(sfail), static_cast<GLenum>(dpfail), static_cast<GLenum>(dppass));
+        glStencilOp(static_cast<GLenum>(sfail), static_cast<GLenum>(dpfail),
+                   static_cast<GLenum>(dppass));
     }
 
     void OpenGLRendererAPI::SetStencilMask(const u32 mask) {
         glStencilMask(mask);
     }
 
+    // === Color Mask ===
+
     void OpenGLRendererAPI::SetColorMask(const bool r, const bool g, const bool b, const bool a) {
         glColorMask(r ? GL_TRUE : GL_FALSE, g ? GL_TRUE : GL_FALSE, b ? GL_TRUE : GL_FALSE, a ? GL_TRUE : GL_FALSE);
     }
+
+    // === Multisampling ===
 
     void OpenGLRendererAPI::EnableMultisample() {
         if (!m_MultisampleEnabled) {
@@ -186,6 +274,8 @@ namespace ash {
             glDisable(GL_MULTISAMPLE);
         }
     }
+
+    // === Draw Commands ===
 
     void OpenGLRendererAPI::DrawArrays(PrimitiveType mode, const int first, const int count) {
         glDrawArrays(static_cast<GLenum>(mode), first, count);
@@ -203,27 +293,4 @@ namespace ash {
         glDrawElementsInstanced(static_cast<GLenum>(mode), count, static_cast<GLenum>(type), indices, instanceCount);
     }
 
-    bool OpenGLRendererAPI::IsDepthTestEnabled() const {
-        return m_DepthEnabled;
-    }
-
-    bool OpenGLRendererAPI::IsBlendingEnabled() const {
-        return m_BlendEnabled;
-    }
-
-    bool OpenGLRendererAPI::IsCullingEnabled() const {
-        return m_CullingEnabled;
-    }
-
-    bool OpenGLRendererAPI::IsStencilEnabled() const {
-        return m_StencilEnabled;
-    }
-
-    bool OpenGLRendererAPI::IsWireframeEnabled() const {
-        return m_Wireframe;
-    }
-
-    bool OpenGLRendererAPI::IsScissorEnabled() const {
-        return m_ScissorEnabled;
-    }
 }

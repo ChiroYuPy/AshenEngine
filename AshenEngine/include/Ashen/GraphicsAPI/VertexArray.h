@@ -309,6 +309,9 @@ namespace ash {
             return m_VertexBuffers[0]->GetCount();
         }
 
+        [[nodiscard]] const Ref<IndexBuffer>& GetIndexBuffer() const { return m_IndexBuffer; }
+        [[nodiscard]] const Vector<Ref<VertexBuffer>>& GetVertexBuffers() const { return m_VertexBuffers; }
+
         [[nodiscard]] const VertexArrayConfig &GetConfig() const { return m_Config; }
 
         static Ref<VertexArray> Create(const VertexArrayConfig &config = VertexArrayConfig::Default()) {

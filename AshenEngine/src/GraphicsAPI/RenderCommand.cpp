@@ -1,38 +1,43 @@
 #include "Ashen/GraphicsAPI/RenderCommand.h"
-#include "Ashen/GraphicsAPI/OpenGL/OpenGLRendererAPI.h"
+#include "Ashen/Core/Logger.h"
 
 namespace ash {
 
-    Own<RendererAPI> RenderCommand::s_API = nullptr;
+    Ref<RendererAPI> RenderCommand::s_API = nullptr;
 
     void RenderCommand::Init() {
-        switch (RendererAPI::GetAPI()) {
-            case RendererAPI::API::OpenGL:
-                s_API = MakeOwn<OpenGLRendererAPI>();
-                break;
-
-            case RendererAPI::API::None:
-            default:
-                // No rendering API
-                break;
+        s_API = RendererAPI::Create();
+        if (!s_API) {
+            Logger::Error("Failed to create RendererAPI!");
+            return;
         }
+        s_API->Init();
+        Logger::Info("RenderCommand initialized successfully");
     }
 
     void RenderCommand::Shutdown() {
-        s_API.reset();
+        if (s_API) {
+            s_API->Shutdown();
+            s_API.reset();
+        }
+        Logger::Info("RenderCommand shut down");
     }
+
+    // === Clear Operations ===
 
     void RenderCommand::Clear(const ClearBuffer buffers) {
         s_API->Clear(buffers);
     }
 
-    void RenderCommand::SetClearColor(const Vec4 &color) {
+    void RenderCommand::SetClearColor(const Vec4& color) {
         s_API->SetClearColor(color);
     }
 
     void RenderCommand::SetClearColor(const float r, const float g, const float b, const float a) {
         s_API->SetClearColor(r, g, b, a);
     }
+
+    // === Viewport & Scissor ===
 
     void RenderCommand::SetViewport(const uint32_t x, const uint32_t y, const uint32_t width, const uint32_t height) {
         s_API->SetViewport(x, y, width, height);
@@ -54,6 +59,8 @@ namespace ash {
         s_API->SetScissor(x, y, width, height);
     }
 
+    // === Depth Testing ===
+
     void RenderCommand::EnableDepthTest() {
         s_API->EnableDepthTest();
     }
@@ -70,6 +77,8 @@ namespace ash {
         s_API->SetDepthWrite(enable);
     }
 
+    // === Blending ===
+
     void RenderCommand::EnableBlending() {
         s_API->EnableBlending();
     }
@@ -82,8 +91,7 @@ namespace ash {
         s_API->SetBlendFunc(src, dst);
     }
 
-    void RenderCommand::SetBlendFuncSeparate(const BlendFactor srcRGB, const BlendFactor dstRGB,
-        const BlendFactor srcAlpha, const BlendFactor dstAlpha) {
+    void RenderCommand::SetBlendFuncSeparate(const BlendFactor srcRGB, const BlendFactor dstRGB,const BlendFactor srcAlpha, const BlendFactor dstAlpha) {
         s_API->SetBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
     }
 
@@ -91,9 +99,11 @@ namespace ash {
         s_API->SetBlendOp(op);
     }
 
-    void RenderCommand::SetBlendColor(const Vec4 &color) {
+    void RenderCommand::SetBlendColor(const Vec4& color) {
         s_API->SetBlendColor(color);
     }
+
+    // === Culling ===
 
     void RenderCommand::EnableCulling() {
         s_API->EnableCulling();
@@ -111,6 +121,8 @@ namespace ash {
         s_API->SetFrontFace(orientation);
     }
 
+    // === Polygon Mode ===
+
     void RenderCommand::SetPolygonMode(const CullFaceMode faces, const PolygonMode mode) {
         s_API->SetPolygonMode(faces, mode);
     }
@@ -127,6 +139,8 @@ namespace ash {
         s_API->SetPolygonOffset(factor, units);
     }
 
+    // === Rendering Primitives ===
+
     void RenderCommand::SetPointSize(const float size) {
         s_API->SetPointSize(size);
     }
@@ -134,6 +148,8 @@ namespace ash {
     void RenderCommand::SetLineWidth(const float width) {
         s_API->SetLineWidth(width);
     }
+
+    // === Stencil Testing ===
 
     void RenderCommand::EnableStencil() {
         s_API->EnableStencil();
@@ -155,9 +171,13 @@ namespace ash {
         s_API->SetStencilMask(mask);
     }
 
+    // === Color Mask ===
+
     void RenderCommand::SetColorMask(const bool r, const bool g, const bool b, const bool a) {
         s_API->SetColorMask(r, g, b, a);
     }
+
+    // === Multisampling ===
 
     void RenderCommand::EnableMultisample() {
         s_API->EnableMultisample();
@@ -167,24 +187,50 @@ namespace ash {
         s_API->DisableMultisample();
     }
 
+    // === Draw Commands (Low Level) ===
+
     void RenderCommand::DrawArrays(const PrimitiveType mode, const int first, const int count) {
         s_API->DrawArrays(mode, first, count);
     }
 
-    void RenderCommand::DrawElements(const PrimitiveType mode, const int count, const IndexType type,
-        const void *indices) {
+    void RenderCommand::DrawElements(const PrimitiveType mode, const int count, const IndexType type, const void* indices) {
         s_API->DrawElements(mode, count, type, indices);
     }
 
-    void RenderCommand::DrawArraysInstanced(const PrimitiveType mode, const int first, const int count,
-        const int instanceCount) {
+    void RenderCommand::DrawArraysInstanced(const PrimitiveType mode, const int first, const int count, const int instanceCount) {
         s_API->DrawArraysInstanced(mode, first, count, instanceCount);
     }
 
-    void RenderCommand::DrawElementsInstanced(const PrimitiveType mode, const int count, const IndexType type,
-        const void *indices, const int instanceCount) {
+    void RenderCommand::DrawElementsInstanced(const PrimitiveType mode, const int count, const IndexType type, const void* indices, const int instanceCount) {
         s_API->DrawElementsInstanced(mode, count, type, indices, instanceCount);
     }
+
+    // === Draw Commands (High Level) ===
+
+    void RenderCommand::Submit(const Ref<VertexArray>& vertexArray) {
+        if (!vertexArray) {
+            Logger::Warn("Attempted to submit null VertexArray");
+            return;
+        }
+
+        s_API->DrawVertexArray(vertexArray);
+    }
+
+    void RenderCommand::SubmitInstanced(const Ref<VertexArray>& vertexArray, uint32_t instanceCount) {
+        if (!vertexArray) {
+            Logger::Warn("Attempted to submit null VertexArray");
+            return;
+        }
+
+        if (instanceCount == 0) {
+            Logger::Warn("Attempted to submit with 0 instances");
+            return;
+        }
+
+        s_API->DrawVertexArrayInstanced(vertexArray, instanceCount);
+    }
+
+    // === State Queries ===
 
     bool RenderCommand::IsDepthTestEnabled() {
         return s_API->IsDepthTestEnabled();
@@ -209,4 +255,5 @@ namespace ash {
     bool RenderCommand::IsScissorEnabled() {
         return s_API->IsScissorEnabled();
     }
+
 }
