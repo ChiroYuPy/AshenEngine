@@ -334,7 +334,7 @@ namespace ash {
 
     // ========== Matrix Operations ==========
     inline Mat4 Identity() noexcept {
-        return {1.0f};
+        return Mat4{1.0f};
     }
 
     inline Mat4 Translate(const Mat4 &mat, const Vec3 &offset) noexcept {
