@@ -10,6 +10,10 @@ add_executable(AshenTestbed
         include/layers/Renderer2DTestLayer.h
         src/layers/NodeGraphTestLayer.cpp
         include/layers/NodeGraphTestLayer.h
+        src/layers/FeaturesDemoLayer.cpp
+        include/layers/FeaturesDemoLayer.h
+        src/layers/ImGuiDemoLayer.cpp
+        include/layers/ImGuiDemoLayer.h
 )
 
 target_include_directories(AshenTestbed PRIVATE

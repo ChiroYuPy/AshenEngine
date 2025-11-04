@@ -9,10 +9,22 @@ add_library(AshenVendor STATIC
         vendor/src/OpenSimplex2S.cpp
         vendor/src/tiny_obj_loader.cc
         vendor/src/miniaudio.cpp
+        vendor/src/imgui.cpp
+        vendor/src/imgui_draw.cpp
+        vendor/src/imgui_tables.cpp
+        vendor/src/imgui_widgets.cpp
+        vendor/src/imgui_demo.cpp
+        vendor/src/imgui_impl_glfw.cpp
+        vendor/src/imgui_impl_opengl3.cpp
 )
 
 target_include_directories(AshenVendor PUBLIC
         vendor/include
+        ${CMAKE_CURRENT_BINARY_DIR}/../vcpkg_installed/x64-windows/include
+)
+
+target_link_libraries(AshenVendor PUBLIC
+        glfw
 )
 
 # ===== ENGINE LIBRARY =====
@@ -41,6 +53,7 @@ target_link_libraries(AshenEngineLib
         OpenGL::GL
         glfw
         glm::glm
+        nlohmann_json::nlohmann_json
         AshenVendor
 )
 
@@ -52,3 +65,8 @@ set_target_properties(AshenEngineLib PROPERTIES
 target_compile_definitions(AshenEngineLib PUBLIC
         GLFW_INCLUDE_NONE
 )
+
+# Enable profiling in Debug builds
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    target_compile_definitions(AshenEngineLib PUBLIC ASHEN_ENABLE_PROFILING)
+endif()

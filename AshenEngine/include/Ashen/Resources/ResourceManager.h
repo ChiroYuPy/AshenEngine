@@ -130,7 +130,7 @@ namespace ash {
 
     /**
      * @brief Shader resource manager
-     * Handles both built-in and custom shaders
+     * Handles both built-in and custom shaders with hot-reload support
      */
     class ShaderManager final : public ResourceManager<ShaderProgram> {
     public:
@@ -157,10 +157,45 @@ namespace ash {
          */
         Ref<ShaderProgram> Load(const std::string &id) override;
 
+        /**
+         * @brief Enable hot-reload for a specific shader
+         * When enabled, the shader will be automatically reloaded when files change
+         */
+        void EnableHotReload(const std::string &id);
+
+        /**
+         * @brief Disable hot-reload for a specific shader
+         */
+        void DisableHotReload(const std::string &id);
+
+        /**
+         * @brief Enable hot-reload for all loaded shaders
+         */
+        void EnableHotReloadAll();
+
+        /**
+         * @brief Manually reload a shader from disk
+         */
+        bool Reload(const std::string &id);
+
+        /**
+         * @brief Update file watcher (call once per frame)
+         */
+        void Update();
+
         void Clear() override;
 
     private:
-        ShaderManager() = default;
+        ShaderManager();
+
+        struct ShaderPaths {
+            fs::path vertPath;
+            fs::path fragPath;
+            fs::path geomPath; // Optional
+        };
+
+        std::unordered_map<std::string, ShaderPaths> m_ShaderPaths;
+        std::unordered_set<std::string> m_HotReloadEnabled;
     };
 
     /**

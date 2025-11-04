@@ -142,6 +142,9 @@ namespace ash {
 
         AudioManager::Get().Update();
 
+        // Update shader hot-reload system
+        AssetLibrary::Shaders().Update();
+
         if (m_NodeGraph)
             m_NodeGraph->Process(deltaTime);
 

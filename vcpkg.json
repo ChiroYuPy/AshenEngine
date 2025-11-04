@@ -1,0 +1,13 @@
+{
+  "name": "ashen",
+  "version-string": "1.0",
+  "dependencies": [
+    "glfw3",
+    "glm",
+    "nlohmann-json",
+    {
+      "name": "imgui",
+      "features": ["glfw-binding", "opengl3-binding"]
+    }
+  ]
+}

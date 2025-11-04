@@ -10,6 +10,7 @@
 #include "Ashen/Resources/Loader/ShaderLoader.h"
 #include "Ashen/Resources/Loader/TextureLoader.h"
 #include "Ashen/Utils/FileSystem.h"
+#include "Ashen/Utils/FileWatcher.h"
 
 namespace ash {
     // ========== ResourcePaths ==========
@@ -36,6 +37,8 @@ namespace ash {
     }
 
     // ========== ShaderManager ==========
+
+    ShaderManager::ShaderManager() = default;
 
     ShaderManager &ShaderManager::Instance() {
         static ShaderManager instance;
@@ -96,13 +99,154 @@ namespace ash {
         );
         Cache(id, shader);
 
+        // Store paths for hot-reload
+        ShaderPaths paths;
+        paths.vertPath = vertPath;
+        paths.fragPath = fragPath;
+        m_ShaderPaths[id] = paths;
+
         Logger::Info() << "Loaded shader: " << id;
         return shader;
+    }
+
+    void ShaderManager::EnableHotReload(const String &id) {
+        std::lock_guard lock(m_Mutex);
+
+        // Check if shader exists
+        if (!Has(id)) {
+            Logger::Warn() << "Cannot enable hot-reload: shader '" << id << "' not loaded";
+            return;
+        }
+
+        // Check if paths are stored
+        auto pathIt = m_ShaderPaths.find(id);
+        if (pathIt == m_ShaderPaths.end()) {
+            Logger::Warn() << "Cannot enable hot-reload: no paths stored for '" << id << "'";
+            return;
+        }
+
+        m_HotReloadEnabled.insert(id);
+        Logger::Info() << "Hot-reload enabled for shader: " << id;
+    }
+
+    void ShaderManager::DisableHotReload(const String &id) {
+        std::lock_guard lock(m_Mutex);
+        m_HotReloadEnabled.erase(id);
+        Logger::Info() << "Hot-reload disabled for shader: " << id;
+    }
+
+    void ShaderManager::EnableHotReloadAll() {
+        std::lock_guard lock(m_Mutex);
+
+        for (const auto& [id, paths] : m_ShaderPaths) {
+            m_HotReloadEnabled.insert(id);
+        }
+
+        Logger::Info() << "Hot-reload enabled for all shaders (" << m_HotReloadEnabled.size() << " shaders)";
+    }
+
+    bool ShaderManager::Reload(const String &id) {
+        std::lock_guard lock(m_Mutex);
+
+        // Check if shader exists
+        auto resourceIt = m_Resources.find(id);
+        if (resourceIt == m_Resources.end()) {
+            Logger::Error() << "Cannot reload: shader '" << id << "' not found";
+            return false;
+        }
+
+        // Check if paths are stored
+        auto pathIt = m_ShaderPaths.find(id);
+        if (pathIt == m_ShaderPaths.end()) {
+            Logger::Error() << "Cannot reload: no paths stored for '" << id << "'";
+            return false;
+        }
+
+        const auto& paths = pathIt->second;
+
+        // Verify files still exist
+        if (!FileSystem::Exists(paths.vertPath) || !FileSystem::Exists(paths.fragPath)) {
+            Logger::Error() << "Cannot reload: shader files not found for '" << id << "'";
+            return false;
+        }
+
+        try {
+            // Reload shader from files
+            auto newShader = MakeRef<ShaderProgram>(
+                ShaderLoader::Load(paths.vertPath, paths.fragPath)
+            );
+
+            // Replace old shader with new one
+            resourceIt->second = newShader;
+
+            Logger::Info() << "Successfully reloaded shader: " << id;
+            return true;
+        } catch (const std::exception& e) {
+            Logger::Error() << "Failed to reload shader '" << id << "': " << e.what();
+            return false;
+        }
+    }
+
+    void ShaderManager::Update() {
+        std::lock_guard lock(m_Mutex);
+
+        // Check each hot-reload enabled shader
+        for (const auto& id : m_HotReloadEnabled) {
+            auto pathIt = m_ShaderPaths.find(id);
+            if (pathIt == m_ShaderPaths.end()) {
+                continue;
+            }
+
+            const auto& paths = pathIt->second;
+
+            // Check if any file was modified
+            static std::unordered_map<String, fs::file_time_type> lastWriteTimes;
+
+            bool needsReload = false;
+
+            try {
+                if (FileSystem::Exists(paths.vertPath)) {
+                    auto currentTime = fs::last_write_time(paths.vertPath);
+                    auto key = id + "_vert";
+
+                    if (lastWriteTimes.find(key) == lastWriteTimes.end()) {
+                        lastWriteTimes[key] = currentTime;
+                    } else if (lastWriteTimes[key] != currentTime) {
+                        lastWriteTimes[key] = currentTime;
+                        needsReload = true;
+                    }
+                }
+
+                if (FileSystem::Exists(paths.fragPath)) {
+                    auto currentTime = fs::last_write_time(paths.fragPath);
+                    auto key = id + "_frag";
+
+                    if (lastWriteTimes.find(key) == lastWriteTimes.end()) {
+                        lastWriteTimes[key] = currentTime;
+                    } else if (lastWriteTimes[key] != currentTime) {
+                        lastWriteTimes[key] = currentTime;
+                        needsReload = true;
+                    }
+                }
+
+                if (needsReload) {
+                    // Unlock mutex temporarily to avoid deadlock in Reload
+                    m_Mutex.unlock();
+                    Reload(id);
+                    m_Mutex.lock();
+                }
+            } catch (const std::exception&) {
+                // Ignore errors during file watching
+                continue;
+            }
+        }
     }
 
     void ShaderManager::Clear() {
         ResourceManager::Clear();
         BuiltInShaderManager::Instance().Clear();
+        m_ShaderPaths.clear();
+        m_HotReloadEnabled.clear();
         Logger::Debug("Cleared all shaders");
     }
 

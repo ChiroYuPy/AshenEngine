@@ -70,23 +70,41 @@ namespace ash {
     bool Node::IsProcessing() const { return m_ProcessEnabled; }
 
     void Node::Ready() {
+        // Call this node's Ready first
+        _Ready();
+
+        // Then propagate to children
         for (const auto &child: m_Children)
             if (child) child->Ready();
     }
 
     void Node::Process(float delta) {
         if (!m_ProcessEnabled) return;
+
+        // Call this node's Process first
+        _Process(delta);
+
+        // Then propagate to children
         for (const auto &child: m_Children)
             if (child) child->Process(delta);
     }
 
     void Node::PhysicsProcess(float delta) {
         if (!m_ProcessEnabled) return;
+
+        // Call this node's PhysicsProcess first
+        _PhysicsProcess(delta);
+
+        // Then propagate to children
         for (const auto &child: m_Children)
             if (child) child->PhysicsProcess(delta);
     }
 
     void Node::Draw() {
+        // Call this node's Draw first
+        _Draw();
+
+        // Then propagate to children
         for (const auto &child: m_Children)
             if (child) child->Draw();
     }

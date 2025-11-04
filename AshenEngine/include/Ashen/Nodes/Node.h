@@ -62,6 +62,7 @@ namespace ash {
 
         bool IsProcessing() const;
 
+        // Lifecycle methods (DO NOT override these directly - use _Ready, _Process, etc.)
         virtual void Ready();
 
         virtual void Process(float delta);
@@ -79,6 +80,15 @@ namespace ash {
         virtual void ExitTree();
 
     protected:
+        // Override these methods in derived classes for custom behavior
+        virtual void _Ready() {}
+
+        virtual void _Process(float delta) {}
+
+        virtual void _PhysicsProcess(float delta) {}
+
+        virtual void _Draw() {}
+
         Node *m_Parent = nullptr;
         Vector<Own<Node> > m_Children;
         String m_Name;

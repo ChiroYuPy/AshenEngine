@@ -49,6 +49,8 @@ namespace ash {
 
         [[nodiscard]] void *GetHandle() const;
 
+        [[nodiscard]] void *GetNativeWindow() const { return GetHandle(); }
+
     private:
         void SetupCallbacks() const;
 

@@ -156,9 +156,9 @@ namespace ash {
             const VertexBufferLayout layout({
                 VertexAttributeDescription::Vec3(0, offsetof(CircleVertex, WorldPosition)),
                 VertexAttributeDescription::Vec3(1, offsetof(CircleVertex, LocalPosition)),
-                VertexAttributeDescription::Vec4(1, offsetof(CircleVertex, Color)),
-                VertexAttributeDescription::Float(1, offsetof(CircleVertex, Thickness)),
-                VertexAttributeDescription::Float(1, offsetof(CircleVertex, Fade)),
+                VertexAttributeDescription::Vec4(2, offsetof(CircleVertex, Color)),
+                VertexAttributeDescription::Float(3, offsetof(CircleVertex, Thickness)),
+                VertexAttributeDescription::Float(4, offsetof(CircleVertex, Fade)),
             });
 
             circles.VertexArray2D->AddVertexBuffer(circles.VertexBuffer2D, layout);
@@ -364,7 +364,10 @@ namespace ash {
         constexpr size_t quadVertexCount = 4;
         constexpr float textureIndex = 0.0f;
 
-        if (s_Data.Quads.IndexCount >= QuadData::MaxIndices) {
+        // Vérifier le dépassement de buffer (indices ET vertices)
+        size_t currentVertexCount = (s_Data.Quads.VertexBufferPtr - s_Data.Quads.VertexBufferBase);
+        if (s_Data.Quads.IndexCount >= QuadData::MaxIndices ||
+            currentVertexCount + quadVertexCount > QuadData::MaxVertices) {
             FlushQuads();
             s_Data.Quads.IndexCount = 0;
             s_Data.Quads.VertexBufferPtr = s_Data.Quads.VertexBufferBase;
@@ -401,7 +404,10 @@ namespace ash {
                               const Vec4 &tintColor) {
         constexpr size_t quadVertexCount = 4;
 
-        if (s_Data.Quads.IndexCount >= QuadData::MaxIndices) {
+        // Vérifier le dépassement de buffer (indices ET vertices)
+        size_t currentVertexCount = (s_Data.Quads.VertexBufferPtr - s_Data.Quads.VertexBufferBase);
+        if (s_Data.Quads.IndexCount >= QuadData::MaxIndices ||
+            currentVertexCount + quadVertexCount > QuadData::MaxVertices) {
             FlushQuads();
             s_Data.Quads.IndexCount = 0;
             s_Data.Quads.VertexBufferPtr = s_Data.Quads.VertexBufferBase;
@@ -474,7 +480,8 @@ namespace ash {
     }
 
     void Renderer2D::DrawLine(const Vec3 &p0, const Vec3 &p1, const Vec4 &color) {
-        if (s_Data.Lines.VertexCount >= LineData::MaxVertices) {
+        // Check if adding 2 vertices would overflow
+        if (s_Data.Lines.VertexCount + 2 > LineData::MaxVertices) {
             FlushLines();
             s_Data.Lines.VertexCount = 0;
             s_Data.Lines.VertexBufferPtr = s_Data.Lines.VertexBufferBase;
@@ -530,7 +537,10 @@ namespace ash {
                                 const float thickness, const float fade) {
         constexpr size_t circleVertexCount = 4;
 
-        if (s_Data.Circles.IndexCount >= CircleData::MaxIndices) {
+        // Check if adding 4 vertices would overflow (indices ET vertices)
+        size_t currentVertexCount = (s_Data.Circles.VertexBufferPtr - s_Data.Circles.VertexBufferBase);
+        if (s_Data.Circles.IndexCount >= CircleData::MaxIndices ||
+            currentVertexCount + circleVertexCount > CircleData::MaxVertices) {
             FlushCircles();
             s_Data.Circles.IndexCount = 0;
             s_Data.Circles.VertexBufferPtr = s_Data.Circles.VertexBufferBase;
@@ -570,7 +580,10 @@ namespace ash {
         if (points.size() < 3) return;
 
         for (size_t i = 1; i < points.size() - 1; i++) {
-            if (s_Data.Quads.IndexCount >= QuadData::MaxIndices) {
+            constexpr size_t verticesPerTriangle = 4;  // Using 4 vertices per triangle (with duplicate)
+            size_t currentVertexCount = (s_Data.Quads.VertexBufferPtr - s_Data.Quads.VertexBufferBase);
+            if (s_Data.Quads.IndexCount >= QuadData::MaxIndices ||
+                currentVertexCount + verticesPerTriangle > QuadData::MaxVertices) {
                 FlushQuads();
                 s_Data.Quads.IndexCount = 0;
                 s_Data.Quads.VertexBufferPtr = s_Data.Quads.VertexBufferBase;
