@@ -2,7 +2,7 @@
 #define ASHEN_SCENESERIALIZER_H
 
 #include <filesystem>
-#include <nlohmann/json.hpp>
+#include <json.hpp>
 
 #include "Ashen/Core/Types.h"
 #include "Ashen/Nodes/Node.h"

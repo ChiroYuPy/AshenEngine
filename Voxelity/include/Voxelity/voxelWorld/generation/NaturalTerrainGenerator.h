@@ -1,7 +1,7 @@
 #ifndef VOXELITY_NATURALTERRAINGENERATOR_H
 #define VOXELITY_NATURALTERRAINGENERATOR_H
 
-#include "OpenSimplex2S.hpp"
+#include "../../../../../AshenEngine/vendor/opensimplex2s/OpenSimplex2S.hpp"
 
 #include "Voxelity/voxelWorld/generation/ITerrainGenerator.h"
 

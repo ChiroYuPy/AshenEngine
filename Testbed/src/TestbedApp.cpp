@@ -12,7 +12,7 @@ namespace ash {
         : Application(settings) {
         // === PHYSICS DEMO ===
         // Demo des nouveaux systèmes: Physique, Particules
-        PushLayer(MakeOwn<PhysicsDemoLayer>());
+        // PushLayer(MakeOwn<PhysicsDemoLayer>());
 
         // === IMGUI DEMO ===
         // Demo showing ImGui integration with Scene Hierarchy, Inspector, and Performance Monitor
@@ -25,7 +25,7 @@ namespace ash {
         // === DEMOS ORIGINALES ===
         // Commente la ligne au-dessus et décommente ci-dessous pour voir les demos originales
         // PushLayer(MakeOwn<GameLayer>());
-        // PushLayer(MakeOwn<NodeGraphTestLayer>());
+        PushLayer(MakeOwn<NodeGraphTestLayer>());
         // PushLayer(MakeOwn<Renderer2DTestLayer>());
     }
 }

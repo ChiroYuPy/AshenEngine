@@ -52,7 +52,7 @@ namespace ash {
             // Name
             char nameBuffer[256];
             String name = node->GetName();
-            strncpy_s(nameBuffer, name.c_str(), sizeof(nameBuffer) - 1);
+
             nameBuffer[sizeof(nameBuffer) - 1] = '\0';
 
             if (ImGui::InputText("Name", nameBuffer, sizeof(nameBuffer))) {
