@@ -2,6 +2,7 @@
 
 #include "Ashen/Core/Input.h"
 #include "Ashen/Events/ApplicationEvent.h"
+#include "Ashen/Events/EventDispatcher.h"
 #include "Ashen/GraphicsAPI/RenderCommand.h"
 #include "Ashen/Resources/ResourceManager.h"
 
@@ -86,7 +87,7 @@ namespace voxelity {
     void VoxelWorldLayer::OnRender() {
         if (!m_camera || !m_worldRenderer) return;
 
-        ash::RenderCommand::EnableDepthTest(true);
+        ash::RenderCommand::EnableDepthTest();
         ash::RenderCommand::SetDepthFunc(ash::DepthFunc::Less);
 
         renderSkybox();
@@ -100,8 +101,8 @@ namespace voxelity {
     void VoxelWorldLayer::setupCamera() {
         m_camera = ash::MakeRef<ash::PerspectiveCamera>();
         m_camera->SetPosition({0, 70, 0});
-        m_camera->SetFov(70.f);
-        m_camera->SetRotation(45.f, 0.f);
+        m_camera->SetFieldOfView(70.f);
+        m_camera->SetOrientation(ash::Vec3(0.f, ash::ToRadians(45.f), 0.f));
     }
 
     void VoxelWorldLayer::setupShader() {
@@ -144,7 +145,7 @@ namespace voxelity {
             "resources/textures/mountain_skybox/back.jpg"
         };
 
-        m_skybox = ash::MakeRef<ash::SkyboxCubeMap>(faces, shader);
+        // m_skybox = ash::MakeRef<ash::SkyboxCubeMap>(faces, shader);
     }
 
     void VoxelWorldLayer::setupInputHandler() {
@@ -156,8 +157,8 @@ namespace voxelity {
     }
 
     void VoxelWorldLayer::renderSkybox() const {
-        if (m_skybox)
-            m_skybox->Render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
+        // if (m_skybox)
+        //     m_skybox->Render(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
     }
 
     void VoxelWorldLayer::renderWorld() const {

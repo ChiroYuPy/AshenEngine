@@ -15,7 +15,7 @@ namespace voxelity {
         void OnEvent(ash::Event &event) override;
 
     private:
-        ash::Ref<ash::UICamera> m_UICamera;
+        ash::Ref<ash::OrthographicCamera> m_UICamera;
         ash::Ref<ash::Texture2D> m_CrosshairTexture;
 
         bool showCrosshair;

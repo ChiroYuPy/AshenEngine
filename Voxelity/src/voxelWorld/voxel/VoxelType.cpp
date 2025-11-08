@@ -2,7 +2,7 @@
 
 namespace voxelity {
     VoxelDefinition::VoxelDefinition(const std::string_view displayName,
-                                     const ash::Color &color,
+                                     const ash::Vec4 &color,
                                      const RenderMode renderingMode,
                                      const bool hasCollision)
         : displayName(displayName),
@@ -34,7 +34,7 @@ namespace voxelity {
         }
     }
 
-    void VoxelTypeRegistry::setColor(const VoxelType voxelID, const ash::Color &color) noexcept {
+    void VoxelTypeRegistry::setColor(const VoxelType voxelID, const ash::Vec4 &color) noexcept {
         if (isValidVoxelID(voxelID)) {
             registry[voxelID].color = color;
         }
@@ -76,106 +76,106 @@ namespace voxelity {
         }
 
         registry[VoxelID::AIR] = VoxelDefinition{
-            "Air", ash::Color::fromHex("#000000"), RenderMode::INVISIBLE, false
+            "Air", ash::Vec4(0.00f, 0.00f, 0.00f, 1.00f), RenderMode::INVISIBLE, false
         };
 
         registry[VoxelID::DIRT] = VoxelDefinition{
-            "Dirt", ash::Color::fromHex("#80522F"), RenderMode::OPAQUE, true
+            "Dirt", ash::Vec4(0.50f, 0.32f, 0.18f, 1.00f), RenderMode::OPAQUE, true
         };
         registry[VoxelID::DIRT].friction = 0.7f;
 
         registry[VoxelID::GRASS] = VoxelDefinition{
-            "Grass", ash::Color::fromHex("#7CAC17"), RenderMode::OPAQUE, true
+            "Grass", ash::Vec4(0.49f, 0.67f, 0.09f, 1.00f), RenderMode::OPAQUE, true
         };
         registry[VoxelID::GRASS].friction = 0.65f;
 
         registry[VoxelID::STONE] = VoxelDefinition{
-            "Stone", ash::Color::fromHex("#7F7F7F"), RenderMode::OPAQUE, true
+            "Stone", ash::Vec4(0.50f, 0.50f, 0.50f, 1.00f), RenderMode::OPAQUE, true
         };
         registry[VoxelID::STONE].friction = 0.8f;
 
         registry[VoxelID::SAND] = VoxelDefinition{
-            "Sand", ash::Color::fromHex("#FAF0CF"), RenderMode::OPAQUE, true
+            "Sand", ash::Vec4(0.98f, 0.94f, 0.81f, 1.00f), RenderMode::OPAQUE, true
         };
         registry[VoxelID::SAND].friction = 0.5f;
 
         registry[VoxelID::WATER] = VoxelDefinition{
-            "Water", ash::Color::fromHex("#3F76E480"), RenderMode::TRANSPARENT, false
+            "Water", ash::Vec4(0.25f, 0.46f, 0.89f, 0.50f), RenderMode::TRANSPARENT, false
         };
         registry[VoxelID::WATER].friction = 0.1f;
 
         registry[VoxelID::LAVA] = VoxelDefinition{
-            "Lava", ash::Color::fromHex("#CF4A0F80"), RenderMode::TRANSPARENT, false
+            "Lava", ash::Vec4(0.81f, 0.29f, 0.06f, 0.50f), RenderMode::TRANSPARENT, false
         };
         registry[VoxelID::LAVA].friction = 0.2f;
 
         registry[VoxelID::GLASS] = VoxelDefinition{
-            "Glass", ash::Color::fromHex("#FFFFFF40"), RenderMode::TRANSPARENT, true
+            "Glass", ash::Vec4(1.00f, 1.00f, 1.00f, 0.25f), RenderMode::TRANSPARENT, true
         };
 
         registry[VoxelID::WOOD] = VoxelDefinition{
-            "Wood Log", ash::Color::fromHex("#6B4F2F"), RenderMode::OPAQUE, true
+            "Wood Log", ash::Vec4(0.42f, 0.31f, 0.18f, 1.00f), RenderMode::OPAQUE, true
         };
         registry[VoxelID::WOOD].friction = 0.6f;
 
         registry[VoxelID::LEAVES] = VoxelDefinition{
-            "Leaves", ash::Color::fromHex("#4C9B23A0"), RenderMode::TRANSPARENT, true
+            "Leaves", ash::Vec4(0.30f, 0.61f, 0.14f, 0.63f), RenderMode::TRANSPARENT, true
         };
 
         registry[VoxelID::COBBLESTONE] = VoxelDefinition{
-            "Cobblestone", ash::Color::fromHex("#7A7A7A"), RenderMode::OPAQUE, true
+            "Cobblestone", ash::Vec4(0.48f, 0.48f, 0.48f, 1.00f), RenderMode::OPAQUE, true
         };
         registry[VoxelID::COBBLESTONE].friction = 0.75f;
 
         registry[VoxelID::PLANKS] = VoxelDefinition{
-            "Planks", ash::Color::fromHex("#9B7653"), RenderMode::OPAQUE, true
+            "Planks", ash::Vec4(0.61f, 0.46f, 0.33f, 1.00f), RenderMode::OPAQUE, true
         };
 
         registry[VoxelID::BRICK] = VoxelDefinition{
-            "Brick", ash::Color::fromHex("#9A5839"), RenderMode::OPAQUE, true
+            "Brick", ash::Vec4(0.60f, 0.35f, 0.22f, 1.00f), RenderMode::OPAQUE, true
         };
 
         registry[VoxelID::BEDROCK] = VoxelDefinition{
-            "Bedrock", ash::Color::fromHex("#4A4A4A"), RenderMode::OPAQUE, true
+            "Bedrock", ash::Vec4(0.29f, 0.29f, 0.29f, 1.00f), RenderMode::OPAQUE, true
         };
 
         registry[VoxelID::GRAVEL] = VoxelDefinition{
-            "Gravel", ash::Color::fromHex("#8A8A8A"), RenderMode::OPAQUE, true
+            "Gravel", ash::Vec4(0.54f, 0.54f, 0.54f, 1.00f), RenderMode::OPAQUE, true
         };
         registry[VoxelID::GRAVEL].friction = 0.55f;
 
         registry[VoxelID::ICE] = VoxelDefinition{
-            "Ice", ash::Color::fromHex("#A0C8F0C0"), RenderMode::TRANSPARENT, true
+            "Ice", ash::Vec4(0.63f, 0.78f, 0.94f, 0.75f), RenderMode::TRANSPARENT, true
         };
-        registry[VoxelID::ICE].friction = 0.98f; // Très glissant
+        registry[VoxelID::ICE].friction = 0.98f;
 
         registry[VoxelID::SNOW] = VoxelDefinition{
-            "Snow", ash::Color::fromHex("#FFFFFF"), RenderMode::OPAQUE, true
+            "Snow", ash::Vec4(1.00f, 1.00f, 1.00f, 1.00f), RenderMode::OPAQUE, true
         };
         registry[VoxelID::SNOW].friction = 0.9f;
 
         registry[VoxelID::CLAY] = VoxelDefinition{
-            "Clay", ash::Color::fromHex("#A0A0B8"), RenderMode::OPAQUE, true
+            "Clay", ash::Vec4(0.63f, 0.63f, 0.72f, 1.00f), RenderMode::OPAQUE, true
         };
 
         registry[VoxelID::OBSIDIAN] = VoxelDefinition{
-            "Obsidian", ash::Color::fromHex("#14141E"), RenderMode::OPAQUE, true
+            "Obsidian", ash::Vec4(0.08f, 0.08f, 0.12f, 1.00f), RenderMode::OPAQUE, true
         };
 
         registry[VoxelID::COAL_ORE] = VoxelDefinition{
-            "Coal Ore", ash::Color::fromHex("#6F6F6F"), RenderMode::OPAQUE, true
+            "Coal Ore", ash::Vec4(0.44f, 0.44f, 0.44f, 1.00f), RenderMode::OPAQUE, true
         };
 
         registry[VoxelID::IRON_ORE] = VoxelDefinition{
-            "Iron Ore", ash::Color::fromHex("#D8A88E"), RenderMode::OPAQUE, true
+            "Iron Ore", ash::Vec4(0.85f, 0.66f, 0.56f, 1.00f), RenderMode::OPAQUE, true
         };
 
         registry[VoxelID::GOLD_ORE] = VoxelDefinition{
-            "Gold Ore", ash::Color::fromHex("#FCEE4B"), RenderMode::OPAQUE, true
+            "Gold Ore", ash::Vec4(0.99f, 0.93f, 0.29f, 1.00f), RenderMode::OPAQUE, true
         };
 
         registry[VoxelID::DIAMOND_ORE] = VoxelDefinition{
-            "Diamond Ore", ash::Color::fromHex("#5DECF5"), RenderMode::OPAQUE, true
+            "Diamond Ore", ash::Vec4(0.36f, 0.93f, 0.96f, 1.00f), RenderMode::OPAQUE, true
         };
     }
 
@@ -191,7 +191,7 @@ namespace voxelity {
         return getVoxelTypeDefinition(voxelID).displayName;
     }
 
-    ash::Color getVoxelColor(const VoxelType voxelID) noexcept {
+    ash::Vec4 getVoxelColor(const VoxelType voxelID) noexcept {
         return getVoxelTypeDefinition(voxelID).color;
     }
 

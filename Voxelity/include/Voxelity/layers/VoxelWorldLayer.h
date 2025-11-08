@@ -2,7 +2,6 @@
 #define VOXELITY_WORLDRENDERLAYER_H
 
 #include "Ashen/Graphics/Cameras/Camera.h"
-#include "Ashen/Graphics/Skybox/SkyboxCubeMap.h"
 #include "Ashen/Core/Types.h"
 
 #include "Voxelity/VoxelityApp.h"
@@ -68,7 +67,7 @@ namespace voxelity {
         ash::Ref<ash::ShaderProgram> m_shader;
 
         // Skybox
-        ash::Ref<ash::SkyboxCubeMap> m_skybox;
+        // ash::Ref<ash::SkyboxCubeMap> m_skybox;
 
         // Initialisation
         void setupCamera();

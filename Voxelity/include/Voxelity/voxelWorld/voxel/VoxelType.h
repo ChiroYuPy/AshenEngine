@@ -5,7 +5,7 @@
 #include <string>
 #include <array>
 
-#include "Ashen/Core/Color.h"
+#include "Ashen/Math/Math.h"
 
 namespace voxelity {
     using VoxelType = uint8_t;
@@ -19,7 +19,7 @@ namespace voxelity {
 
     struct VoxelDefinition {
         std::string displayName;
-        ash::Color color;
+        ash::Vec4 color;
         RenderMode renderMode;
         bool hasCollision;
         float friction = 0.6f; // Coefficient de friction
@@ -27,7 +27,7 @@ namespace voxelity {
 
         explicit VoxelDefinition(
             std::string_view displayName = "Unknown Block",
-            const ash::Color &color = ash::Color(255, 0, 255, 255),
+            const ash::Vec4 &color = ash::Vec4(255, 0, 255, 255),
             RenderMode renderingMode = RenderMode::OPAQUE,
             bool hasCollision = true);
     };
@@ -72,7 +72,7 @@ namespace voxelity {
 
         void setDefinition(VoxelType voxelID, const VoxelDefinition &definition) noexcept;
 
-        void setColor(VoxelType voxelID, const ash::Color &color) noexcept;
+        void setColor(VoxelType voxelID, const ash::Vec4 &color) noexcept;
 
         void setRenderingMode(VoxelType voxelID, RenderMode mode) noexcept;
 
@@ -94,7 +94,7 @@ namespace voxelity {
 
     [[nodiscard]] const std::string &getDisplayName(VoxelType voxelID) noexcept;
 
-    [[nodiscard]] ash::Color getVoxelColor(VoxelType voxelID) noexcept;
+    [[nodiscard]] ash::Vec4 getVoxelColor(VoxelType voxelID) noexcept;
 
     [[nodiscard]] RenderMode getRenderMode(VoxelType voxelID) noexcept;
 

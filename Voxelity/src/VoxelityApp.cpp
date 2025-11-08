@@ -5,8 +5,8 @@
 
 namespace voxelity {
     VoxelityApp::VoxelityApp(const ash::ApplicationSettings &settings) : Application(settings) {
-        PushLayer<VoxelWorldLayer>();
-        PushLayer<UILayer>();
+        PushLayer(ash::MakeOwn<VoxelWorldLayer>());
+        PushLayer(ash::MakeOwn<UILayer>());
     }
 }
 

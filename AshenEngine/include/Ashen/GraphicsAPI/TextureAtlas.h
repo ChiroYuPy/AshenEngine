@@ -37,8 +37,7 @@ namespace ash {
 
         void UpdateFromRegistry() {
             for (size_t i = 0; i < MAX_COLORS; ++i) {
-                const auto &color = voxelity::getVoxelColor(static_cast<voxelity::VoxelType>(i));
-                m_colors[i] = color.toVec4();
+                m_colors[i] = voxelity::getVoxelColor(static_cast<voxelity::VoxelType>(i));
             }
 
             m_texture.SetData(

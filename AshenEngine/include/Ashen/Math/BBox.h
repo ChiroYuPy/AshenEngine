@@ -2,6 +2,7 @@
 #define ASHEN_BBOX_H
 
 #include "Ashen/Core/Types.h"
+#include "Ashen/Math/Math.h"
 #include <glm/glm.hpp>
 
 namespace ash {

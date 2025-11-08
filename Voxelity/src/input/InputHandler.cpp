@@ -2,6 +2,7 @@
 
 #include "Ashen/Core/Input.h"
 #include "Ashen/Core/Logger.h"
+#include "Ashen/Events/EventDispatcher.h"
 #include "Ashen/Events/KeyEvent.h"
 #include "Ashen/Events/MouseEvent.h"
 
@@ -77,7 +78,7 @@ namespace voxelity {
                 }
             } else {
                 // Activer le mode caméra
-                ash::Input::SetCursorMode(ash::CursorMode::Disabled);
+                ash::Input::SetCursorMode(ash::CursorMode::Captured);
                 // IMPORTANT : Reset le delta pour éviter les sauts
                 ash::Input::ResetMouseDelta();
                 m_playerController.setActive(true);

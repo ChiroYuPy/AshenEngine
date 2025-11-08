@@ -101,7 +101,7 @@ namespace ash {
     }
 
     void PerspectiveCamera::SetOrientation(const Quaternion &orientation) {
-        m_Orientation = glm::normalize(orientation);
+        m_Orientation = Normalize(orientation);
         UpdateVectorsFromOrientation();
     }
 

@@ -91,7 +91,7 @@ namespace voxelity {
 
     void WorldRenderer::renderOpaquePass() const {
         ash::RenderCommand::SetDepthWrite(true);
-        ash::RenderCommand::EnableBlending(false);
+        ash::RenderCommand::DisableBlending();
 
         m_world.forEachChunk([&](const ChunkCoord &, const Chunk *chunk) {
             if (chunk && chunk->hasMesh()) chunk->drawOpaque(m_shader);
@@ -99,7 +99,7 @@ namespace voxelity {
     }
 
     void WorldRenderer::renderTransparentPass() const {
-        ash::RenderCommand::EnableBlending(true);
+        ash::RenderCommand::EnableBlending();
         ash::RenderCommand::SetBlendFunc(ash::BlendFactor::SrcAlpha, ash::BlendFactor::OneMinusSrcAlpha);
         ash::RenderCommand::SetDepthWrite(false);
 
@@ -108,6 +108,6 @@ namespace voxelity {
         });
 
         ash::RenderCommand::SetDepthWrite(true);
-        ash::RenderCommand::EnableBlending(false);
+        ash::RenderCommand::DisableBlending();
     }
 }

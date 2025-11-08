@@ -59,7 +59,7 @@ namespace voxelity {
 
             actualMotion[axis] += moved;
 
-            entityBox = entityBox.translated(glm::vec3(
+            entityBox = entityBox.Translated(ash::Vec3(
                 axis == 0 ? moved : 0.0f,
                 axis == 1 ? moved : 0.0f,
                 axis == 2 ? moved : 0.0f
@@ -104,7 +104,7 @@ namespace voxelity {
             sweepBox.min[axis] += motion;
         }
 
-        sweepBox = sweepBox.expanded(m_config.collisionEpsilon);
+        sweepBox = sweepBox.Expanded(m_config.collisionEpsilon);
 
         ash::Vector<glm::ivec3> blocks;
         getBroadPhaseBlocks(sweepBox, blocks, world);
@@ -113,7 +113,7 @@ namespace voxelity {
         bool hitFound = false;
 
         for (const auto &blockPos: blocks) {
-            const ash::BBox3 blockBox = ash::BBox3::fromBlock(blockPos);
+            const ash::BBox3 blockBox = ash::BBox3::FromBlock(blockPos);
 
             float hitDist;
             if (motion > 0.0f) {
@@ -123,13 +123,13 @@ namespace voxelity {
             }
 
             if (std::abs(hitDist) < std::abs(closestHit)) {
-                ash::BBox3 testBox = aabb.translated(glm::vec3(
+                ash::BBox3 testBox = aabb.Translated(glm::vec3(
                     axis == 0 ? hitDist : 0.0f,
                     axis == 1 ? hitDist : 0.0f,
                     axis == 2 ? hitDist : 0.0f
                 ));
 
-                if (testBox.intersects(blockBox)) {
+                if (testBox.Intersects(blockBox)) {
                     closestHit = hitDist;
                     hitFound = true;
 

@@ -3,6 +3,7 @@
 #include "Ashen/Core/Input.h"
 #include "Ashen/Events/KeyEvent.h"
 #include "Ashen/Core/Logger.h"
+#include "Ashen/Events/EventDispatcher.h"
 
 namespace voxelity {
     PlayerController::PlayerController(std::shared_ptr<ash::PerspectiveCamera> camera)
@@ -82,7 +83,7 @@ namespace voxelity {
         const glm::vec2 offset = mouseDelta * m_settings.mouseSensitivity;
 
         if (glm::length(offset) > 0.001f) {
-            m_camera->Rotate(offset.x, -offset.y);
+            m_camera->SetOrientation(ash::Vec3{-offset.y, offset.x, 0.f});
         }
     }
 }

@@ -1,6 +1,7 @@
 #include "Voxelity/layers/UILayer.h"
 
 #include "Ashen/Events/ApplicationEvent.h"
+#include "Ashen/Events/EventDispatcher.h"
 #include "Ashen/Events/KeyEvent.h"
 #include "Ashen/GraphicsAPI/RenderCommand.h"
 #include "Ashen/Graphics/Rendering/Renderer2D.h"
@@ -10,14 +11,14 @@
 
 namespace voxelity {
     UILayer::UILayer() : showCrosshair(true) {
-        m_UICamera = std::make_shared<ash::UICamera>();
+        m_UICamera = std::make_shared<ash::OrthographicCamera>(ash::Application::Get().GetWindow().GetWidth(), ash::Application::Get().GetWindow().GetHeight());
 
         m_CrosshairTexture = ash::AssetLibrary::Textures().Load("textures/crosshairs/crosshair.png");
     }
 
     void UILayer::OnRender() {
-        ash::RenderCommand::EnableDepthTest(false);
-        ash::RenderCommand::EnableBlending(true);
+        ash::RenderCommand::DisableDepthTest();
+        ash::RenderCommand::EnableBlending();
 
         const ash::Window &window = VoxelityApp::Get().GetWindow();
         const auto windowWidth = static_cast<float>(window.GetWidth());
